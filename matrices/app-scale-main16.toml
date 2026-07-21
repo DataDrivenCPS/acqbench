@@ -1,0 +1,25 @@
+# main ONLY, re-tested with the Docker VM raised to 16 GB. main previously
+# capped at 100 (failed 125) purely on the old 8.3 GB VM; with ~16.7 GB it
+# should reach further before the VM wall (~115 MB/container => ~130-140 max).
+# Probes past 100 to find main's new ceiling. Appended to results/app.jsonl;
+# ceilings merge across runs (the old 125-fail row is superseded by these).
+
+refs = ["git:main"]
+topologies = ["server"]
+workloads = ["app_scale"]
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+app_scale = true
+app_image = "acquirium_test-acquirium:latest"
+
+[run]
+repetitions = 1
+warmup = 0
+
+[workload_params.app_scale]
+counts = [100, 125]
+interval = 2.0
+steady_seconds = 12.0
+per_app_startup_budget = 7.0

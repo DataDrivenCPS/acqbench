@@ -1,0 +1,190 @@
+{
+  "graph": "graphs/benicia.ttl",
+  "setup": {
+    "insert_ms": 323.5,
+    "register_ms": 147.7,
+    "registered_refs": 28
+  },
+  "queries": {
+    "entity_by_class_pump": {
+      "rows": 4,
+      "times_ms": [
+        34.68,
+        41.56,
+        40.94
+      ],
+      "error": null
+    },
+    "entity_by_uri": {
+      "rows": 1,
+      "times_ms": [
+        30.81,
+        16.85,
+        35.44
+      ],
+      "error": null
+    },
+    "entity_sensor_class": {
+      "rows": 0,
+      "times_ms": [
+        57.06,
+        9.0,
+        7.84
+      ],
+      "error": null
+    },
+    "entity_superclass_closure": {
+      "rows": 0,
+      "times_ms": [
+        10.34,
+        8.16,
+        13.52
+      ],
+      "error": null
+    },
+    "metadata_broad_union": {
+      "rows": 26,
+      "times_ms": [
+        31.63,
+        13.36,
+        14.59
+      ],
+      "error": null
+    },
+    "metadata_broad_no_union": {
+      "rows": 26,
+      "times_ms": [
+        16.69,
+        15.14,
+        16.11
+      ],
+      "error": null
+    },
+    "related_hops1": {
+      "rows": 15,
+      "times_ms": [
+        58.91,
+        60.39,
+        51.77
+      ],
+      "error": null
+    },
+    "related_hops3": {
+      "rows": 23,
+      "times_ms": [
+        1955.54,
+        1871.7,
+        1942.33
+      ],
+      "error": null
+    },
+    "related_explicit_predicate": {
+      "rows": 15,
+      "times_ms": [
+        13.38,
+        10.5,
+        9.85
+      ],
+      "error": null
+    },
+    "related_multi_hop_predicates": {
+      "rows": 15,
+      "times_ms": [
+        14.06,
+        14.73,
+        13.78
+      ],
+      "error": null
+    },
+    "related_downstream": {
+      "rows": 2,
+      "times_ms": [
+        13.34,
+        12.73,
+        11.58
+      ],
+      "error": null
+    },
+    "related_upstream": {
+      "rows": 2,
+      "times_ms": [
+        11.82,
+        12.89,
+        12.36
+      ],
+      "error": null
+    },
+    "relate_to_join": {
+      "rows": 18,
+      "times_ms": [
+        397.09,
+        375.95,
+        376.88
+      ],
+      "error": null
+    },
+    "connectivity_cp_chain": {
+      "rows": 3,
+      "times_ms": [
+        11.59,
+        11.6,
+        10.93
+      ],
+      "error": null
+    },
+    "find_data_direct": {
+      "rows": 16,
+      "times_ms": [
+        24.05,
+        23.88,
+        22.73
+      ],
+      "error": null
+    },
+    "find_related_data_directional": {
+      "rows": 7,
+      "times_ms": [
+        21.45,
+        23.7,
+        23.4
+      ],
+      "error": null
+    },
+    "filter_by_unit": {
+      "rows": 6,
+      "times_ms": [
+        23.07,
+        22.59,
+        22.72
+      ],
+      "error": null
+    },
+    "filter_by_medium": {
+      "rows": 9,
+      "times_ms": [
+        25.62,
+        23.39,
+        23.53
+      ],
+      "error": null
+    },
+    "filter_by_substance_exclude": {
+      "rows": 14,
+      "times_ms": [
+        38.74,
+        39.57,
+        38.14
+      ],
+      "error": null
+    },
+    "filter_by_quantity_kind": {
+      "rows": 2,
+      "times_ms": [
+        23.57,
+        23.31,
+        22.73
+      ],
+      "error": null
+    }
+  }
+}

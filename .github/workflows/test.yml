@@ -1,0 +1,39 @@
+# Tests the harness itself — not acquirium.
+#
+# Deliberately does not run a benchmark matrix: a shared CI runner is noisy and
+# contended, so its timings would not be comparable run to run. Benchmarks
+# belong on a quiet, dedicated machine. What CI can usefully check is that the
+# harness's own logic is correct.
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install
+        run: uv sync --all-extras --dev
+
+      - name: Test
+        run: uv run pytest tests/ -v
+
+      - name: Check shipped matrices parse
+        run: |
+          for m in matrices/*.toml; do
+            echo "--- $m"
+            uv run acqbench plan "$m"
+          done

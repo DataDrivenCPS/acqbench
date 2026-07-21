@@ -1,0 +1,37 @@
+# A minimal two-ref A/B, for checking the compare path works end to end.
+# Small enough to finish quickly; too small for the numbers to mean much.
+#
+#   acqbench run matrices/ab-check.toml --results results/ab.jsonl --profile
+#   acqbench compare pypi:0.3.1 --results results/ab.jsonl
+
+refs = [
+  "pypi:0.3.1",
+  "path:../acquirium",
+]
+
+topologies = ["server"]
+
+workloads = ["write_arrow", "read_limit", "sparql_main"]
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+
+[run]
+repetitions = 2
+warmup = 1
+
+[workload_params.write_arrow]
+streams = 20
+rows_per_stream = 200
+batches = 3
+
+[workload_params.read_limit]
+streams = 3
+rows_per_stream = 5_000
+reads = 10
+limit = 100
+
+[workload_params.sparql_main]
+points = 200
+queries = 10

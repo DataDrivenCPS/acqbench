@@ -1,0 +1,195 @@
+# main vs ums-ray-backend: driver tick latency and actor scheduling.
+#
+# Each [[configs]] entry is one grid point: driver_count x bench_rows_per_tick x
+# driver_interval(period). One server boot per point, because `main` has no
+# dynamic-driver API — drivers only start from config at boot (threads on main,
+# Ray actors on ums-ray-backend). At the 10-minute period the per-tick ingest
+# size is irrelevant (a sub-second tick then minutes idle), so it is fixed to
+# 1000 rather than swept — that reduction saves ~2 hours of pure waiting.
+#
+#   acqbench run matrices/driver-tick.toml --results results/dt.jsonl
+#   acqbench driver-compare git:main git:ums-ray-backend -m tick
+#   acqbench driver-compare git:main git:ums-ray-backend -m jitter
+#   acqbench driver-compare git:main git:ums-ray-backend -m online   # actor create
+
+refs = ["git:main", "git:ums-ray-backend"]
+topologies = ["server+drivers"]
+workloads = ["driver_tick"]
+
+[run]
+repetitions = 1
+warmup = 0
+
+[workload_params.driver_tick.n_ticks]
+30 = 5
+60 = 4
+600 = 2
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 1
+driver_interval = 30.0
+bench_rows_per_tick = 100
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 10
+driver_interval = 30.0
+bench_rows_per_tick = 100
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 100
+driver_interval = 30.0
+bench_rows_per_tick = 100
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 1
+driver_interval = 30.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 10
+driver_interval = 30.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 100
+driver_interval = 30.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 1
+driver_interval = 30.0
+bench_rows_per_tick = 10000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 10
+driver_interval = 30.0
+bench_rows_per_tick = 10000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 100
+driver_interval = 30.0
+bench_rows_per_tick = 10000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 1
+driver_interval = 60.0
+bench_rows_per_tick = 100
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 10
+driver_interval = 60.0
+bench_rows_per_tick = 100
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 100
+driver_interval = 60.0
+bench_rows_per_tick = 100
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 1
+driver_interval = 60.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 10
+driver_interval = 60.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 100
+driver_interval = 60.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 1
+driver_interval = 60.0
+bench_rows_per_tick = 10000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 10
+driver_interval = 60.0
+bench_rows_per_tick = 10000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 100
+driver_interval = 60.0
+bench_rows_per_tick = 10000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 1
+driver_interval = 600.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 10
+driver_interval = 600.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 100
+driver_interval = 600.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+

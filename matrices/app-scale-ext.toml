@@ -1,0 +1,24 @@
+# ums-ray-backend ONLY, small isolated probe past 100. main is already done
+# (ceiling 100; fails at 125 on the Docker VM wall). Kept to two counts so the
+# run is short and survives — heavy runs have been getting killed mid-flight.
+# Appended to results/app.jsonl; ceilings merge across runs.
+
+refs = ["git:ums-ray-backend"]
+topologies = ["server"]
+workloads = ["app_scale"]
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+app_scale = true
+app_image = "acquirium_test-acquirium:latest"
+
+[run]
+repetitions = 1
+warmup = 0
+
+[workload_params.app_scale]
+counts = [125, 150]
+interval = 2.0
+steady_seconds = 12.0
+per_app_startup_budget = 4.0

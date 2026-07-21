@@ -1,0 +1,34 @@
+# Smallest useful matrix: one ref, one config, duckdb only.
+# Needs no Docker. Use this to check the harness works before committing to a
+# long run.
+#
+#   acqbench run matrices/smoke.toml
+
+refs = ["path:../acquirium"]
+
+topologies = ["server"]
+
+workloads = ["write_arrow", "read_limit", "sparql_main"]
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+
+[run]
+repetitions = 1
+warmup = 0
+
+[workload_params.write_arrow]
+streams = 10
+rows_per_stream = 100
+batches = 2
+
+[workload_params.read_limit]
+streams = 2
+rows_per_stream = 1_000
+reads = 5
+limit = 100
+
+[workload_params.sparql_main]
+points = 50
+queries = 5

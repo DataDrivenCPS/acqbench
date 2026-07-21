@@ -1,0 +1,37 @@
+# main vs ums-ray-backend: plain ingestion at scale, then timeseries queries.
+#
+# Topology is server+drivers (drivers, no apps) — which is also where the ray
+# backend differs from main, since drivers run through Ray actors there. Any
+# overhead the ray driver runtime adds to the data path shows up here.
+#
+# One workload does both halves over the same data: each repetition ingests 2M
+# rows into a fresh time window, then queries exactly that data across
+# selectivities from a single point to a full 2M-row scan.
+#
+#   acqbench run matrices/ingest-query.toml --results results/iq.jsonl --profile
+#   acqbench compare git:main            --results results/iq.jsonl   # ingestion rows/s
+#   acqbench queries-compare git:main git:ums-ray-backend --results results/iq.jsonl  # per query shape
+
+refs = [
+  "git:main",
+  "git:ums-ray-backend",
+]
+
+topologies = ["server+drivers"]
+
+workloads = ["ingest_query"]
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 2
+driver_interval = 5.0
+
+[run]
+repetitions = 3
+warmup = 0   # the workload ingests a fresh 2M-row window each rep; no warmup
+
+[workload_params.ingest_query]
+streams = 40
+rows_per_stream = 50_000   # 40 x 50k = 2,000,000 rows per repetition
+chunk_rows = 10_000        # ingested as 5 Arrow requests of 400k rows each

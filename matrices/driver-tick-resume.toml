@@ -1,0 +1,69 @@
+refs = ["git:ums-ray-backend"]
+topologies = ["server+drivers"]
+workloads = ["driver_tick"]
+
+[run]
+repetitions = 1
+warmup = 0
+
+[workload_params.driver_tick.n_ticks]
+30 = 5
+60 = 4
+600 = 2
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 100
+driver_interval = 60.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 1
+driver_interval = 60.0
+bench_rows_per_tick = 10000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 10
+driver_interval = 60.0
+bench_rows_per_tick = 10000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 100
+driver_interval = 60.0
+bench_rows_per_tick = 10000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 1
+driver_interval = 600.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 10
+driver_interval = 600.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+driver_count = 100
+driver_interval = 600.0
+bench_rows_per_tick = 1000
+bench_streams = 4
+

@@ -1,0 +1,68 @@
+# The everyday question: did my branch make anything faster or slower?
+#
+# Compares a working tree against the last release on the duckdb backend
+# (no Docker needed), across the full component surface.
+#
+#   acqbench run matrices/branch-vs-baseline.toml
+#   acqbench compare pypi:0.3.1
+
+refs = [
+  "pypi:0.3.1",          # baseline: the last release
+  "path:../acquirium",   # candidate: whatever is checked out
+]
+
+topologies = ["server"]
+
+workloads = [
+  "startup_warm",
+  "write_json",
+  "write_arrow",
+  "read_full",
+  "read_limit",
+  "graph_insert",
+  "sparql_main",
+  "sparql_union",
+]
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+
+[run]
+# Three repetitions is the floor for a median to mean anything. Raise it if
+# `acqbench summary` reports a high spread.
+repetitions = 3
+warmup = 1
+
+[workload_params.write_json]
+streams = 50
+rows_per_stream = 200
+batches = 5
+
+[workload_params.write_arrow]
+streams = 50
+rows_per_stream = 200
+batches = 5
+
+[workload_params.read_full]
+streams = 5
+rows_per_stream = 20_000
+reads = 10
+
+[workload_params.read_limit]
+streams = 5
+rows_per_stream = 20_000
+reads = 50
+limit = 100
+
+[workload_params.graph_insert]
+points = 500
+inserts = 3
+
+[workload_params.sparql_main]
+points = 500
+queries = 20
+
+[workload_params.sparql_union]
+points = 500
+queries = 10

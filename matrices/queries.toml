@@ -1,0 +1,37 @@
+# Acquirium's Python query interface against the three real plant graphs.
+#
+# Unlike every other workload, this one runs acquirium's own client code — the
+# script is exec'd with each ref's interpreter — so it measures Client/query.py
+# and the server together, which is what a user of that version actually gets.
+#
+# Every query runs against every graph. Some return zero rows by design (a
+# Sensor query on Benicia, which has no sensors); the no-match path is a
+# different cost and is measured deliberately. See graphs/README.md.
+#
+#   acqbench run matrices/queries.toml --results results/queries.jsonl --profile
+#   acqbench queries --results results/queries.jsonl
+#   acqbench compare pypi:0.3.1 --results results/queries.jsonl
+
+refs = [
+  "pypi:0.3.1",
+  "path:../acquirium",
+]
+
+topologies = ["server"]
+
+workloads = ["query_api"]
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+
+[run]
+# query_api needs its own server (it wipes the main graph with replace=true), so
+# each repetition costs a boot. Keep repetitions modest.
+repetitions = 3
+warmup = 0
+
+[workload_params.query_api]
+# Times each query this many times per graph, within one server.
+repeat = 5
+graphs = ["benicia", "benicia_100", "watertap"]

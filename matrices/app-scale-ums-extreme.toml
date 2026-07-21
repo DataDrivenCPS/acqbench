@@ -1,0 +1,30 @@
+# ums-ray-backend ONLY: push to 200+ to find the HARD crash (OOM), since it
+# doesn't hard-fail below 150 — it just swap-thrashes (startup 878s at 150).
+# Run in isolation AFTER main's tests. This WILL push the 26 GB host into heavy
+# swap / OOM-kill territory — that is the point. The workload abandons a count
+# that can't bring all apps online within budget; if the OS OOM-kills the server
+# the apps stop emitting and the count registers as failed = crash found.
+# Appended to results/app.jsonl; ceilings merge across runs.
+#
+# Note: Docker Desktop now caps its VM at 16 GB, but idle (no containers in this
+# ums-only test) it holds only ~1-2 GB, so ums-ray still gets most of the host.
+
+refs = ["git:ums-ray-backend"]
+topologies = ["server"]
+workloads = ["app_scale"]
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+app_scale = true
+app_image = "acquirium_test-acquirium:latest"
+
+[run]
+repetitions = 1
+warmup = 0
+
+[workload_params.app_scale]
+counts = [250]
+interval = 2.0
+steady_seconds = 10.0
+per_app_startup_budget = 10.0

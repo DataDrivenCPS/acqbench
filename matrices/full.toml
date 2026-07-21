@@ -1,0 +1,88 @@
+# The full cross-product: refs x backends x topologies.
+#
+# This is expensive. `acqbench plan matrices/full.toml` first — the run count
+# is the product of every axis, and cold-start workloads restart the server on
+# every repetition.
+#
+# Needs Docker for the timescale backend:
+#   acqbench services up
+#   acqbench run matrices/full.toml
+
+refs = [
+  "pypi:0.3.1",
+  "git:main",
+  "path:../acquirium",
+]
+
+# The marginal-cost axis: each step adds a component, and the delta against
+# `server` is what that component costs.
+topologies = ["server", "server+drivers"]
+
+workloads = [
+  "startup_cold",
+  "startup_warm",
+  "write_json",
+  "write_arrow",
+  "write_arrow_text",
+  "read_full",
+  "read_window",
+  "read_limit",
+  "graph_insert",
+  "sparql_main",
+  "sparql_union",
+]
+
+# Expands to the cartesian product of these lists.
+[sweep]
+backend = ["duckdb", "timescale"]
+read_batch_size = [10_000, 50_000]
+driver_count = [2]
+driver_interval = [5.0]
+
+[run]
+repetitions = 3
+warmup = 1
+
+[workload_params.write_json]
+streams = 100
+rows_per_stream = 500
+batches = 10
+
+[workload_params.write_arrow]
+streams = 100
+rows_per_stream = 500
+batches = 10
+
+[workload_params.write_arrow_text]
+streams = 100
+rows_per_stream = 500
+batches = 10
+
+[workload_params.read_full]
+streams = 10
+rows_per_stream = 50_000
+reads = 10
+
+[workload_params.read_window]
+streams = 10
+rows_per_stream = 50_000
+reads = 20
+window_rows = 1_000
+
+[workload_params.read_limit]
+streams = 10
+rows_per_stream = 50_000
+reads = 50
+limit = 100
+
+[workload_params.graph_insert]
+points = 1_000
+inserts = 5
+
+[workload_params.sparql_main]
+points = 1_000
+queries = 20
+
+[workload_params.sparql_union]
+points = 1_000
+queries = 10

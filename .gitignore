@@ -216,3 +216,27 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------------------
+# acqbench project-specific
+# ---------------------------------------------------------------------------
+.DS_Store
+venvs/
+
+# Local Claude Code settings
+.claude/
+
+# Per-ref acquirium installs, server scratch space, and pre-warmed data_dir
+# templates. All are large, machine-specific, and rebuildable.
+runs/
+.cache/
+
+# Server scratch space: logs, pids, data dirs, embedding cache. Large,
+# machine-specific, and regenerated on every run.
+.acqbench_run/
+
+# Results are machine-specific, so they are not committed by default. To
+# publish a run, commit the matrix file that produced it plus the specific
+# results file, e.g.:
+#   git add -f results/2026-07-15-ray-backend.jsonl results/environment.json
+results/

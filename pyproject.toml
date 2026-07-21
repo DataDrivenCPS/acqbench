@@ -1,0 +1,48 @@
+[project]
+name = "acqbench"
+version = "0.1.0"
+description = "Benchmark suite for Acquirium: provisions acquirium at arbitrary refs and measures per-component performance across a config matrix"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+
+# NOTE: acquirium is deliberately NOT a dependency. The harness drives a server
+# running in a *separate* venv over raw HTTP, so the same harness code can
+# benchmark any acquirium version without being tied to one of them.
+dependencies = [
+    "httpx>=0.27",
+    "pyarrow>=17",
+    "polars>=1.0",
+    "typer>=0.12",
+    "rich>=13.7",
+    "psutil>=6.0",
+    "tomli-w>=1.0",
+]
+
+[project.optional-dependencies]
+plot = [
+    "matplotlib>=3.8",
+    "pandas>=2.2",
+]
+
+[project.scripts]
+acqbench = "acqbench.cli:app"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/acqbench"]
+
+# The plant graphs are pinned benchmark inputs, so they travel with the package
+# rather than being resolved from a checkout that may not exist for a given ref.
+force-include = { "graphs" = "acqbench_graphs" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

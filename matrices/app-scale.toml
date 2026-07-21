@@ -1,0 +1,41 @@
+# main vs ums-ray-backend: app scalability to the breaking point.
+#
+# The workload escalates the app count on one server per branch (apps started
+# and stopped over the HTTP API), stopping the moment a count can't bring every
+# app online — that count is the ceiling. Different execution models:
+#   main         -> one Docker container per app (bounded by the Docker VM RAM)
+#   ums-ray      -> one Ray actor per app        (bounded by host RAM)
+#
+# Measurement rules (per the request):
+#   * startup_s = time from registration start until ALL N apps are online
+#     (each has emitted its first trigger).
+#   * per-app latency / dispatch / throughput are steady-state ONLY — measured
+#     after all N are online, never during the startup ramp.
+#
+# Needs Docker running (main's per-app containers). The counts stop at 100:
+# main breaks well before that (~50-60, Docker VM ~8 GB); ums-ray reaches ~100.
+# 125+ is deliberately NOT probed — it pushes ums-ray into swap and could hang
+# the machine. If you want ums-ray's exact ceiling above 100, raise the counts.
+#
+#   acqbench run matrices/app-scale.toml --results results/app.jsonl
+#   acqbench app-scale --results results/app.jsonl
+
+refs = ["git:main", "git:ums-ray-backend"]
+topologies = ["server"]
+workloads = ["app_scale"]
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+app_scale = true
+app_image = "acquirium_test-acquirium:latest"
+
+[run]
+repetitions = 1
+warmup = 0
+
+[workload_params.app_scale]
+counts = [1, 10, 25, 50, 75, 100]
+interval = 2.0
+steady_seconds = 20.0
+per_app_startup_budget = 4.0
