@@ -125,7 +125,7 @@
       <li><b>Both are memory-bound at ~15 GB</b> under the 16 GB cap: main fits 150 apps, ums-ray 125. Roughly the same wall, reached different ways.</li>
       <li><b>main packs more via shared image pages</b> &mdash; 150 identical containers share read-only layers, so effective per-app drops toward 100 MB at the top.</li>
       <li><b>ums-ray is lighter per app and starts faster</b> (65 vs 75s at 100), but its actors do not share as much, so it caps sooner.</li>
-      <li>The failures differ: main gets a clean server-side rejection at 175; ums-ray simply cannot bring all 150 online within budget (146 up).</li>
+      <li>The failures differ: at 175, main's nested Docker daemon cannot start a container within its 60s timeout (surfaced as HTTP 400); ums-ray simply cannot bring all 150 online within budget (146 up). Neither is an acquirium bug &mdash; both are the infrastructure hitting the memory wall.</li>
     </ul>
   </div>
   <footer><span>acqbench &middot; app_scale</span><span>2026-07-22</span></footer>
