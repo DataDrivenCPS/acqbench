@@ -1,4 +1,4 @@
-<title>Driver Tick — acqbench</title>
+<title>Driver Tick &mdash; acqbench</title>
 <style>
   :root{
     --bg:#eef1f4; --surface:#ffffff; --ink:#10151b; --muted:#586472;
@@ -24,14 +24,14 @@
   .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--accent);font-weight:600;}
   h1{font-size:30px;line-height:1.1;margin:8px 0 0;letter-spacing:-.02em;text-wrap:balance;}
-  .lede{font-size:16px;margin:10px 0 0;max-width:62ch;}
+  .lede{font-size:16px;margin:10px 0 0;max-width:64ch;}
   .lede b{color:var(--accent);}
   .meta{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:16px;
     font-family:var(--mono);font-size:11.5px;color:var(--muted);}
   .meta span{border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap;}
 
   .figs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
-    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:26px 0 24px;}
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:26px 0 22px;}
   .fig{background:var(--surface);padding:16px;}
   .fig .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
   .fig .v{font-family:var(--mono);font-size:22px;font-weight:600;margin-top:6px;letter-spacing:-.01em;
@@ -39,7 +39,7 @@
   .fig .s{font-size:12px;color:var(--muted);margin-top:2px;}
   .win-m{color:var(--accent);} .win-u{color:var(--good);}
 
-  .grid2{display:grid;grid-template-columns:1fr;gap:16px;}
+  .grid2{display:grid;grid-template-columns:1fr;gap:14px;}
   .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);}
   table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12.5px;
     font-variant-numeric:tabular-nums;}
@@ -52,36 +52,41 @@
   th.l,td.l{text-align:left;}
   .best{font-weight:600;}
   .m{color:var(--accent);} .u{color:var(--good);}
-
-  .read{margin:22px 2px 0;padding-top:18px;border-top:2px solid var(--line-strong);
-    font-size:15px;max-width:66ch;}
-  .read b{color:var(--accent);}
-  footer{margin-top:20px;font-family:var(--mono);font-size:11px;color:var(--muted);
-    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-  .legend{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0 2px 6px;}
+  .legend{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0 2px 8px;}
   .legend b.m{color:var(--accent);} .legend b.u{color:var(--good);}
+
+  .find{margin:24px 2px 0;padding-top:18px;border-top:2px solid var(--line-strong);}
+  .find h2{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 12px;font-weight:600;}
+  .find ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;}
+  .find li{font-size:14.5px;padding-left:18px;position:relative;max-width:74ch;}
+  .find li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:1px;background:var(--accent);}
+  .find li b{color:var(--accent);}
+  footer{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--muted);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 </style>
 
 <div class="sheet">
-  <div class="eyebrow">acqbench · benchmark report</div>
+  <div class="eyebrow">acqbench &middot; benchmark report</div>
   <h1>Driver Tick</h1>
-  <p class="lede">A crossover. <b>Threads</b> start instant and stay tight until they contend; <b>Ray actors</b> pay a fixed startup and a ~120&nbsp;ms jitter floor but hold flat — and take the lead past ~100 busy drivers.</p>
+  <p class="lede">A crossover. <b>Threads</b> (main) start instant and stay tight until they contend; <b>Ray actors</b> (ums-ray) pay a fixed startup and a ~120 ms jitter floor but hold flat &mdash; and take the lead past ~100 busy drivers.</p>
   <div class="meta">
     <span>main = threads</span><span>ums-ray = Ray actors</span>
-    <span>1·10·100 drivers</span><span>100·1k·10k rows/tick</span><span>30s·1m·10m period</span><span>42 cells</span>
+    <span>1 &middot; 10 &middot; 100 drivers</span><span>100 / 1k / 10k rows/tick</span><span>30s / 1m / 10m period</span>
+    <span>16 GB RAM &middot; 4 vCPU</span>
   </div>
 
   <div class="figs">
-    <div class="fig"><div class="k">Online @100</div><div class="v"><span class="win-m">0.8s</span> / 68s</div><div class="s">main vs ums-ray</div></div>
-    <div class="fig"><div class="k">Jitter @100·1k·10m</div><div class="v">799 / <span class="win-u">119</span></div><div class="s">ms — ums-ray holds flat</div></div>
-    <div class="fig"><div class="k">Tick @100·10k</div><div class="v">233 / <span class="win-u">67</span></div><div class="s">ms — ums-ray wins</div></div>
+    <div class="fig"><div class="k">Online @ 100 drivers</div><div class="v"><span class="win-m">0.8s</span> / 68s</div><div class="s">main vs ums-ray</div></div>
+    <div class="fig"><div class="k">Jitter @ 100 &middot; 1k &middot; 10m</div><div class="v">799 / <span class="win-u">119</span></div><div class="s">ms &mdash; ums-ray stays flat</div></div>
+    <div class="fig"><div class="k">Tick @ 100 &middot; 10k</div><div class="v">233 / <span class="win-u">67</span></div><div class="s">ms &mdash; ums-ray wins</div></div>
   </div>
 
-  <p class="legend">Lower is better. <b class="m">teal</b> = main ahead · <b class="u">green</b> = ums-ray ahead.</p>
+  <p class="legend">Lower is better. <b class="m">teal</b> = main ahead &middot; <b class="u">green</b> = ums-ray ahead.</p>
   <div class="grid2">
     <div class="tblwrap">
       <table>
-        <caption>Time until all drivers online (s) — actor vs thread startup.</caption>
+        <caption>Time until all drivers online (s) &mdash; actor vs thread startup.</caption>
         <thead><tr><th class="l">Drivers</th><th>main</th><th>ums-ray</th></tr></thead>
         <tbody>
           <tr><td class="l">1</td><td class="best">0.02</td><td>0.02</td></tr>
@@ -92,29 +97,37 @@
     </div>
     <div class="tblwrap">
       <table>
-        <caption>Scheduling jitter (median ms) — the load where each model wins.</caption>
-        <thead><tr><th class="l">Config</th><th>main</th><th>ums-ray</th></tr></thead>
+        <caption>Scheduling jitter (median ms) &mdash; the load where each model wins.</caption>
+        <thead><tr><th class="l">Config (drv &middot; rows &middot; period)</th><th>main</th><th>ums-ray</th></tr></thead>
         <tbody>
-          <tr><td class="l">1 drv · 100 · 30s</td><td class="best m">29</td><td>105</td></tr>
-          <tr><td class="l">100 drv · 100 · 30s</td><td class="best m">14</td><td>120</td></tr>
-          <tr><td class="l">100 drv · 10k · 1m</td><td>503</td><td class="best u">168</td></tr>
-          <tr><td class="l">100 drv · 1k · 10m</td><td>799</td><td class="best u">119</td></tr>
+          <tr><td class="l">1 &middot; 100 &middot; 30s</td><td class="best m">29</td><td>105</td></tr>
+          <tr><td class="l">100 &middot; 100 &middot; 30s</td><td class="best m">14</td><td>120</td></tr>
+          <tr><td class="l">100 &middot; 10k &middot; 1m</td><td>503</td><td class="best u">168</td></tr>
+          <tr><td class="l">100 &middot; 1k &middot; 10m</td><td>799</td><td class="best u">119</td></tr>
         </tbody>
       </table>
     </div>
     <div class="tblwrap">
       <table>
-        <caption>Tick latency (median ms) — the crossover in one column.</caption>
-        <thead><tr><th class="l">Config</th><th>main</th><th>ums-ray</th></tr></thead>
+        <caption>Tick latency (median ms) &mdash; the crossover in one column.</caption>
+        <thead><tr><th class="l">Config (drv &middot; rows &middot; period)</th><th>main</th><th>ums-ray</th></tr></thead>
         <tbody>
-          <tr><td class="l">100 drv · 100 · 1m</td><td class="best m">10</td><td>22</td></tr>
-          <tr><td class="l">100 drv · 10k · 1m</td><td>233</td><td class="best u">67</td></tr>
-          <tr><td class="l">100 drv · 1k · 10m</td><td>127</td><td class="best u">26</td></tr>
+          <tr><td class="l">100 &middot; 100 &middot; 1m</td><td class="best m">10</td><td>22</td></tr>
+          <tr><td class="l">100 &middot; 10k &middot; 1m</td><td>233</td><td class="best u">67</td></tr>
+          <tr><td class="l">100 &middot; 1k &middot; 10m</td><td>127</td><td class="best u">26</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <p class="read">Read: <b>pick by concurrency.</b> Below ~100 drivers, threads are faster to start and tighter to schedule. At 100 drivers doing real per-tick work, thread contention blows main's latency and jitter up 3–7×, while the actors stay flat — Ray's fixed overhead finally pays off.</p>
-  <footer><span>acqbench · driver_tick</span><span>2026-07-22</span></footer>
+  <div class="find">
+    <h2>Key findings</h2>
+    <ul>
+      <li><b>Startup favors threads, heavily.</b> main brings 100 drivers online in 0.8s; ums-ray needs ~0.65s per actor, so 100 actors take 68s.</li>
+      <li><b>Ray carries a fixed floor</b> of ~100&ndash;170 ms jitter and higher base tick latency &mdash; so it is the wrong pick for a handful of light drivers.</li>
+      <li><b>But it holds flat under load.</b> At 100 drivers doing real per-tick work, thread contention blows main's latency and jitter up 3&ndash;7x while the actors barely move &mdash; Ray wins tick (67 vs 233 ms) and jitter (119 vs 799 ms).</li>
+      <li><b>Crossover is ~100 busy drivers.</b> Below it, use threads; above it, use actors.</li>
+    </ul>
+  </div>
+  <footer><span>acqbench &middot; driver_tick</span><span>2026-07-22</span></footer>
 </div>

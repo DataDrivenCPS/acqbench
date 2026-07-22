@@ -1,4 +1,4 @@
-<title>App Scale — acqbench</title>
+<title>App Scale &mdash; acqbench</title>
 <style>
   :root{
     --bg:#eef1f4; --surface:#ffffff; --ink:#10151b; --muted:#586472;
@@ -24,20 +24,20 @@
   .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--accent);font-weight:600;}
   h1{font-size:30px;line-height:1.1;margin:8px 0 0;letter-spacing:-.02em;text-wrap:balance;}
-  .lede{font-size:16px;margin:10px 0 0;max-width:62ch;}
+  .lede{font-size:16px;margin:10px 0 0;max-width:64ch;}
   .lede b{color:var(--accent);}
   .meta{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:16px;
     font-family:var(--mono);font-size:11.5px;color:var(--muted);}
   .meta span{border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap;}
 
-  .figs{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);
-    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:26px 0 8px;}
-  .fig{background:var(--surface);padding:16px 18px;}
-  .fig .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
-  .fig .row{display:flex;align-items:baseline;gap:10px;margin-top:8px;}
-  .fig .brand{font-family:var(--mono);font-size:11px;width:66px;color:var(--muted);}
-  .fig .v{font-family:var(--mono);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
-  .fig .u{font-size:12px;color:var(--muted);}
+  .figs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:26px 0 6px;}
+  .fig{background:var(--surface);padding:16px 16px;}
+  .fig .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);}
+  .fig .row{display:flex;align-items:baseline;gap:8px;margin-top:9px;}
+  .fig .brand{font-family:var(--mono);font-size:11px;width:58px;color:var(--muted);}
+  .fig .v{font-family:var(--mono);font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+  .fig .u{font-size:11.5px;color:var(--muted);}
   .m .v{color:var(--accent);} .u2 .v{color:var(--good);}
 
   .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-top:16px;}
@@ -56,43 +56,52 @@
   .fail{color:var(--bad);}
   tr.brk td{background:color-mix(in srgb,var(--bad) 9%,transparent);}
 
-  .read{margin:22px 2px 0;padding-top:18px;border-top:2px solid var(--line-strong);
-    font-size:15px;max-width:66ch;}
-  .read b{color:var(--accent);}
-  footer{margin-top:20px;font-family:var(--mono);font-size:11px;color:var(--muted);
+  .find{margin:24px 2px 0;padding-top:18px;border-top:2px solid var(--line-strong);}
+  .find h2{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 12px;font-weight:600;}
+  .find ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;}
+  .find li{font-size:14.5px;padding-left:18px;position:relative;max-width:74ch;}
+  .find li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:1px;background:var(--accent);}
+  .find li b{color:var(--accent);}
+  footer{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--muted);
     display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 </style>
 
 <div class="sheet">
-  <div class="eyebrow">acqbench · benchmark report</div>
+  <div class="eyebrow">acqbench &middot; benchmark report</div>
   <h1>App Scale</h1>
-  <p class="lede">Both models hit the same wall at <b>~15 GB</b>. Cost per app is the acquirium runtime — not the task. main packs a slightly higher ceiling; ums-ray is a touch lighter and starts faster.</p>
+  <p class="lede">Both models hit the same wall at <b>~15 GB</b>. The cost of an app is the acquirium runtime it loads &mdash; not the work it does. main packs a slightly higher ceiling; ums-ray is a touch lighter and starts faster.</p>
   <div class="meta">
     <span>main = container/app</span><span>ums-ray = Ray actor/app</span>
-    <span>16 GiB cap · no swap</span><span>read-only apps · 2s tick</span><span>cloud-vm</span>
+    <span>16 GB RAM &middot; 4 vCPU</span><span>16 GiB cap &middot; no swap</span><span>read-only apps &middot; 2s tick</span>
   </div>
 
   <div class="figs">
     <div class="fig">
       <div class="k">Ceiling (apps online)</div>
-      <div class="row m"><span class="brand">main</span><span class="v">150</span><span class="u">175 fails — server HTTP 400</span></div>
-      <div class="row u2"><span class="brand">ums-ray</span><span class="v">125</span><span class="u">150 → only 146 online</span></div>
+      <div class="row m"><span class="brand">main</span><span class="v">150</span><span class="u">175 fails (HTTP 400)</span></div>
+      <div class="row u2"><span class="brand">ums-ray</span><span class="v">125</span><span class="u">150 &rarr; only 146 up</span></div>
     </div>
     <div class="fig">
-      <div class="k">Memory per app</div>
-      <div class="row m"><span class="brand">main</span><span class="v">~120</span><span class="u">MB · drops to 100 at N=150</span></div>
-      <div class="row u2"><span class="brand">ums-ray</span><span class="v">~110</span><span class="u">MB · flat</span></div>
+      <div class="k">Per-app overhead</div>
+      <div class="row m"><span class="brand">main</span><span class="v">~120</span><span class="u">MB / app</span></div>
+      <div class="row u2"><span class="brand">ums-ray</span><span class="v">~110</span><span class="u">MB / app</span></div>
+    </div>
+    <div class="fig">
+      <div class="k">Startup @ 100 apps</div>
+      <div class="row m"><span class="brand">main</span><span class="v">75</span><span class="u">seconds</span></div>
+      <div class="row u2"><span class="brand">ums-ray</span><span class="v">65</span><span class="u">seconds</span></div>
     </div>
   </div>
 
   <div class="tblwrap">
     <table>
-      <caption>Startup = time to bring all N online. Per-app memory from cgroup delta (real resident, shared pages counted once).</caption>
+      <caption>Startup = time to bring all N apps online. Per-app = the memory each app adds, from a cgroup memory.current delta (real resident, shared pages counted once).</caption>
       <thead>
         <tr>
           <th class="l" rowspan="2">Apps</th>
-          <th class="grp" colspan="2"><span class="cm">main · container</span></th>
-          <th class="grp sep" colspan="2"><span class="cu">ums-ray · actor</span></th>
+          <th class="grp" colspan="2"><span class="cm">main &middot; container</span></th>
+          <th class="grp sep" colspan="2"><span class="cu">ums-ray &middot; actor</span></th>
         </tr>
         <tr><th>startup s</th><th>MB/app</th><th class="sep">startup s</th><th>MB/app</th></tr>
       </thead>
@@ -103,12 +112,21 @@
         <tr><td class="l">75</td><td>43.5</td><td>124</td><td class="sep">46.3</td><td>110</td></tr>
         <tr><td class="l">100</td><td>74.9</td><td>123</td><td class="sep">64.9</td><td>110</td></tr>
         <tr><td class="l">125</td><td>114.6</td><td>120</td><td class="sep">87.0</td><td>110</td></tr>
-        <tr><td class="l">150</td><td>215.3</td><td>100</td><td class="sep fail">broke</td><td class="fail">146/150</td></tr>
-        <tr class="brk"><td class="l">175</td><td class="fail" colspan="2">broke — HTTP 400 on /apps/run</td><td class="sep">—</td><td>—</td></tr>
+        <tr><td class="l">150</td><td>215.3</td><td>100</td><td class="sep fail">broke</td><td class="fail">146/150 up</td></tr>
+        <tr class="brk"><td class="l">175</td><td class="fail" colspan="2">broke &mdash; server HTTP 400 on /apps/run</td><td class="sep">&mdash;</td><td>&mdash;</td></tr>
       </tbody>
     </table>
   </div>
 
-  <p class="read">Read: <b>memory sets the ceiling, not the model.</b> An idle app still carries the whole runtime (~110–120 MB), so ~125–150 fit in 16 GB either way. main squeezes in more via shared image pages; ums-ray starts faster at the top. main's break is a clean server-side rejection, ums-ray's is a startup that can't finish in budget.</p>
-  <footer><span>acqbench · app_scale</span><span>2026-07-22</span></footer>
+  <div class="find">
+    <h2>Key findings</h2>
+    <ul>
+      <li><b>Per-app overhead is the runtime, ~110&ndash;120 MB.</b> An idle read-only app still loads all of acquirium (pyarrow, polars, duckdb), so memory &mdash; not CPU or the task &mdash; sets the ceiling.</li>
+      <li><b>Both are memory-bound at ~15 GB</b> under the 16 GB cap: main fits 150 apps, ums-ray 125. Roughly the same wall, reached different ways.</li>
+      <li><b>main packs more via shared image pages</b> &mdash; 150 identical containers share read-only layers, so effective per-app drops toward 100 MB at the top.</li>
+      <li><b>ums-ray is lighter per app and starts faster</b> (65 vs 75s at 100), but its actors do not share as much, so it caps sooner.</li>
+      <li>The failures differ: main gets a clean server-side rejection at 175; ums-ray simply cannot bring all 150 online within budget (146 up).</li>
+    </ul>
+  </div>
+  <footer><span>acqbench &middot; app_scale</span><span>2026-07-22</span></footer>
 </div>

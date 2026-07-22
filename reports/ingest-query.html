@@ -1,4 +1,4 @@
-<title>Ingest + Query — acqbench</title>
+<title>Ingest + Query &mdash; acqbench</title>
 <style>
   :root{
     --bg:#eef1f4; --surface:#ffffff; --ink:#10151b; --muted:#586472;
@@ -24,7 +24,7 @@
   .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--accent);font-weight:600;}
   h1{font-size:30px;line-height:1.1;margin:8px 0 0;letter-spacing:-.02em;text-wrap:balance;}
-  .lede{font-size:16px;color:var(--ink);margin:10px 0 0;max-width:60ch;}
+  .lede{font-size:16px;margin:10px 0 0;max-width:60ch;}
   .lede b{color:var(--accent);}
   .meta{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:16px;
     font-family:var(--mono);font-size:11.5px;color:var(--muted);}
@@ -42,43 +42,48 @@
   table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12.5px;
     font-variant-numeric:tabular-nums;}
   caption{caption-side:top;text-align:left;font-family:var(--sans);font-size:12px;color:var(--muted);
-    padding:12px 14px 0;}
+    padding:12px 14px 2px;}
   th,td{padding:7px 14px;text-align:right;white-space:nowrap;border-top:1px solid var(--line);}
   thead th{border-top:0;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
     font-weight:600;padding-top:12px;padding-bottom:10px;}
   tbody tr:hover td{background:color-mix(in srgb,var(--accent) 6%,transparent);}
   th.l,td.l{text-align:left;}
   td.q{color:var(--ink);}
-  .d-good{color:var(--good);} .d-bad{color:var(--bad);} .d-same{color:var(--same);}
+  .d-same{color:var(--same);}
   .tag{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
 
-  .read{margin:22px 2px 0;padding-top:18px;border-top:2px solid var(--line-strong);
-    font-size:15px;max-width:64ch;}
-  .read b{color:var(--accent);}
-  footer{margin-top:20px;font-family:var(--mono);font-size:11px;color:var(--muted);
+  .find{margin:24px 2px 0;padding-top:18px;border-top:2px solid var(--line-strong);}
+  .find h2{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 12px;font-weight:600;}
+  .find ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;}
+  .find li{font-size:14.5px;padding-left:18px;position:relative;max-width:72ch;}
+  .find li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:1px;background:var(--accent);}
+  .find li b{color:var(--accent);}
+  footer{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--muted);
     display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 </style>
 
 <div class="sheet">
-  <div class="eyebrow">acqbench · benchmark report</div>
-  <h1>Ingest&nbsp;+&nbsp;Query</h1>
-  <p class="lede">Ingestion within <b>0.2%</b>. Every query within noise. The Ray backend doesn't touch the data path — it only changes where drivers run.</p>
+  <div class="eyebrow">acqbench &middot; benchmark report</div>
+  <h1>Ingest + Query</h1>
+  <p class="lede">Ingestion within <b>0.2%</b>. Every query within noise. The Ray backend does not touch the data path &mdash; it only changes where drivers run.</p>
   <div class="meta">
     <span>main @937654f</span><span>ums-ray-backend @bfb3385</span>
-    <span>duckdb · server+drivers</span><span>2M rows/rep · 3 reps</span><span>cloud-vm · 16 GiB</span>
+    <span>duckdb &middot; server+drivers</span><span>2M rows/rep &middot; 3 reps</span>
+    <span>cloud-vm &middot; 16 GB RAM &middot; 4 vCPU</span>
   </div>
 
   <div class="figs">
-    <div class="fig"><div class="k">Ingestion Δ</div><div class="v d-same">+0.2%</div><div class="s">211.9k → 212.0k rows/s</div></div>
-    <div class="fig"><div class="k">Queries differ</div><div class="v">0 / 12</div><div class="s">all same or noise</div></div>
-    <div class="fig"><div class="k">Widest read</div><div class="v">2.0M</div><div class="s">564 vs 588 ms · same</div></div>
+    <div class="fig"><div class="k">Ingestion diff</div><div class="v d-same">+0.2%</div><div class="s">211.9k &rarr; 212.0k rows/s</div></div>
+    <div class="fig"><div class="k">Queries that differ</div><div class="v">0 / 12</div><div class="s">all same or noise</div></div>
+    <div class="fig"><div class="k">Widest read</div><div class="v">2.0M</div><div class="s">564 vs 588 ms &middot; same</div></div>
   </div>
 
   <div class="tblwrap">
     <table>
-      <caption>Per-query latency, median ms. Δ negative = ums-ray faster; verdict discounts deltas smaller than a branch's own spread.</caption>
+      <caption>Per-query latency, median ms. Diff negative = ums-ray faster; "noisy" = a branch's own reps disagreed by more than the gap.</caption>
       <thead>
-        <tr><th class="l">Query</th><th>Rows</th><th>main</th><th>ums-ray</th><th>Δ</th><th class="l">Verdict</th></tr>
+        <tr><th class="l">Query</th><th>Rows</th><th>main</th><th>ums-ray</th><th>Diff</th><th class="l">Verdict</th></tr>
       </thead>
       <tbody>
         <tr><td class="l q">full_all</td><td>2,000,000</td><td>563.6</td><td>588.4</td><td class="d-same">+4.4%</td><td class="l tag">same</td></tr>
@@ -86,17 +91,24 @@
         <tr><td class="l q">full_stream</td><td>50,000</td><td>12.9</td><td>13.1</td><td class="d-same">+1.5%</td><td class="l tag">same</td></tr>
         <tr><td class="l q">window_hr</td><td>25,000</td><td>9.2</td><td>9.3</td><td class="d-same">+1.0%</td><td class="l tag">same</td></tr>
         <tr><td class="l q">window_10k</td><td>10,000</td><td>6.8</td><td>7.1</td><td class="d-same">+4.3%</td><td class="l tag">same</td></tr>
-        <tr><td class="l q">latest_1k</td><td>1,000</td><td>4.5</td><td>4.2</td><td class="d-same">−5.3%</td><td class="l tag">noisy</td></tr>
-        <tr><td class="l q">window_1k</td><td>1,000</td><td>5.9</td><td>5.7</td><td class="d-same">−2.4%</td><td class="l tag">same</td></tr>
+        <tr><td class="l q">latest_1k</td><td>1,000</td><td>4.5</td><td>4.2</td><td class="d-same">-5.3%</td><td class="l tag">noisy</td></tr>
+        <tr><td class="l q">window_1k</td><td>1,000</td><td>5.9</td><td>5.7</td><td class="d-same">-2.4%</td><td class="l tag">same</td></tr>
         <tr><td class="l q">latest_100</td><td>100</td><td>3.8</td><td>3.9</td><td class="d-same">+2.4%</td><td class="l tag">same</td></tr>
-        <tr><td class="l q">window_100</td><td>100</td><td>5.7</td><td>5.6</td><td class="d-same">−1.7%</td><td class="l tag">same</td></tr>
+        <tr><td class="l q">window_100</td><td>100</td><td>5.7</td><td>5.6</td><td class="d-same">-1.7%</td><td class="l tag">same</td></tr>
         <tr><td class="l q">info_all</td><td>40</td><td>12.5</td><td>13.4</td><td class="d-same">+6.8%</td><td class="l tag">noisy</td></tr>
-        <tr><td class="l q">latest_1</td><td>1</td><td>5.7</td><td>5.4</td><td class="d-same">−4.4%</td><td class="l tag">same</td></tr>
-        <tr><td class="l q">info_single</td><td>1</td><td>5.1</td><td>4.7</td><td class="d-same">−8.0%</td><td class="l tag">noisy</td></tr>
+        <tr><td class="l q">latest_1</td><td>1</td><td>5.7</td><td>5.4</td><td class="d-same">-4.4%</td><td class="l tag">same</td></tr>
+        <tr><td class="l q">info_single</td><td>1</td><td>5.1</td><td>4.7</td><td class="d-same">-8.0%</td><td class="l tag">noisy</td></tr>
       </tbody>
     </table>
   </div>
 
-  <p class="read">Read: <b>no data-path cost.</b> Write throughput and read latency are the same on both branches across five orders of magnitude of selectivity. Whatever the Ray backend changes, it isn't the ingest or query hot path.</p>
-  <footer><span>acqbench · ingest_query</span><span>2026-07-22</span></footer>
+  <div class="find">
+    <h2>Key findings</h2>
+    <ul>
+      <li><b>No data-path cost.</b> Write throughput is identical (+0.2%) and read latency matches across five orders of magnitude of selectivity.</li>
+      <li>The largest deltas (info_single -8%, info_all +6.8%) are <b>noise</b> &mdash; each branch's own repetitions swing wider than the gap between branches.</li>
+      <li>Whatever the Ray backend changes, it is not ingest or query. It moves driver execution off the request path, and that path is unaffected.</li>
+    </ul>
+  </div>
+  <footer><span>acqbench &middot; ingest_query</span><span>2026-07-22</span></footer>
 </div>
