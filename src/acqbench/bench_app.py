@@ -33,6 +33,7 @@ timestamp, and POST both to the latency receiver via an ``Output.trigger``.
 from __future__ import annotations
 
 import hashlib
+import time
 from datetime import datetime, timezone
 
 from acquirium import App, Output
@@ -43,6 +44,13 @@ from acquirium import Acquirium, AppContext
 # of timeseries rows) before registering apps. See bench_setup() in
 # scripts/run_bench.py / the module docstring of the harness.
 POINT_URI = "urn:acqbench:point:temp0"
+
+# A fixed, deterministic, I/O-free unit of "in-app logic". Chained SHA-1 so the
+# loop can't be optimised away; the count is tuned to land near ~1-2 ms on one
+# idle core. The absolute time doesn't matter — the point is how it changes as
+# more apps run at once, which is pure CPU/GIL/scheduler contention with no
+# server round-trip in the way.
+_COMPUTE_ITERS = 12_000
 
 
 def _output_uri(point_uri: str) -> str:
@@ -83,13 +91,25 @@ class BenchApp(App):
         # time_received: when this run started processing.
         time_received = datetime.now(timezone.utc).isoformat()
 
-        # Trivial, cheap read-only work: fetch the latest value for the bound
-        # point. Guarded so a missing/empty point never crashes the run — the
-        # benchmark cares that a read executed, not what it returned.
+        # (1) In-app compute: a fixed local task, no I/O. Timed on its own with a
+        # monotonic clock so the number is a pure duration (immune to cross-
+        # container clock skew) reflecting only how much CPU this app can get
+        # while the rest of the fleet runs alongside it.
+        t = time.perf_counter()
+        digest = b"acqbench"
+        for _ in range(_COMPUTE_ITERS):
+            digest = hashlib.sha1(digest).digest()
+        compute_us = (time.perf_counter() - t) * 1e6
+
+        # (2) Server read: the cheapest valid data access, timed separately so
+        # shared-server contention shows up on its own axis. Guarded so a
+        # missing/empty point never crashes the run.
+        t = time.perf_counter()
         try:
             ctx.query.latest_data(cast_value="float")
         except Exception:
             pass
+        read_us = (time.perf_counter() - t) * 1e6
 
         # time_completed: when this run finished processing.
         time_completed = datetime.now(timezone.utc).isoformat()
@@ -106,6 +126,8 @@ class BenchApp(App):
             "app_id": ctx.app_id,
             "time_received": time_received,
             "time_completed": time_completed,
+            "compute_us": round(compute_us, 1),
+            "read_us": round(read_us, 1),
         }
         return [
             Output.trigger(

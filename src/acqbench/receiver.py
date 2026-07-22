@@ -33,6 +33,10 @@ class Trigger:
     time_received: str | None
     time_completed: str | None
     endpoint_receipt: str
+    # Optional monotonic durations (ms) the app self-reports: a fixed local
+    # compute task and a server read, timed separately. None on older apps.
+    compute_ms: float | None = None
+    read_ms: float | None = None
 
 
 @dataclass
@@ -75,6 +79,8 @@ class Receiver:
                             time_received=msg.get("time_received"),
                             time_completed=msg.get("time_completed"),
                             endpoint_receipt=stamp,
+                            compute_ms=_us_to_ms(msg.get("compute_us")),
+                            read_ms=_us_to_ms(msg.get("read_us")),
                         )
                     )
                 self.send_response(200)
@@ -168,6 +174,8 @@ class Receiver:
         # Steady state: triggers strictly after the last app came online.
         recv_to_done: list[float] = []
         done_to_endpoint: list[float] = []
+        compute_ms: list[float] = []
+        read_ms: list[float] = []
         steady_apps: set[str] = set()
         steady_window: list[datetime] = []
         for t in triggers:
@@ -181,6 +189,10 @@ class Receiver:
                 recv_to_done.append((c - r).total_seconds() * 1000.0)
             if c and e:
                 done_to_endpoint.append((e - c).total_seconds() * 1000.0)
+            if t.compute_ms is not None:
+                compute_ms.append(t.compute_ms)
+            if t.read_ms is not None:
+                read_ms.append(t.read_ms)
 
         span_s = (
             (max(steady_window) - min(steady_window)).total_seconds()
@@ -198,6 +210,8 @@ class Receiver:
             steady_span_s=span_s,
             received_to_completed_ms=recv_to_done,
             completed_to_endpoint_ms=done_to_endpoint,
+            compute_ms=compute_ms,
+            read_ms=read_ms,
         )
 
 
@@ -213,6 +227,15 @@ class SteadyStateAnalysis:
     steady_span_s: float
     received_to_completed_ms: list[float]
     completed_to_endpoint_ms: list[float]
+    compute_ms: list[float] = field(default_factory=list)  # in-app local task
+    read_ms: list[float] = field(default_factory=list)     # server read
+
+
+def _us_to_ms(v: object) -> float | None:
+    try:
+        return float(v) / 1000.0 if v is not None else None
+    except (TypeError, ValueError):
+        return None
 
 
 def _parse(s: str | None) -> datetime | None:

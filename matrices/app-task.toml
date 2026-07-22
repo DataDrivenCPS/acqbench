@@ -1,0 +1,33 @@
+# In-app task latency vs concurrency (main vs ums-ray-backend), on cloud-vm.
+#
+# Same machinery as app-scale, but the question is different: not "how many apps
+# fit" but "how much does one app's own work slow down as N apps run at once".
+# Each app times two things per tick and reports them separately:
+#   compute_ms  a fixed local SHA-1 loop, no I/O   -> CPU / GIL / scheduler contention
+#   read_ms     one latest_data() server read      -> shared-server contention
+#
+# Counts stay BELOW the memory ceiling (main 150 / ums 125) so every app is
+# online for the whole steady window — we want contention, not thrash. The knee
+# of interest is the 4-vCPU cap: expect compute to stay flat to ~4 apps, then
+# climb as the fleet oversubscribes the cores. Longer steady window than the
+# ceiling test for more per-app samples.
+
+refs = ["git:main", "git:ums-ray-backend"]
+topologies = ["server"]
+workloads = ["app_scale"]
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+app_scale = true
+app_image = "acquirium_test-acquirium:latest"
+
+[run]
+repetitions = 1
+warmup = 0
+
+[workload_params.app_scale]
+counts = [1, 4, 10, 25, 50, 100, 125]
+interval = 1.0
+steady_seconds = 30.0
+per_app_startup_budget = 6.0

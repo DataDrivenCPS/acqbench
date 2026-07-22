@@ -170,6 +170,11 @@ class AppScale(Workload):
             "steady_span_s": analysis.steady_span_s,
             "received_to_completed_ms": summarize(analysis.received_to_completed_ms),
             "completed_to_endpoint_ms": summarize(analysis.completed_to_endpoint_ms),
+            # In-app local compute vs server read, timed separately by the app —
+            # how each degrades with concurrency is the point of app_task runs.
+            "compute_ms": summarize(analysis.compute_ms),
+            "read_ms": summarize(analysis.read_ms),
+            "compute_samples": len(analysis.compute_ms),
             "steady_throughput_per_s": (
                 analysis.steady_triggers / analysis.steady_span_s
                 if analysis.steady_span_s > 0 else 0.0
