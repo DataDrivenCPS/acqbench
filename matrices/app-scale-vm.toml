@@ -1,0 +1,24 @@
+# main vs ums-ray-backend: app scalability to the breaking point, on cloud-vm.
+# 16 GiB cgroup cap (swap off) => a clean CONTAINED OOM ceiling. Per-app ~150-190MB
+# (acquirium runtime), so the ceiling is ~80-100 apps for both branches; counts
+# escalate past that and the workload stops at the first count that can't bring
+# every app online. main = Docker container/app (nested dockerd); ums = Ray actor/app.
+refs = ["git:main", "git:ums-ray-backend"]
+topologies = ["server"]
+workloads = ["app_scale"]
+
+[[configs]]
+backend = "duckdb"
+read_batch_size = 50_000
+app_scale = true
+app_image = "acquirium_test-acquirium:latest"
+
+[run]
+repetitions = 1
+warmup = 0
+
+[workload_params.app_scale]
+counts = [1, 10, 25, 50, 75, 100, 125, 150]
+interval = 2.0
+steady_seconds = 15.0
+per_app_startup_budget = 6.0
