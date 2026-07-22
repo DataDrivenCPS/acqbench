@@ -80,10 +80,15 @@ class AppScale(Workload):
         # host.docker.internal; ums-ray reaches it on loopback all the same.
         with Receiver(host="0.0.0.0") as receiver:
             self._setup_point(ctx)
-            # ums-ray actors are descendants of the server process, so app
-            # memory is measured as the server-tree RSS delta from this
-            # apps-idle baseline. (main's containers are separate → docker stats.)
+            # App memory is the increase in this cgroup's resident memory once N
+            # apps are up. Both execution models live inside one cgroup — main's
+            # worker containers roll up as nested-cgroup children, ums-ray's Ray
+            # actors as descendants of the server — so a memory.current delta is
+            # an accurate, consistent measure for both (real resident memory, not
+            # RSS-summed shared pages, and it works where nested `docker stats`
+            # reports 0). Falls back to server-tree RSS where there is no cgroup.
             self._baseline_rss_mb = ctx.server.resources().get("rss_mb", 0.0)
+            self._baseline_cg_mb = _cgroup_mem_mb()
             for n in self.counts:
                 point = self._run_count(ctx, receiver, branch, cfg.app_image, n)
                 results.append(point)
@@ -202,13 +207,18 @@ class AppScale(Workload):
         return best
 
     def _app_memory(self, ctx: Context, branch: str) -> float | None:
-        """Total RSS (MB) attributable to the running apps — the
+        """Total memory (MB) attributable to the running apps — the
         apps-infrastructure overhead being measured.
 
-        main: sum of the per-app worker containers (docker stats).
-        ums-ray: the server process tree grows to include the Ray actors, so the
-        RSS delta from the apps-idle baseline is the actors' footprint.
+        Preferred: the cgroup memory.current delta from the apps-idle baseline,
+        which captures both models (main's containers and ums-ray's actors) as
+        real resident memory. Falls back per-branch where there is no cgroup:
+        docker stats for main's containers, server-tree RSS delta for ums-ray.
         """
+        base_cg = getattr(self, "_baseline_cg_mb", None)
+        now_cg = _cgroup_mem_mb()
+        if base_cg is not None and now_cg is not None:
+            return max(0.0, now_cg - base_cg)
         if branch == "main":
             return _docker_app_memory_mb()
         now = ctx.server.resources().get("rss_mb", 0.0)
@@ -238,6 +248,20 @@ def _p95(vals: list[float]) -> float:
         return 0.0
     from ..metrics import percentile
     return percentile(sorted(vals), 95)
+
+
+def _cgroup_mem_mb() -> float | None:
+    """Current resident memory (MB) of this cgroup, or None if not on cgroup v2.
+
+    Reads memory.current, which on a container rolls up the server, the harness,
+    and every app (nested-container children for main, actor descendants for
+    ums-ray) — so a delta from an apps-idle baseline is the apps' real footprint.
+    """
+    try:
+        with open("/sys/fs/cgroup/memory.current") as f:
+            return int(f.read().strip()) / 1e6
+    except (OSError, ValueError):
+        return None
 
 
 def _docker_app_memory_mb() -> float | None:
