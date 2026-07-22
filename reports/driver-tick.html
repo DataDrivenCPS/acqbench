@@ -1,0 +1,120 @@
+<title>Driver Tick — acqbench</title>
+<style>
+  :root{
+    --bg:#eef1f4; --surface:#ffffff; --ink:#10151b; --muted:#586472;
+    --line:#dde2e8; --line-strong:#c7cfd8; --accent:#0f857a;
+    --good:#1f7a34; --bad:#c34532; --same:#7b8592;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#0b0e12;--surface:#141a21;--ink:#e7ebef;--muted:#98a2ad;
+      --line:#222a33;--line-strong:#2f3a45;--accent:#34c2b1;
+      --good:#54c96a;--bad:#ff7c6c;--same:#7d8792;}
+  }
+  :root[data-theme="light"]{--bg:#eef1f4;--surface:#fff;--ink:#10151b;--muted:#586472;
+    --line:#dde2e8;--line-strong:#c7cfd8;--accent:#0f857a;--good:#1f7a34;--bad:#c34532;--same:#7b8592;}
+  :root[data-theme="dark"]{--bg:#0b0e12;--surface:#141a21;--ink:#e7ebef;--muted:#98a2ad;
+    --line:#222a33;--line-strong:#2f3a45;--accent:#34c2b1;--good:#54c96a;--bad:#ff7c6c;--same:#7d8792;}
+
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .sheet{max-width:800px;margin:0 auto;padding:40px 28px 32px;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;}
+  h1{font-size:30px;line-height:1.1;margin:8px 0 0;letter-spacing:-.02em;text-wrap:balance;}
+  .lede{font-size:16px;margin:10px 0 0;max-width:62ch;}
+  .lede b{color:var(--accent);}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:16px;
+    font-family:var(--mono);font-size:11.5px;color:var(--muted);}
+  .meta span{border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap;}
+
+  .figs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:26px 0 24px;}
+  .fig{background:var(--surface);padding:16px;}
+  .fig .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+  .fig .v{font-family:var(--mono);font-size:22px;font-weight:600;margin-top:6px;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;}
+  .fig .s{font-size:12px;color:var(--muted);margin-top:2px;}
+  .win-m{color:var(--accent);} .win-u{color:var(--good);}
+
+  .grid2{display:grid;grid-template-columns:1fr;gap:16px;}
+  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12.5px;
+    font-variant-numeric:tabular-nums;}
+  caption{caption-side:top;text-align:left;font-family:var(--sans);font-size:12px;color:var(--muted);
+    padding:12px 14px 2px;}
+  th,td{padding:7px 13px;text-align:right;white-space:nowrap;border-top:1px solid var(--line);}
+  thead th{border-top:0;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;padding-top:11px;padding-bottom:9px;}
+  tbody tr:hover td{background:color-mix(in srgb,var(--accent) 6%,transparent);}
+  th.l,td.l{text-align:left;}
+  .best{font-weight:600;}
+  .m{color:var(--accent);} .u{color:var(--good);}
+
+  .read{margin:22px 2px 0;padding-top:18px;border-top:2px solid var(--line-strong);
+    font-size:15px;max-width:66ch;}
+  .read b{color:var(--accent);}
+  footer{margin-top:20px;font-family:var(--mono);font-size:11px;color:var(--muted);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .legend{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0 2px 6px;}
+  .legend b.m{color:var(--accent);} .legend b.u{color:var(--good);}
+</style>
+
+<div class="sheet">
+  <div class="eyebrow">acqbench · benchmark report</div>
+  <h1>Driver Tick</h1>
+  <p class="lede">A crossover. <b>Threads</b> start instant and stay tight until they contend; <b>Ray actors</b> pay a fixed startup and a ~120&nbsp;ms jitter floor but hold flat — and take the lead past ~100 busy drivers.</p>
+  <div class="meta">
+    <span>main = threads</span><span>ums-ray = Ray actors</span>
+    <span>1·10·100 drivers</span><span>100·1k·10k rows/tick</span><span>30s·1m·10m period</span><span>42 cells</span>
+  </div>
+
+  <div class="figs">
+    <div class="fig"><div class="k">Online @100</div><div class="v"><span class="win-m">0.8s</span> / 68s</div><div class="s">main vs ums-ray</div></div>
+    <div class="fig"><div class="k">Jitter @100·1k·10m</div><div class="v">799 / <span class="win-u">119</span></div><div class="s">ms — ums-ray holds flat</div></div>
+    <div class="fig"><div class="k">Tick @100·10k</div><div class="v">233 / <span class="win-u">67</span></div><div class="s">ms — ums-ray wins</div></div>
+  </div>
+
+  <p class="legend">Lower is better. <b class="m">teal</b> = main ahead · <b class="u">green</b> = ums-ray ahead.</p>
+  <div class="grid2">
+    <div class="tblwrap">
+      <table>
+        <caption>Time until all drivers online (s) — actor vs thread startup.</caption>
+        <thead><tr><th class="l">Drivers</th><th>main</th><th>ums-ray</th></tr></thead>
+        <tbody>
+          <tr><td class="l">1</td><td class="best">0.02</td><td>0.02</td></tr>
+          <tr><td class="l">10</td><td class="best m">0.09</td><td>6.1</td></tr>
+          <tr><td class="l">100</td><td class="best m">0.80</td><td>67.6</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tblwrap">
+      <table>
+        <caption>Scheduling jitter (median ms) — the load where each model wins.</caption>
+        <thead><tr><th class="l">Config</th><th>main</th><th>ums-ray</th></tr></thead>
+        <tbody>
+          <tr><td class="l">1 drv · 100 · 30s</td><td class="best m">29</td><td>105</td></tr>
+          <tr><td class="l">100 drv · 100 · 30s</td><td class="best m">14</td><td>120</td></tr>
+          <tr><td class="l">100 drv · 10k · 1m</td><td>503</td><td class="best u">168</td></tr>
+          <tr><td class="l">100 drv · 1k · 10m</td><td>799</td><td class="best u">119</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tblwrap">
+      <table>
+        <caption>Tick latency (median ms) — the crossover in one column.</caption>
+        <thead><tr><th class="l">Config</th><th>main</th><th>ums-ray</th></tr></thead>
+        <tbody>
+          <tr><td class="l">100 drv · 100 · 1m</td><td class="best m">10</td><td>22</td></tr>
+          <tr><td class="l">100 drv · 10k · 1m</td><td>233</td><td class="best u">67</td></tr>
+          <tr><td class="l">100 drv · 1k · 10m</td><td>127</td><td class="best u">26</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p class="read">Read: <b>pick by concurrency.</b> Below ~100 drivers, threads are faster to start and tighter to schedule. At 100 drivers doing real per-tick work, thread contention blows main's latency and jitter up 3–7×, while the actors stay flat — Ray's fixed overhead finally pays off.</p>
+  <footer><span>acqbench · driver_tick</span><span>2026-07-22</span></footer>
+</div>

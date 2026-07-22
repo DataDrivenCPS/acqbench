@@ -1,0 +1,102 @@
+<title>Ingest + Query — acqbench</title>
+<style>
+  :root{
+    --bg:#eef1f4; --surface:#ffffff; --ink:#10151b; --muted:#586472;
+    --line:#dde2e8; --line-strong:#c7cfd8; --accent:#0f857a;
+    --good:#1f7a34; --bad:#c34532; --same:#7b8592;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#0b0e12;--surface:#141a21;--ink:#e7ebef;--muted:#98a2ad;
+      --line:#222a33;--line-strong:#2f3a45;--accent:#34c2b1;
+      --good:#54c96a;--bad:#ff7c6c;--same:#7d8792;}
+  }
+  :root[data-theme="light"]{--bg:#eef1f4;--surface:#fff;--ink:#10151b;--muted:#586472;
+    --line:#dde2e8;--line-strong:#c7cfd8;--accent:#0f857a;--good:#1f7a34;--bad:#c34532;--same:#7b8592;}
+  :root[data-theme="dark"]{--bg:#0b0e12;--surface:#141a21;--ink:#e7ebef;--muted:#98a2ad;
+    --line:#222a33;--line-strong:#2f3a45;--accent:#34c2b1;--good:#54c96a;--bad:#ff7c6c;--same:#7d8792;}
+
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .sheet{max-width:800px;margin:0 auto;padding:40px 28px 32px;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;}
+  h1{font-size:30px;line-height:1.1;margin:8px 0 0;letter-spacing:-.02em;text-wrap:balance;}
+  .lede{font-size:16px;color:var(--ink);margin:10px 0 0;max-width:60ch;}
+  .lede b{color:var(--accent);}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:16px;
+    font-family:var(--mono);font-size:11.5px;color:var(--muted);}
+  .meta span{border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap;}
+
+  .figs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:26px 0 24px;}
+  .fig{background:var(--surface);padding:16px 16px 14px;}
+  .fig .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+  .fig .v{font-family:var(--mono);font-size:26px;font-weight:600;margin-top:6px;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;}
+  .fig .s{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12.5px;
+    font-variant-numeric:tabular-nums;}
+  caption{caption-side:top;text-align:left;font-family:var(--sans);font-size:12px;color:var(--muted);
+    padding:12px 14px 0;}
+  th,td{padding:7px 14px;text-align:right;white-space:nowrap;border-top:1px solid var(--line);}
+  thead th{border-top:0;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;padding-top:12px;padding-bottom:10px;}
+  tbody tr:hover td{background:color-mix(in srgb,var(--accent) 6%,transparent);}
+  th.l,td.l{text-align:left;}
+  td.q{color:var(--ink);}
+  .d-good{color:var(--good);} .d-bad{color:var(--bad);} .d-same{color:var(--same);}
+  .tag{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+
+  .read{margin:22px 2px 0;padding-top:18px;border-top:2px solid var(--line-strong);
+    font-size:15px;max-width:64ch;}
+  .read b{color:var(--accent);}
+  footer{margin-top:20px;font-family:var(--mono);font-size:11px;color:var(--muted);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+</style>
+
+<div class="sheet">
+  <div class="eyebrow">acqbench · benchmark report</div>
+  <h1>Ingest&nbsp;+&nbsp;Query</h1>
+  <p class="lede">Ingestion within <b>0.2%</b>. Every query within noise. The Ray backend doesn't touch the data path — it only changes where drivers run.</p>
+  <div class="meta">
+    <span>main @937654f</span><span>ums-ray-backend @bfb3385</span>
+    <span>duckdb · server+drivers</span><span>2M rows/rep · 3 reps</span><span>cloud-vm · 16 GiB</span>
+  </div>
+
+  <div class="figs">
+    <div class="fig"><div class="k">Ingestion Δ</div><div class="v d-same">+0.2%</div><div class="s">211.9k → 212.0k rows/s</div></div>
+    <div class="fig"><div class="k">Queries differ</div><div class="v">0 / 12</div><div class="s">all same or noise</div></div>
+    <div class="fig"><div class="k">Widest read</div><div class="v">2.0M</div><div class="s">564 vs 588 ms · same</div></div>
+  </div>
+
+  <div class="tblwrap">
+    <table>
+      <caption>Per-query latency, median ms. Δ negative = ums-ray faster; verdict discounts deltas smaller than a branch's own spread.</caption>
+      <thead>
+        <tr><th class="l">Query</th><th>Rows</th><th>main</th><th>ums-ray</th><th>Δ</th><th class="l">Verdict</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="l q">full_all</td><td>2,000,000</td><td>563.6</td><td>588.4</td><td class="d-same">+4.4%</td><td class="l tag">same</td></tr>
+        <tr><td class="l q">full_5_streams</td><td>250,000</td><td>66.9</td><td>69.9</td><td class="d-same">+4.6%</td><td class="l tag">same</td></tr>
+        <tr><td class="l q">full_stream</td><td>50,000</td><td>12.9</td><td>13.1</td><td class="d-same">+1.5%</td><td class="l tag">same</td></tr>
+        <tr><td class="l q">window_hr</td><td>25,000</td><td>9.2</td><td>9.3</td><td class="d-same">+1.0%</td><td class="l tag">same</td></tr>
+        <tr><td class="l q">window_10k</td><td>10,000</td><td>6.8</td><td>7.1</td><td class="d-same">+4.3%</td><td class="l tag">same</td></tr>
+        <tr><td class="l q">latest_1k</td><td>1,000</td><td>4.5</td><td>4.2</td><td class="d-same">−5.3%</td><td class="l tag">noisy</td></tr>
+        <tr><td class="l q">window_1k</td><td>1,000</td><td>5.9</td><td>5.7</td><td class="d-same">−2.4%</td><td class="l tag">same</td></tr>
+        <tr><td class="l q">latest_100</td><td>100</td><td>3.8</td><td>3.9</td><td class="d-same">+2.4%</td><td class="l tag">same</td></tr>
+        <tr><td class="l q">window_100</td><td>100</td><td>5.7</td><td>5.6</td><td class="d-same">−1.7%</td><td class="l tag">same</td></tr>
+        <tr><td class="l q">info_all</td><td>40</td><td>12.5</td><td>13.4</td><td class="d-same">+6.8%</td><td class="l tag">noisy</td></tr>
+        <tr><td class="l q">latest_1</td><td>1</td><td>5.7</td><td>5.4</td><td class="d-same">−4.4%</td><td class="l tag">same</td></tr>
+        <tr><td class="l q">info_single</td><td>1</td><td>5.1</td><td>4.7</td><td class="d-same">−8.0%</td><td class="l tag">noisy</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="read">Read: <b>no data-path cost.</b> Write throughput and read latency are the same on both branches across five orders of magnitude of selectivity. Whatever the Ray backend changes, it isn't the ingest or query hot path.</p>
+  <footer><span>acqbench · ingest_query</span><span>2026-07-22</span></footer>
+</div>

@@ -1,0 +1,114 @@
+<title>App Scale — acqbench</title>
+<style>
+  :root{
+    --bg:#eef1f4; --surface:#ffffff; --ink:#10151b; --muted:#586472;
+    --line:#dde2e8; --line-strong:#c7cfd8; --accent:#0f857a;
+    --good:#1f7a34; --bad:#c34532; --same:#7b8592;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#0b0e12;--surface:#141a21;--ink:#e7ebef;--muted:#98a2ad;
+      --line:#222a33;--line-strong:#2f3a45;--accent:#34c2b1;
+      --good:#54c96a;--bad:#ff7c6c;--same:#7d8792;}
+  }
+  :root[data-theme="light"]{--bg:#eef1f4;--surface:#fff;--ink:#10151b;--muted:#586472;
+    --line:#dde2e8;--line-strong:#c7cfd8;--accent:#0f857a;--good:#1f7a34;--bad:#c34532;--same:#7b8592;}
+  :root[data-theme="dark"]{--bg:#0b0e12;--surface:#141a21;--ink:#e7ebef;--muted:#98a2ad;
+    --line:#222a33;--line-strong:#2f3a45;--accent:#34c2b1;--good:#54c96a;--bad:#ff7c6c;--same:#7d8792;}
+
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .sheet{max-width:800px;margin:0 auto;padding:40px 28px 32px;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;}
+  h1{font-size:30px;line-height:1.1;margin:8px 0 0;letter-spacing:-.02em;text-wrap:balance;}
+  .lede{font-size:16px;margin:10px 0 0;max-width:62ch;}
+  .lede b{color:var(--accent);}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:16px;
+    font-family:var(--mono);font-size:11.5px;color:var(--muted);}
+  .meta span{border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap;}
+
+  .figs{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:26px 0 8px;}
+  .fig{background:var(--surface);padding:16px 18px;}
+  .fig .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+  .fig .row{display:flex;align-items:baseline;gap:10px;margin-top:8px;}
+  .fig .brand{font-family:var(--mono);font-size:11px;width:66px;color:var(--muted);}
+  .fig .v{font-family:var(--mono);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+  .fig .u{font-size:12px;color:var(--muted);}
+  .m .v{color:var(--accent);} .u2 .v{color:var(--good);}
+
+  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-top:16px;}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12.5px;
+    font-variant-numeric:tabular-nums;}
+  caption{caption-side:top;text-align:left;font-family:var(--sans);font-size:12px;color:var(--muted);
+    padding:12px 14px 2px;}
+  th,td{padding:6.5px 12px;text-align:right;white-space:nowrap;border-top:1px solid var(--line);}
+  thead th{border-top:0;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;padding-top:11px;padding-bottom:9px;}
+  thead .grp{text-align:center;color:var(--ink);border-bottom:1px solid var(--line);}
+  thead .grp .cm{color:var(--accent);} thead .grp .cu{color:var(--good);}
+  th.l,td.l{text-align:left;}
+  .sep{border-left:1px solid var(--line);}
+  tbody tr:hover td{background:color-mix(in srgb,var(--accent) 6%,transparent);}
+  .fail{color:var(--bad);}
+  tr.brk td{background:color-mix(in srgb,var(--bad) 9%,transparent);}
+
+  .read{margin:22px 2px 0;padding-top:18px;border-top:2px solid var(--line-strong);
+    font-size:15px;max-width:66ch;}
+  .read b{color:var(--accent);}
+  footer{margin-top:20px;font-family:var(--mono);font-size:11px;color:var(--muted);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+</style>
+
+<div class="sheet">
+  <div class="eyebrow">acqbench · benchmark report</div>
+  <h1>App Scale</h1>
+  <p class="lede">Both models hit the same wall at <b>~15 GB</b>. Cost per app is the acquirium runtime — not the task. main packs a slightly higher ceiling; ums-ray is a touch lighter and starts faster.</p>
+  <div class="meta">
+    <span>main = container/app</span><span>ums-ray = Ray actor/app</span>
+    <span>16 GiB cap · no swap</span><span>read-only apps · 2s tick</span><span>cloud-vm</span>
+  </div>
+
+  <div class="figs">
+    <div class="fig">
+      <div class="k">Ceiling (apps online)</div>
+      <div class="row m"><span class="brand">main</span><span class="v">150</span><span class="u">175 fails — server HTTP 400</span></div>
+      <div class="row u2"><span class="brand">ums-ray</span><span class="v">125</span><span class="u">150 → only 146 online</span></div>
+    </div>
+    <div class="fig">
+      <div class="k">Memory per app</div>
+      <div class="row m"><span class="brand">main</span><span class="v">~120</span><span class="u">MB · drops to 100 at N=150</span></div>
+      <div class="row u2"><span class="brand">ums-ray</span><span class="v">~110</span><span class="u">MB · flat</span></div>
+    </div>
+  </div>
+
+  <div class="tblwrap">
+    <table>
+      <caption>Startup = time to bring all N online. Per-app memory from cgroup delta (real resident, shared pages counted once).</caption>
+      <thead>
+        <tr>
+          <th class="l" rowspan="2">Apps</th>
+          <th class="grp" colspan="2"><span class="cm">main · container</span></th>
+          <th class="grp sep" colspan="2"><span class="cu">ums-ray · actor</span></th>
+        </tr>
+        <tr><th>startup s</th><th>MB/app</th><th class="sep">startup s</th><th>MB/app</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="l">10</td><td>4.7</td><td>145</td><td class="sep">5.4</td><td>118</td></tr>
+        <tr><td class="l">25</td><td>11.4</td><td>130</td><td class="sep">14.3</td><td>110</td></tr>
+        <tr><td class="l">50</td><td>24.6</td><td>125</td><td class="sep">29.1</td><td>111</td></tr>
+        <tr><td class="l">75</td><td>43.5</td><td>124</td><td class="sep">46.3</td><td>110</td></tr>
+        <tr><td class="l">100</td><td>74.9</td><td>123</td><td class="sep">64.9</td><td>110</td></tr>
+        <tr><td class="l">125</td><td>114.6</td><td>120</td><td class="sep">87.0</td><td>110</td></tr>
+        <tr><td class="l">150</td><td>215.3</td><td>100</td><td class="sep fail">broke</td><td class="fail">146/150</td></tr>
+        <tr class="brk"><td class="l">175</td><td class="fail" colspan="2">broke — HTTP 400 on /apps/run</td><td class="sep">—</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="read">Read: <b>memory sets the ceiling, not the model.</b> An idle app still carries the whole runtime (~110–120 MB), so ~125–150 fit in 16 GB either way. main squeezes in more via shared image pages; ums-ray starts faster at the top. main's break is a clean server-side rejection, ums-ray's is a startup that can't finish in budget.</p>
+  <footer><span>acqbench · app_scale</span><span>2026-07-22</span></footer>
+</div>
