@@ -1,0 +1,123 @@
+<title>In-App Task vs Concurrency &mdash; acqbench</title>
+<style>
+  :root{
+    --bg:#eef1f4; --surface:#ffffff; --ink:#10151b; --muted:#586472;
+    --line:#dde2e8; --line-strong:#c7cfd8; --accent:#0f857a;
+    --good:#1f7a34; --bad:#c34532; --same:#7b8592;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#0b0e12;--surface:#141a21;--ink:#e7ebef;--muted:#98a2ad;
+      --line:#222a33;--line-strong:#2f3a45;--accent:#34c2b1;
+      --good:#54c96a;--bad:#ff7c6c;--same:#7d8792;}
+  }
+  :root[data-theme="light"]{--bg:#eef1f4;--surface:#fff;--ink:#10151b;--muted:#586472;
+    --line:#dde2e8;--line-strong:#c7cfd8;--accent:#0f857a;--good:#1f7a34;--bad:#c34532;--same:#7b8592;}
+  :root[data-theme="dark"]{--bg:#0b0e12;--surface:#141a21;--ink:#e7ebef;--muted:#98a2ad;
+    --line:#222a33;--line-strong:#2f3a45;--accent:#34c2b1;--good:#54c96a;--bad:#ff7c6c;--same:#7d8792;}
+
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .sheet{max-width:820px;margin:0 auto;padding:40px 28px 32px;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;}
+  h1{font-size:29px;line-height:1.1;margin:8px 0 0;letter-spacing:-.02em;text-wrap:balance;}
+  .lede{font-size:16px;margin:10px 0 0;max-width:66ch;}
+  .lede b{color:var(--accent);} .lede .bad{color:var(--bad);}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:16px;
+    font-family:var(--mono);font-size:11.5px;color:var(--muted);}
+  .meta span{border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap;}
+
+  .figs{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:26px 0 6px;}
+  .fig{background:var(--surface);padding:16px 18px;}
+  .fig .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);}
+  .fig .v{font-family:var(--mono);font-size:23px;font-weight:600;margin-top:7px;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;}
+  .fig .s{font-size:12px;color:var(--muted);margin-top:3px;}
+  .flat{color:var(--good);} .cliff{color:var(--bad);}
+
+  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-top:16px;}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12.5px;
+    font-variant-numeric:tabular-nums;}
+  caption{caption-side:top;text-align:left;font-family:var(--sans);font-size:12px;color:var(--muted);
+    padding:12px 14px 2px;}
+  th,td{padding:6.5px 12px;text-align:right;white-space:nowrap;border-top:1px solid var(--line);}
+  thead th{border-top:0;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;padding-top:11px;padding-bottom:9px;}
+  thead .grp{text-align:center;color:var(--ink);border-bottom:1px solid var(--line);}
+  thead .grp .cm{color:var(--accent);} thead .grp .cu{color:var(--good);}
+  th.l,td.l{text-align:left;}
+  .sep{border-left:1px solid var(--line);}
+  tbody tr:hover td{background:color-mix(in srgb,var(--accent) 6%,transparent);}
+  .hot{color:var(--bad);font-weight:600;}
+
+  .find{margin:24px 2px 0;padding-top:18px;border-top:2px solid var(--line-strong);}
+  .find h2{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 12px;font-weight:600;}
+  .find ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;}
+  .find li{font-size:14.5px;padding-left:18px;position:relative;max-width:76ch;}
+  .find li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:1px;background:var(--accent);}
+  .find li b{color:var(--accent);} .find li .bad{color:var(--bad);}
+  footer{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--muted);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+</style>
+
+<div class="sheet">
+  <div class="eyebrow">acqbench &middot; benchmark report</div>
+  <h1>In-App Task vs Concurrency</h1>
+  <p class="lede">As the fleet grows to 125 apps, each app's own compute <b>does not slow down at all</b>. What cracks is the <span class="bad">shared server read</span> &mdash; and only near the memory ceiling, sharply on main, gently on ums-ray.</p>
+  <div class="meta">
+    <span>fixed SHA-1 task + 1 read/tick</span><span>1 &rarr; 125 apps</span>
+    <span>1s tick &middot; 30s window</span><span>16 GB RAM &middot; 4 vCPU</span><span>below the memory ceiling</span>
+  </div>
+
+  <div class="figs">
+    <div class="fig">
+      <div class="k">In-app compute, 1 &rarr; 125 apps</div>
+      <div class="v flat">flat ~2.5 ms</div>
+      <div class="s">main 2.9 &rarr; 2.6 &middot; ums-ray 2.4 &rarr; 2.4 (p50)</div>
+    </div>
+    <div class="fig">
+      <div class="k">Server read @ 125 apps (p50)</div>
+      <div class="v"><span class="cliff">254</span> / 26</div>
+      <div class="s">main cliffs, ums-ray holds &middot; ms</div>
+    </div>
+  </div>
+
+  <div class="tblwrap">
+    <table>
+      <caption>Median latency (ms) per app tick, steady-state. compute = fixed local SHA-1 loop (no I/O); read = one latest_data() call. p95 in parentheses.</caption>
+      <thead>
+        <tr>
+          <th class="l" rowspan="2">Apps</th>
+          <th class="grp" colspan="2"><span class="cm">main</span></th>
+          <th class="grp sep" colspan="2"><span class="cu">ums-ray</span></th>
+        </tr>
+        <tr><th>compute</th><th>read (p95)</th><th class="sep">compute</th><th>read (p95)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="l">1</td><td>2.90</td><td>16.7 (19)</td><td class="sep">2.44</td><td>17.7 (20)</td></tr>
+        <tr><td class="l">4</td><td>2.89</td><td>16.7 (18)</td><td class="sep">2.37</td><td>17.2 (19)</td></tr>
+        <tr><td class="l">10</td><td>2.92</td><td>17.9 (22)</td><td class="sep">2.42</td><td>18.1 (23)</td></tr>
+        <tr><td class="l">25</td><td>2.89</td><td>19.4 (25)</td><td class="sep">2.33</td><td>14.1 (19)</td></tr>
+        <tr><td class="l">50</td><td>2.78</td><td>19.2 (26)</td><td class="sep">2.34</td><td>15.8 (23)</td></tr>
+        <tr><td class="l">100</td><td>2.61</td><td>17.8 (<span class="hot">143</span>)</td><td class="sep">2.38</td><td>21.8 (30)</td></tr>
+        <tr><td class="l">125</td><td>2.64</td><td class="hot">254 (463)</td><td class="sep">2.43</td><td>26.3 (45)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="find">
+    <h2>Key findings</h2>
+    <ul>
+      <li><b>Per-app compute is isolated.</b> A ~2.5 ms task stays ~2.5 ms from 1 to 125 apps on both branches. 125 apps ticking once a second demand only ~0.3 of the 4 cores, so simple apps never touch the CPU wall.</li>
+      <li><b>The shared server read is the real limit.</b> It holds ~17 ms to 100 apps, then main <span class="bad">cliffs at 125</span> (254 ms median, 463 ms p95) as it nears its 150-app memory ceiling; its tail already frays at 100 (p95 143 ms).</li>
+      <li><b>ums-ray stays graceful</b> &mdash; read is still 26 ms at 125 apps, ~10x better than main at the same count. It degrades on startup (bringing apps online), not on the read path.</li>
+      <li><b>Bottom line:</b> scaling simple apps is limited by the data-access path and memory, not per-app CPU. Nothing an app does to itself slows down; what slows is talking to the one server they share.</li>
+    </ul>
+  </div>
+  <footer><span>acqbench &middot; app_task</span><span>2026-07-22</span></footer>
+</div>
