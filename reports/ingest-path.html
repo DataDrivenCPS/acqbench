@@ -1,0 +1,284 @@
+<title>Ingest Path &mdash; acqbench</title>
+<style>
+  :root{
+    --bg:#eef1f4; --surface:#ffffff; --ink:#10151b; --muted:#586472;
+    --line:#dde2e8; --line-strong:#c7cfd8; --accent:#0f857a;
+    --good:#1f7a34; --bad:#c34532; --same:#7b8592;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){--bg:#0b0e12;--surface:#141a21;--ink:#e7ebef;--muted:#98a2ad;
+      --line:#222a33;--line-strong:#2f3a45;--accent:#34c2b1;
+      --good:#54c96a;--bad:#ff7c6c;--same:#7d8792;}
+  }
+  :root[data-theme="light"]{--bg:#eef1f4;--surface:#fff;--ink:#10151b;--muted:#586472;
+    --line:#dde2e8;--line-strong:#c7cfd8;--accent:#0f857a;--good:#1f7a34;--bad:#c34532;--same:#7b8592;}
+  :root[data-theme="dark"]{--bg:#0b0e12;--surface:#141a21;--ink:#e7ebef;--muted:#98a2ad;
+    --line:#222a33;--line-strong:#2f3a45;--accent:#34c2b1;--good:#54c96a;--bad:#ff7c6c;--same:#7d8792;}
+
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .sheet{max-width:840px;margin:0 auto;padding:40px 28px 32px;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;}
+  h1{font-size:30px;line-height:1.1;margin:8px 0 0;letter-spacing:-.02em;text-wrap:balance;}
+  .lede{font-size:16px;margin:10px 0 0;max-width:66ch;}
+  .lede b{color:var(--accent);}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:16px;
+    font-family:var(--mono);font-size:11.5px;color:var(--muted);}
+  .meta span{border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap;}
+
+  .figs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:26px 0 6px;}
+  .fig{background:var(--surface);padding:16px 16px 14px;}
+  .fig .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;margin-bottom:6px;}
+  .fig .v{font-size:26px;font-weight:650;letter-spacing:-.02em;color:var(--accent);
+    font-variant-numeric:tabular-nums;}
+  .fig .u{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  @media (max-width:640px){.figs{grid-template-columns:1fr;}}
+
+  h2.sec{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin:30px 0 4px;font-weight:600;}
+  p.note{font-size:13px;color:var(--muted);margin:2px 0 12px;max-width:74ch;}
+  p.note b{color:var(--ink);}
+
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:11.5px;color:var(--muted);
+    margin:8px 0 10px;}
+  .legend i{display:inline-block;width:14px;height:0;border-top:3px solid;margin-right:6px;
+    vertical-align:3px;}
+  .l-n i{border-color:var(--accent);} .l-t i{border-color:var(--accent);border-top-style:dashed;}
+  .l-r i{border-color:var(--same);}
+
+  .bars{display:flex;flex-direction:column;gap:7px;background:var(--surface);
+    border:1px solid var(--line);border-radius:10px;padding:16px 18px;}
+  .brow{display:grid;grid-template-columns:132px 1fr;gap:10px;align-items:center;}
+  .brow .bl{font-family:var(--mono);font-size:11.5px;color:var(--ink);text-align:right;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .btrack{display:flex;flex-direction:column;gap:2px;}
+  .bar{height:9px;border-radius:0 4px 4px 0;position:relative;min-width:1px;}
+  .bar.ni{background:var(--accent);} .bar.wi{background:var(--same);}
+  .bar span{position:absolute;left:calc(100% + 7px);top:50%;transform:translateY(-50%);
+    font-family:var(--mono);font-size:10.5px;color:var(--muted);white-space:nowrap;line-height:1;}
+  .bgroup{border-top:1px solid var(--line);margin-top:4px;padding-top:10px;}
+  .bgroup:first-child{border-top:0;margin-top:0;padding-top:0;}
+  .bghead{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:8px;}
+
+  .charts2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:2px;}
+  @media (max-width:700px){.charts2{grid-template-columns:1fr;}}
+  .chart{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 14px 8px;}
+  .chart h3{font-size:13px;margin:0 0 2px;font-weight:600;}
+  .chart .sub{font-size:11.5px;color:var(--muted);margin:0 0 6px;}
+  .chart svg{width:100%;height:auto;display:block;}
+  .chart .grid{stroke:var(--line);stroke-width:1;}
+  .chart .axis{stroke:var(--line-strong);stroke-width:1;}
+  .chart text{font-family:var(--mono);font-size:10px;fill:var(--muted);}
+  .chart .ln-n{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;}
+  .chart .ln-t{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-dasharray:5 4;opacity:.8;}
+  .chart .ln-r{fill:none;stroke:var(--same);stroke-width:2;stroke-linejoin:round;}
+  .chart .nd-t{stroke:var(--accent);stroke-width:3;opacity:.8;}
+  .chart .nd-r{stroke:var(--same);stroke-width:3;}
+  .chart .anno{fill:var(--ink);font-weight:600;}
+
+  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-top:12px;}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12.5px;
+    font-variant-numeric:tabular-nums;}
+  caption{caption-side:top;text-align:left;font-family:var(--sans);font-size:12px;color:var(--muted);
+    padding:12px 14px 2px;}
+  th,td{padding:6.5px 12px;text-align:right;white-space:nowrap;border-top:1px solid var(--line);}
+  thead th{border-top:0;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;padding-top:11px;padding-bottom:9px;}
+  th.l,td.l{text-align:left;}
+  tbody tr:hover td{background:color-mix(in srgb,var(--accent) 6%,transparent);}
+  td.dim{color:var(--muted);}
+  td.warn{color:var(--bad);}
+
+  .find{margin:26px 2px 0;padding-top:18px;border-top:2px solid var(--line-strong);}
+  .find h2{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 12px;font-weight:600;}
+  .find ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;}
+  .find li{font-size:14.5px;padding-left:18px;position:relative;max-width:76ch;}
+  .find li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:1px;background:var(--accent);}
+  .find li b{color:var(--accent);}
+  .method{margin-top:24px;font-size:12.5px;color:var(--muted);max-width:78ch;}
+  .method b{color:var(--ink);font-weight:600;}
+  footer{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--muted);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+</style>
+
+<div class="sheet">
+  <div class="eyebrow">acqbench &middot; benchmark report</div>
+  <h1>Ingest Path: three index choices for the <code style="font-family:var(--mono)">insert_timeseries</code> store</h1>
+  <p class="lede">The pipeline behind <b>POST /insert_timeseries</b>, replayed in-process against a throwaway DuckDB with three timeseries-table index configurations: <b>no index</b>, a composite <b><code style="font-family:var(--mono)">(ref_uri, ts)</code></b> index, and a low-cardinality <b><code style="font-family:var(--mono)">(ref_uri)</code></b> index. Throughput is capped by Python either way (51k vs 46k vs 45k rows/s) &mdash; but the two indexes fail differently: the composite pays a <b>constant 12% tax</b>, while <code style="font-family:var(--mono)">(ref_uri)</code> is cheaper per commit yet develops <b>stop-the-world checkpoint stalls that grow with the table &mdash; 3.5-minute freezes by 400M rows</b>.</p>
+  <div class="meta">
+    <span>acquirium@main pipeline, replicated verbatim</span><span>wide&rarr;long in pandas</span>
+    <span>DPR Pilot Logs New &middot; ~4,937 csv &middot; 22.3 GB</span>
+    <span>MacBook &middot; 8 cores &middot; 24 GB</span><span>duckdb 1.5.2 &middot; pandas 2.3.3 &middot; polars 1.40.1</span>
+  </div>
+
+  <div class="figs">
+    <div class="fig">
+      <div class="k">No index</div>
+      <div class="v">51,400</div>
+      <div class="u">rows/s, flat to 370M &middot; 5.9 B/row &middot; run: 494 files, 2h03m</div>
+    </div>
+    <div class="fig">
+      <div class="k">idx (ref_uri, ts)</div>
+      <div class="v">45,600</div>
+      <div class="u">rows/s, flat to 330M &middot; 51 B/row &middot; run: 441 files, 2h02m</div>
+    </div>
+    <div class="fig">
+      <div class="k">idx (ref_uri)</div>
+      <div class="v">44,800</div>
+      <div class="u">rows/s to 400M, but 183&ndash;213s stalls &middot; 30 B/row &middot; run: 578 files, 2h30m</div>
+    </div>
+  </div>
+
+  <h2 class="sec">Where the time goes</h2>
+  <p class="note">Seconds of wall time per 1M inserted rows. The Python stages are <b>identical across all three configurations</b> (within 5% run-to-run), single-threaded, and dominate the wall clock &mdash; <code>prep_split</code> (the per-row numeric/text split in <code>prepare_value_columns</code>) alone is 46%. The index choice only moves the SQL rows in the table below.</p>
+  <div class="bars">
+    <div class="bgroup">
+      <div class="bghead">driver-side prep (pandas)</div>
+      <div class="brow"><div class="bl">read_csv</div><div class="btrack">
+        <div class="bar ni" style="width:2.7%"><span>0.24</span></div></div></div>
+      <div class="brow"><div class="bl">build_ts</div><div class="btrack">
+        <div class="bar ni" style="width:0.4%"><span>0.03</span></div></div></div>
+      <div class="brow"><div class="bl">melt (wide&rarr;long)</div><div class="btrack">
+        <div class="bar ni" style="width:5.3%"><span>0.48</span></div></div></div>
+      <div class="brow"><div class="bl">infer_kinds</div><div class="btrack">
+        <div class="bar ni" style="width:14.9%"><span>1.34</span></div></div></div>
+    </div>
+    <div class="bgroup">
+      <div class="bghead">endpoint + manager (python loops)</div>
+      <div class="brow"><div class="bl">regroup</div><div class="btrack">
+        <div class="bar ni" style="width:31.2%"><span>2.81</span></div></div></div>
+      <div class="brow"><div class="bl">mgr_assembly</div><div class="btrack">
+        <div class="bar ni" style="width:48.8%"><span>4.39</span></div></div></div>
+      <div class="brow"><div class="bl">prep_split</div><div class="btrack">
+        <div class="bar ni" style="width:99%"><span>8.94</span></div></div></div>
+      <div class="brow"><div class="bl">tz_dedupe</div><div class="btrack">
+        <div class="bar ni" style="width:2.6%"><span>0.23</span></div></div></div>
+    </div>
+  </div>
+  <div class="tblwrap">
+    <table>
+      <caption>The SQL side is the only thing the index changes. Seconds per 1M rows; commit shows mean, with per-file medians in parentheses (the (ref_uri) mean is inflated by its checkpoint stalls).</caption>
+      <thead><tr><th class="l">Configuration</th><th>sql_delete</th><th>sql_insert</th><th>sql_commit</th><th>commit stalls &gt;5s</th><th>rows/s overall</th></tr></thead>
+      <tbody>
+        <tr><td class="l">no index</td><td>0.08</td><td>0.90</td><td>0.01</td><td>0</td><td>51,400</td></tr>
+        <tr><td class="l">idx (ref_uri, ts)</td><td>0.09</td><td>0.93</td><td>1.80 (1.7 flat)</td><td>1 &middot; 25s</td><td>45,600</td></tr>
+        <tr><td class="l">idx (ref_uri)</td><td>0.10</td><td>0.89</td><td class="warn">3.30 (1.1 flat)</td><td class="warn">6 &middot; up to 213s</td><td>44,800</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="sec">Scaling behaviour</h2>
+  <p class="note">Left: per-file throughput is <b>flat for all three</b> &mdash; no per-row degradation to 330&ndash;400M rows; the (ref_uri) line collapses at the very end only because four back-to-back checkpoint stalls land there. Right: those stalls are the real difference. <b>(ref_uri, ts)</b> stalled once (25s @ 83M rows) and never again; <b>(ref_uri)</b> stalled at 36&ndash;40s around 83M rows and at <b>183&ndash;213s around 395M</b> &mdash; stall duration grows roughly linearly with table size (~0.5s per 1M rows), because each checkpoint rewrites huge ART subtrees under its 239 low-cardinality keys. Its final close-checkpoint took another 197s.</p>
+  <div class="legend">
+    <span class="l-n"><i></i>no index</span>
+    <span class="l-t"><i></i>idx (ref_uri, ts)</span>
+    <span class="l-r"><i></i>idx (ref_uri)</span>
+  </div>
+  <div class="charts2">
+    <div class="chart">
+      <h3>Rows/s vs table size</h3>
+      <p class="sub">per-file throughput, 8-file moving average</p>
+      <svg viewBox="0 0 640 220" role="img" aria-label="Throughput vs table size: all three configurations stay flat, around 51,000, 46,000 and 45,000 rows per second, with the ref_uri line dropping at 400 million rows due to checkpoint stalls">
+        <line class="grid" x1="46" y1="155.6" x2="630" y2="155.6"/><text x="40" y="159" text-anchor="end">10k</text>
+        <line class="grid" x1="46" y1="125.3" x2="630" y2="125.3"/><text x="40" y="129" text-anchor="end">20k</text>
+        <line class="grid" x1="46" y1="95.0" x2="630" y2="95.0"/><text x="40" y="99" text-anchor="end">30k</text>
+        <line class="grid" x1="46" y1="64.6" x2="630" y2="64.6"/><text x="40" y="68" text-anchor="end">40k</text>
+        <line class="grid" x1="46" y1="34.3" x2="630" y2="34.3"/><text x="40" y="38" text-anchor="end">50k</text>
+        <line class="axis" x1="46" y1="186" x2="630" y2="186"/>
+        <text x="46" y="202">0</text><text x="185" y="202">100M</text><text x="324" y="202">200M</text><text x="463" y="202">300M</text><text x="602" y="202" text-anchor="end">400M &middot; rows in table</text>
+        <polyline class="ln-r" points="48.2,106.0 53.4,80.5 62.3,24.8 71.2,26.6 80.0,27.4 88.9,29.8 97.8,25.7 106.7,32.2 115.5,25.1 124.2,26.8 129.6,83.7 137.8,26.8 143.6,50.1 151.3,46.5 160.0,29.5 168.8,56.6 177.7,24.8 186.6,26.9 195.4,32.5 204.2,31.4 213.0,34.5 221.6,28.0 230.4,26.7 239.3,29.2 248.1,27.7 257.0,29.7 265.8,34.7 274.7,35.0 283.6,30.5 292.4,25.5 301.3,36.9 310.1,44.8 318.9,47.5 327.1,47.9 335.4,39.7 342.1,64.0 350.8,27.8 359.7,33.8 368.5,26.3 377.4,27.1 385.2,72.4 394.0,65.9 401.7,58.1 410.5,25.3 419.3,32.2 428.2,25.7 437.0,25.7 445.7,30.1 454.6,28.3 463.4,28.2 472.3,43.6 479.6,41.1 486.4,62.5 495.2,38.4 504.0,38.9 512.6,39.8 520.4,57.2 529.3,37.7 538.2,37.9 547.1,37.4 555.0,39.4 562.8,57.2 571.1,40.2 580.0,39.7 587.9,40.3 594.6,76.8 594.8,117.9 600.1,65.1 600.4,145.4 600.5,156.8 600.6,139.6 600.6,131.4"/>
+        <polyline class="ln-t" points="48.2,101.2 53.4,85.7 62.3,49.8 71.2,49.8 80.0,45.7 88.9,50.7 97.8,50.1 106.7,47.5 115.5,45.7 124.2,46.2 129.6,95.3 137.8,43.4 143.6,64.0 151.3,77.6 160.0,61.2 168.8,59.8 177.7,49.4 186.6,48.0 195.4,44.9 204.2,47.7 213.0,46.8 221.6,46.4 230.4,45.2 239.3,48.6 248.1,46.3 257.0,47.5 265.8,43.5 274.7,41.5 283.6,45.7 292.4,49.7 301.3,47.6 310.1,45.1 318.9,43.6 327.1,49.2 335.4,49.8 342.1,74.8 350.8,43.7 359.7,43.4 368.5,41.4 377.4,40.8 385.2,59.5 394.0,44.3 401.7,59.5 410.5,42.9 419.3,42.2 428.2,41.9 437.0,43.1 445.7,51.1 454.6,47.2 463.4,43.8 472.3,46.2 479.6,47.8 486.4,64.5 495.2,49.9 504.0,49.5"/>
+        <polyline class="ln-n" points="48.2,82.0 53.4,68.8 62.3,33.3 71.2,30.9 80.0,30.1 88.9,29.4 97.8,29.8 106.7,30.5 115.5,29.8 124.2,29.3 129.6,85.8 137.8,29.2 143.6,54.1 151.3,48.9 160.0,32.0 168.8,28.9 177.7,32.5 186.6,28.8 195.4,28.3 204.2,31.9 213.0,30.8 221.6,31.7 230.4,29.2 239.3,28.9 248.1,29.4 257.0,29.0 265.8,30.3 274.7,27.7 283.6,28.2 292.4,29.4 301.3,25.8 310.1,27.6 318.9,29.4 327.1,29.8 335.4,29.7 342.1,65.1 350.8,27.6 359.7,27.5 368.5,27.7 377.4,25.9 385.2,45.0 394.0,25.7 401.7,45.7 410.5,27.1 419.3,29.3 428.2,34.6 437.0,34.8 445.7,30.9 454.6,31.5 463.4,29.9 472.3,33.1 479.6,36.6 486.4,56.1 495.2,28.2 504.0,27.6 512.6,27.6 520.4,46.8 529.3,27.5 538.2,26.8 547.1,29.8 555.0,42.4"/>
+        <text class="anno" x="600" y="14" text-anchor="end">51k / 46k / 45k &mdash; all flat until (ref_uri)&rsquo;s stalls hit</text>
+      </svg>
+    </div>
+    <div class="chart">
+      <h3>Checkpoint stalls: commit &gt; 2s per file</h3>
+      <p class="sub">needle = one file&rsquo;s COMMIT; everything unmarked is &lt; 2s</p>
+      <svg viewBox="0 0 640 220" role="img" aria-label="Checkpoint stalls versus table size: the composite index stalled once for 25 seconds at 83 million rows; the ref_uri index stalled for around 36 to 40 seconds at 83 million rows and 183 to 213 seconds around 395 million rows">
+        <line class="grid" x1="46" y1="139.6" x2="630" y2="139.6"/><text x="40" y="143" text-anchor="end">60s</text>
+        <line class="grid" x1="46" y1="93.3" x2="630" y2="93.3"/><text x="40" y="97" text-anchor="end">120s</text>
+        <line class="grid" x1="46" y1="46.9" x2="630" y2="46.9"/><text x="40" y="50" text-anchor="end">180s</text>
+        <line class="axis" x1="46" y1="186" x2="630" y2="186"/>
+        <text x="46" y="202">0</text><text x="185" y="202">100M</text><text x="324" y="202">200M</text><text x="463" y="202">300M</text><text x="602" y="202" text-anchor="end">400M &middot; rows in table</text>
+        <line class="nd-r" x1="163.2" y1="186" x2="163.2" y2="155.2"/>
+        <line class="nd-r" x1="159.8" y1="186" x2="159.8" y2="158.5"/>
+        <line class="nd-r" x1="592.5" y1="186" x2="592.5" y2="44.2"/>
+        <line class="nd-r" x1="593.5" y1="186" x2="593.5" y2="21.7"/>
+        <line class="nd-r" x1="600.4" y1="186" x2="600.4" y2="33.0"/>
+        <line class="nd-r" x1="601.4" y1="186" x2="601.4" y2="25.6"/>
+        <line class="nd-t" x1="161.1" y1="186" x2="161.1" y2="166.7"/>
+        <line class="nd-t" x1="237.1" y1="186" x2="237.1" y2="183.5"/>
+        <text x="170" y="150">36&ndash;40s (ref_uri) &middot; 25s (ref_uri, ts)</text>
+        <text class="anno" x="585" y="14" text-anchor="end">183&ndash;213s &times;4 (ref_uri)</text>
+      </svg>
+    </div>
+  </div>
+
+  <h2 class="sec">Storage footprint</h2>
+  <p class="note">Final file size after the closing checkpoint serializes the ART index (mid-run sizes look far smaller until a checkpoint fires). The composite index costs ~45 B/row on top of ~6 B/row of data; the single-column index ~24 B/row.</p>
+  <div class="bars">
+    <div class="brow"><div class="bl">idx (ref_uri, ts)</div><div class="btrack">
+      <div class="bar ni" style="width:90%"><span>51.4 B/row &middot; 17.0 GB @ 330M &rarr; ~178 GB full corpus</span></div></div></div>
+    <div class="brow"><div class="bl">idx (ref_uri)</div><div class="btrack">
+      <div class="bar wi" style="width:52.4%"><span>29.9 B/row &middot; 12.0 GB @ 400M &rarr; ~104 GB full corpus</span></div></div></div>
+    <div class="brow"><div class="bl">no index</div><div class="btrack">
+      <div class="bar ni" style="width:10.3%"><span>5.9 B/row &middot; 2.2 GB @ 370M &rarr; 21&ndash;52 GB full corpus</span></div></div></div>
+  </div>
+
+  <h2 class="sec">Consistency &amp; row accounting</h2>
+  <div class="tblwrap">
+    <table>
+      <caption>The (ref_uri) run &mdash; the longest, 578 files to 2023-10-03 &mdash; accounted row by row. The other runs close identically (no-index: 370,084,109 rows from 494 files; composite: 330,173,529 from 441 files; both 0 null-null rows over their ranges).</caption>
+      <thead><tr><th class="l">Stage</th><th>Rows</th><th class="l" style="text-align:left">Note</th></tr></thead>
+      <tbody>
+        <tr><td class="l">wide CSV rows read</td><td>1,756,356</td><td class="l dim">578 files &middot; 2.58 GB &middot; coverage 2023-03-06 &rarr; 2023-10-03 UTC</td></tr>
+        <tr><td class="l">ragged rows skipped</td><td>1,508</td><td class="l dim">cell count &ne; header (driver: truncate/skip)</td></tr>
+        <tr><td class="l">melted cells</td><td>405,760,376</td><td class="l dim">rows &times; stream columns</td></tr>
+        <tr><td class="l">NaN cells dropped</td><td>5,278,796</td><td class="l dim">1.3% &middot; prod stores these as (NULL,&nbsp;NULL) &mdash; see deviations</td></tr>
+        <tr><td class="l">handed to /insert_timeseries</td><td>400,481,580</td><td class="l dim">none lost</td></tr>
+        <tr><td class="l">in-batch duplicates deduped</td><td>1,797</td><td class="l dim">unique(ref_uri, ts) keep=last</td></tr>
+        <tr><td class="l"><b>rows in DuckDB at stop</b></td><td><b>400,479,783</b></td><td class="l dim">= inserted, verified by count(*) &mdash; closes exactly</td></tr>
+        <tr><td class="l">streams / value split</td><td>239</td><td class="l dim">240.65M numeric (60.1%) &middot; 159.83M text (39.9%)</td></tr>
+        <tr><td class="l">(NULL, NULL) rows</td><td class="warn">643</td><td class="l dim">new &mdash; only in files after 2023-09-14: non-finite values (&plusmn;Inf) that split_value nulls out</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">The corpus is a <b>live Resilio share</b> and drifted between runs (4,935 &rarr; 4,937 files; the no-index run saw 302 unparseable timestamps in a file range that later runs, over the same names, did not &mdash; the file contents changed). Timing comparisons pair files by name, so they are unaffected.</p>
+
+  <h2 class="sec">Projection to the full corpus</h2>
+  <div class="tblwrap">
+    <table>
+      <caption>Full corpus = ~4,937 files, 22.3 GB csv &asymp; 3.46B melted rows (155.2k rows per MB, measured).</caption>
+      <thead><tr><th class="l">Configuration</th><th>Throughput</th><th>Total time</th><th>DB size</th><th class="l" style="text-align:left">Scaling risk</th></tr></thead>
+      <tbody>
+        <tr><td class="l">no index</td><td>51.4k rows/s, flat</td><td>~18.9 h</td><td>21&ndash;52 GB</td><td class="l">none measured to 370M rows</td></tr>
+        <tr><td class="l">idx (ref_uri, ts)</td><td>45.6k rows/s, flat</td><td>~21.1 h</td><td>~178 GB</td><td class="l">none to 330M &mdash; constant 1.7 s/M commit, one 25s stall</td></tr>
+        <tr><td class="l">idx (ref_uri)</td><td>44.8k rows/s to 400M</td><td class="warn">~21.5 h + stalls</td><td>~104 GB</td><td class="l warn">stalls grow ~0.5s per 1M table rows &rarr; extrapolates to ~25&ndash;30 min freezes near 3.4B</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="find">
+    <h2>Key findings</h2>
+    <ul>
+      <li><b>The ingest ceiling is Python, not the index choice.</b> 83&ndash;85% of wall time is identical pure-Python row loops in every configuration: <code>prepare_value_columns</code> (46%), <code>insert_timeseries_batch</code> assembly (22%), endpoint regrouping (15%). The three configs differ by at most 13% in throughput. Vectorising the split is worth more than any index decision.</li>
+      <li><b>The composite (ref_uri, ts) index is the predictable one:</b> a constant 12% throughput tax (all of it at COMMIT, 1.7 s per 1M rows, flat to 330M), one 25s checkpoint stall in 441 files &mdash; but the largest footprint at ~45 B/row of index (~178 GB projected).</li>
+      <li><b>The low-cardinality (ref_uri) index is cheaper per row but degrades catastrophically at checkpoints.</b> Steady-state commit is only 1.1 s/M and storage is ~40% smaller than the composite &mdash; but with 239 distinct keys over hundreds of millions of rows, each checkpoint rewrites enormous ART subtrees: stalls went from 36&ndash;40s at 83M rows to <b>183&ndash;213s at ~395M</b> (plus a 197s close-checkpoint), roughly linear growth. At full-corpus scale that extrapolates to ~half-hour freezes &mdash; unusable for live ingestion.</li>
+      <li><b>Upsert semantics never depended on an index</b>: DELETE+INSERT dedupe behaves identically in all three configs, and the DELETE anti-join stays at ~60&ndash;100ms/file via zone-map pruning even with no index at all.</li>
+      <li><b>Row accounting closes exactly in all three runs</b> (melted &minus; NaN &minus; dupes = count(*)), and the longest run surfaced a new data-quality find: <b>643 (NULL, NULL) rows</b> from non-finite (&plusmn;Inf) values in files after 2023-09-14 &mdash; <code>split_value</code> silently nulls non-finite numerics. Together with production&rsquo;s NaN&rarr;"NaN"&rarr;(NULL, NULL) behaviour (~1.3% of all cells), the NULL-row handling deserves an upstream fix.</li>
+    </ul>
+  </div>
+
+  <p class="method"><b>Method.</b> <code>local_ingest_bench/ingest_path_bench.py</code> replays, in one process, the exact main-branch code path behind <code>POST /insert_timeseries</code>: endpoint grouping &rarr; <code>Manager.insert_timeseries_batch</code> (per-stream value-kind lookup, per-row assembly into a polars Object frame) &rarr; <code>DuckDBStore.bulk_insert_polars</code> (<code>prepare_value_columns</code>, UTC normalise, dedupe, DELETE+INSERT in one transaction), with storage code copied verbatim from <code>git show main:</code>. Driver-side prep mirrors <code>DPRTrailerCSVDriver</code> (header by content, <code>Date + Time</code> &rarr; UTC via <code>%m/%d/%Y %I:%M:%S %p</code>, <code>_safe_name</code>, per-stream kind inference, lazy stream registration) but uses pandas for read + melt as specified. Every step is timed for wall, process CPU, and RSS (100 ms sampler). Both index configs keep exactly one <code>CREATE INDEX</code>; <code>UNIQUE(ref_uri, ts)</code> is removed in all three because DuckDB materialises it as an additional ART index. <b>Deviations:</b> no HTTP/JSON/pydantic layer; no RDF-graph writes; pandas drops NaN cells that production stores as (NULL, NULL); Resilio&rsquo;s <code>.sync</code> archive excluded; runs stopped at ~330&ndash;400M rows (the last via <code>--max-rows</code> auto-stop); per-file records in <code>results/full-noindex</code>, <code>results/full-single-index</code>, <code>results/full-ref-only</code>; each DB deleted after its consistency queries. Main&rsquo;s stock six-index schema was measured earlier and is out of scope here; its calibration data remains in <code>results/calibration</code>.</p>
+
+  <footer><span>acqbench &middot; local_ingest_bench &middot; runs: full-noindex (494 files) &middot; full-single-index (441) &middot; full-ref-only (578)</span><span>2026-08-12</span></footer>
+</div>
