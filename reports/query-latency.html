@@ -1,0 +1,258 @@
+<title>Query Latency &mdash; acqbench</title>
+<style>
+  :root{
+    --bg:#eef1f4; --surface:#ffffff; --ink:#10151b; --muted:#586472;
+    --line:#dde2e8; --line-strong:#c7cfd8; --accent:#0f857a;
+    --good:#1f7a34; --bad:#c34532; --same:#7b8592;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){--bg:#0b0e12;--surface:#141a21;--ink:#e7ebef;--muted:#98a2ad;
+      --line:#222a33;--line-strong:#2f3a45;--accent:#34c2b1;
+      --good:#54c96a;--bad:#ff7c6c;--same:#7d8792;}
+  }
+  :root[data-theme="light"]{--bg:#eef1f4;--surface:#fff;--ink:#10151b;--muted:#586472;
+    --line:#dde2e8;--line-strong:#c7cfd8;--accent:#0f857a;--good:#1f7a34;--bad:#c34532;--same:#7b8592;}
+  :root[data-theme="dark"]{--bg:#0b0e12;--surface:#141a21;--ink:#e7ebef;--muted:#98a2ad;
+    --line:#222a33;--line-strong:#2f3a45;--accent:#34c2b1;--good:#54c96a;--bad:#ff7c6c;--same:#7d8792;}
+
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .sheet{max-width:860px;margin:0 auto;padding:40px 28px 32px;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;}
+  h1{font-size:30px;line-height:1.1;margin:8px 0 0;letter-spacing:-.02em;text-wrap:balance;}
+  .lede{font-size:16px;margin:10px 0 0;max-width:66ch;}
+  .lede b{color:var(--accent);}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:16px;
+    font-family:var(--mono);font-size:11.5px;color:var(--muted);}
+  .meta span{border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap;}
+
+  .figs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:26px 0 6px;}
+  .fig{background:var(--surface);padding:16px 16px 14px;}
+  .fig .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;margin-bottom:7px;}
+  .fig .rowline{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;
+    font-family:var(--mono);font-variant-numeric:tabular-nums;padding:2.5px 0;}
+  .fig .rowline b{color:var(--ink);font-weight:600;}
+  .fig .rowline .lbl{color:var(--muted);}
+  .fig .hero{font-size:24px;font-weight:650;letter-spacing:-.02em;color:var(--accent);
+    font-variant-numeric:tabular-nums;margin-bottom:4px;}
+  .fig .win{color:var(--good);} .fig .lose{color:var(--bad);}
+  @media (max-width:660px){.figs{grid-template-columns:1fr;}}
+
+  h2.sec{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin:32px 0 4px;font-weight:600;}
+  p.note{font-size:13.5px;color:var(--muted);margin:2px 0 12px;max-width:76ch;}
+  p.note b{color:var(--ink);}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;font-family:var(--mono);font-size:11.5px;color:var(--muted);
+    margin:10px 0 8px;}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:3px;}
+  .l-n i{border-color:var(--accent);}
+  .l-r i{border-color:var(--bad);}
+  .l-t i{border-color:var(--same);}
+
+  .chart{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px 8px;}
+  .chart svg{width:100%;height:auto;display:block;}
+  .chart .grid{stroke:var(--line);stroke-width:1;}
+  .chart .axis{stroke:var(--line-strong);stroke-width:1;}
+  .chart text{font-family:var(--mono);font-size:10px;fill:var(--muted);}
+  .chart .ln-n{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;}
+  .chart .ln-r{fill:none;stroke:var(--bad);stroke-width:2;stroke-linejoin:round;}
+  .chart .ln-t{fill:none;stroke:var(--same);stroke-width:2;stroke-linejoin:round;stroke-dasharray:5 4;}
+  .chart .dot-n{fill:var(--accent);} .chart .dot-r{fill:var(--bad);} .chart .dot-t{fill:var(--same);}
+  .chart .anno{fill:var(--ink);font-weight:600;}
+
+  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-top:12px;}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12.5px;
+    font-variant-numeric:tabular-nums;}
+  caption{caption-side:top;text-align:left;font-family:var(--sans);font-size:12px;color:var(--muted);
+    padding:12px 14px 2px;}
+  th,td{padding:6px 12px;text-align:right;white-space:nowrap;border-top:1px solid var(--line);}
+  thead th{border-top:0;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;padding-top:11px;padding-bottom:9px;}
+  thead .grp{text-align:center;color:var(--ink);border-bottom:1px solid var(--line);}
+  th.l,td.l{text-align:left;}
+  .sep{border-left:1px solid var(--line);}
+  tbody tr:hover td{background:color-mix(in srgb,var(--accent) 6%,transparent);}
+  td.dim{color:var(--muted);}
+  td.win{color:var(--good);font-weight:600;}
+  td.lose{color:var(--bad);}
+  tr.hl td{background:color-mix(in srgb,var(--good) 10%,transparent);}
+
+  .find{margin:28px 2px 0;padding-top:18px;border-top:2px solid var(--line-strong);}
+  .find h2{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 12px;font-weight:600;}
+  .find ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;}
+  .find li{font-size:14.5px;padding-left:18px;position:relative;max-width:78ch;}
+  .find li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:1px;background:var(--accent);}
+  .find li b{color:var(--accent);}
+  .method{margin-top:24px;font-size:12.5px;color:var(--muted);max-width:80ch;}
+  .method b{color:var(--ink);font-weight:600;}
+  footer{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--muted);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+</style>
+
+<div class="sheet">
+  <div class="eyebrow">acqbench &middot; benchmark report</div>
+  <h1>Query Latency: what each index actually buys</h1>
+  <p class="lede">Three identical 100M-row DuckDB stores &mdash; <b>no index</b>, <b><code style="font-family:var(--mono)">(ref_uri)</code></b>, <b><code style="font-family:var(--mono)">(ref_uri, ts)</code></b> &mdash; measured with main&rsquo;s two query templates, <code style="font-family:var(--mono)">timeseries_info()</code> and <code style="font-family:var(--mono)">timeseries()</code>. The verdict is sharp: the <b>composite index is never used</b> by either template and buys nothing, while <code style="font-family:var(--mono)">(ref_uri)</code> is the only one DuckDB will index-scan &mdash; worth <b>122&times; on a selective lookup</b> and a <b>1.6&times; penalty</b> on everything else.</p>
+  <div class="meta">
+    <span>100,296,256 rows &middot; 229 streams &middot; identical data</span>
+    <span>timeseries_info: 229 uris &times; 10 reps</span>
+    <span>timeseries: 20 queries &times; 100 reps</span>
+    <span>MacBook &middot; 8 cores &middot; 24 GB &middot; duckdb 1.5.2</span>
+  </div>
+
+  <div class="figs">
+    <div class="fig">
+      <div class="k">No index</div>
+      <div class="hero">43,150 rows/s</div>
+      <div class="rowline"><span class="lbl">ingest</span><b>2,324 s &middot; 0.68 GB</b></div>
+      <div class="rowline"><span class="lbl">info p50</span><b>226 ms</b></div>
+      <div class="rowline"><span class="lbl">selective lookup</span><b class="lose">194 ms</b></div>
+      <div class="rowline"><span class="lbl">full stream (443k)</span><b class="win">275 ms</b></div>
+    </div>
+    <div class="fig">
+      <div class="k">idx (ref_uri)</div>
+      <div class="hero">38,454 rows/s</div>
+      <div class="rowline"><span class="lbl">ingest</span><b>2,608 s &middot; 2.93 GB</b></div>
+      <div class="rowline"><span class="lbl">info p50</span><b class="lose">380 ms</b></div>
+      <div class="rowline"><span class="lbl">selective lookup</span><b class="win">1.6 ms</b></div>
+      <div class="rowline"><span class="lbl">full stream (443k)</span><b class="lose">486 ms</b></div>
+    </div>
+    <div class="fig">
+      <div class="k">idx (ref_uri, ts)</div>
+      <div class="hero">39,346 rows/s</div>
+      <div class="rowline"><span class="lbl">ingest</span><b>2,549 s &middot; 5.24 GB</b></div>
+      <div class="rowline"><span class="lbl">info p50</span><b>192 ms</b></div>
+      <div class="rowline"><span class="lbl">selective lookup</span><b class="lose">193 ms</b></div>
+      <div class="rowline"><span class="lbl">full stream (443k)</span><b>326 ms</b></div>
+    </div>
+  </div>
+
+  <h2 class="sec">Template 1 &mdash; timeseries_info()</h2>
+  <p class="note"><code>SELECT COUNT(*), MIN(ts), MAX(ts) &hellip; WHERE ref_uri = ?</code>, run on the store&rsquo;s write connection under its lock, exactly as main does. Every one of the 229 registered ref_uris, 10 repetitions each, per store. <b>226 of those 229 streams hold 443,790 rows apiece</b> &mdash; so this sweep is overwhelmingly a test of the non-selective case, and there the <code>(ref_uri)</code> index is a pure tax.</p>
+  <div class="tblwrap">
+    <table>
+      <caption>2,290 calls per store. The interleaved control re-runs the same query on 12 dense streams with the store order shuffled per sample, which removes the cache-warmth drift that made the sequential sweep look like the composite index was winning.</caption>
+      <thead>
+        <tr><th class="l">Store</th><th>mean</th><th>p50</th><th>p95</th><th>max</th><th>sweep total</th><th class="sep">interleaved p50</th><th>vs no index</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="l">no index</td><td>241.8 ms</td><td>225.6 ms</td><td>339.5 ms</td><td>1,741 ms</td><td>554 s</td><td class="sep">233.9 ms</td><td class="dim">&mdash;</td></tr>
+        <tr><td class="l">idx (ref_uri)</td><td class="lose">389.2 ms</td><td class="lose">379.8 ms</td><td class="lose">488.6 ms</td><td class="lose">2,614 ms</td><td class="lose">891 s</td><td class="sep lose">379.8 ms</td><td class="lose">+62% slower</td></tr>
+        <tr><td class="l">idx (ref_uri, ts)</td><td>202.2 ms</td><td>192.0 ms</td><td>238.6 ms</td><td>766 ms</td><td>463 s</td><td class="sep">229.6 ms</td><td class="dim">&plusmn;2% &mdash; no effect</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">A 100-rep sweep of the no-index store (22,900 calls, run before the reps were trimmed) gives mean 214.6 ms / p95 352.5 ms &mdash; within 12% of the 10-rep figure above, confirming 10 reps is enough for this template.</p>
+
+  <h2 class="sec">Template 2 &mdash; timeseries()</h2>
+  <p class="note">The full generator from main: fresh DuckDB connection per call, <code>WHERE ref_uri = ?</code> plus optional <code>ts</code> bounds, <code>ORDER BY ts</code>, streamed to Arrow record batches with the value-mode logic applied. 20 query shapes &times; 100 reps &times; 3 stores; the iterator is drained every time. Latency tracks <b>result size</b>, not table size &mdash; until a stream is selective enough for an index scan to trigger.</p>
+  <div class="legend">
+    <span class="l-n"><i></i>no index</span>
+    <span class="l-r"><i></i>idx (ref_uri)</span>
+    <span class="l-t"><i></i>idx (ref_uri, ts)</span>
+  </div>
+  <div class="chart">
+    <svg viewBox="0 0 660 220" role="img" aria-label="Log-log chart of query latency against rows returned for one dense stream: all three configurations track together from about 4 milliseconds at 7 rows to 275-486 milliseconds at 443,790 rows, with the no-index store fastest at the large end">
+      <line class="grid" x1="52" y1="129.3" x2="630" y2="129.3"/><text x="46" y="132.8" text-anchor="end">10ms</text>
+      <line class="grid" x1="52" y1="72.7" x2="630" y2="72.7"/><text x="46" y="76.2" text-anchor="end">100ms</text>
+      <line class="grid" x1="52" y1="16" x2="630" y2="16"/><text x="46" y="19.5" text-anchor="end">1s</text>
+      <line class="axis" x1="52" y1="186" x2="630" y2="186"/><text x="46" y="189.5" text-anchor="end">1ms</text>
+      <text x="148" y="202" text-anchor="middle">10</text><text x="245" y="202" text-anchor="middle">100</text>
+      <text x="341" y="202" text-anchor="middle">1k</text><text x="437" y="202" text-anchor="middle">10k</text>
+      <text x="534" y="202" text-anchor="middle">100k</text><text x="630" y="202" text-anchor="end">1M rows returned</text>
+      <polyline class="ln-t" points="133.4,148.6 223.3,148.2 298.3,147.7 373.0,145.7 430.9,128.7 512.0,90.5 546.9,71.5 596.0,43.5"/>
+      <polyline class="ln-r" points="133.4,148.2 223.3,146.7 298.3,146.9 373.0,145.7 430.9,128.9 512.0,90.3 546.9,71.1 596.0,33.8"/>
+      <polyline class="ln-n" points="133.4,153.7 223.3,154.3 298.3,153.9 373.0,151.1 430.9,133.6 512.0,94.6 546.9,75.6 596.0,47.8"/>
+      <circle class="dot-n" cx="596.0" cy="47.8" r="3.5"/>
+      <circle class="dot-r" cx="596.0" cy="33.8" r="3.5"/>
+      <circle class="dot-t" cx="596.0" cy="43.5" r="3.5"/>
+      <text class="anno" x="586" y="26" text-anchor="end">at 443k rows: 275 / 486 / 326 ms</text>
+      <text x="140" y="168">floor ~3.6&ndash;4.6ms: connection + plan + Arrow setup</text>
+    </svg>
+  </div>
+  <p class="note">One dense stream, windowed from 1 minute to its full range. Below ~1,000 rows every configuration flattens onto a <b>~3.6&ndash;4.6 ms floor</b> that is not query work at all &mdash; it is the per-call <code>duckdb.connect()</code>, plan, and Arrow-reader setup that <code>timeseries()</code> pays on every invocation. Above ~10k rows latency is linear in rows returned, and the indexed stores are consistently <i>slower</i> because the scan they fall back to is the same one but their files are 4&ndash;8&times; larger.</p>
+
+  <div class="tblwrap">
+    <table>
+      <caption>All 20 query shapes, p50 ms over 100 reps each. Highlighted row: the only shape where an index changes the picture &mdash; a 3-row stream queried without a time bound.</caption>
+      <thead>
+        <tr><th class="l" rowspan="2">Query</th><th rowspan="2">rows</th><th class="grp" colspan="3">p50 latency</th></tr>
+        <tr><th>no index</th><th>(ref_uri)</th><th>(ref_uri, ts)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="l">dense full range</td><td>443,790</td><td class="win">274.63</td><td class="lose">485.69</td><td>326.47</td></tr>
+        <tr><td class="l">dense 1 month</td><td>137,216</td><td class="win">88.87</td><td>106.52</td><td>104.69</td></tr>
+        <tr><td class="l">dense 1 week</td><td>59,559</td><td class="win">41.04</td><td>48.85</td><td>48.54</td></tr>
+        <tr><td class="l">dense 1 day</td><td>8,575</td><td class="win">8.42</td><td>10.17</td><td>10.26</td></tr>
+        <tr><td class="l">dense 6 h</td><td>2,149</td><td class="win">4.13</td><td>5.14</td><td>5.14</td></tr>
+        <tr><td class="l">dense 1 h</td><td>360</td><td class="win">3.68</td><td>4.89</td><td>4.74</td></tr>
+        <tr><td class="l">dense 10 min</td><td>60</td><td class="win">3.62</td><td>4.93</td><td>4.64</td></tr>
+        <tr><td class="l">dense 1 min</td><td>7</td><td class="win">3.71</td><td>4.64</td><td>4.57</td></tr>
+        <tr><td class="l">dense 1 day limit 1000</td><td>1,000</td><td class="win">5.11</td><td>7.07</td><td>7.25</td></tr>
+        <tr><td class="l">dense full limit 1000</td><td>1,000</td><td class="win">4.75</td><td>6.04</td><td>5.94</td></tr>
+        <tr><td class="l">dense latest 100 desc</td><td>100</td><td class="win">5.81</td><td>6.67</td><td>6.67</td></tr>
+        <tr><td class="l">dense 2 days coalesce</td><td>16,954</td><td>58.73</td><td>58.28</td><td>58.31</td></tr>
+        <tr><td class="l">mid full range</td><td>443,790</td><td class="win">276.17</td><td class="lose">502.07</td><td>322.60</td></tr>
+        <tr><td class="l">mid 1 day</td><td>8,575</td><td>10.60</td><td>11.31</td><td class="win">8.13</td></tr>
+        <tr><td class="l">mid 1 h</td><td>360</td><td>4.47</td><td>5.05</td><td class="win">3.71</td></tr>
+        <tr><td class="l">mid 12 h numeric mode</td><td>4,309</td><td>7.97</td><td>8.26</td><td class="win">5.75</td></tr>
+        <tr class="hl"><td class="l">sparse full range</td><td>3</td><td class="lose">194.19</td><td class="win">1.59</td><td class="lose">192.60</td></tr>
+        <tr><td class="l">text full range</td><td>443,790</td><td>277.70</td><td class="lose">493.96</td><td class="win">271.34</td></tr>
+        <tr><td class="l">text 1 day</td><td>8,575</td><td>8.29</td><td>10.38</td><td>8.55</td></tr>
+        <tr><td class="l">EMPTY before data</td><td>0</td><td>1.04</td><td>1.08</td><td class="win">0.83</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="sec">Why: the plans</h2>
+  <p class="note">Taken from <code>EXPLAIN ANALYZE</code> on each store. Note that plain <code>EXPLAIN</code> reports a scan node in every case &mdash; only <code>ANALYZE</code> discloses <code>Type: Index Scan</code>, which is why the difference is invisible until you profile.</p>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th class="l">Query</th><th class="l">no index</th><th class="l">idx (ref_uri)</th><th class="l">idx (ref_uri, ts)</th></tr></thead>
+      <tbody>
+        <tr><td class="l">ref_uri = ? &rarr; 3 rows</td><td class="l dim">seq scan</td><td class="l win">INDEX SCAN &middot; 3.6 ms</td><td class="l dim">seq scan</td></tr>
+        <tr><td class="l">ref_uri = ? &rarr; 443k rows</td><td class="l dim">seq scan</td><td class="l dim">seq scan (index rejected)</td><td class="l dim">seq scan</td></tr>
+        <tr><td class="l">COUNT/MIN/MAX, 3-row stream</td><td class="l dim">seq scan</td><td class="l win">INDEX SCAN &middot; 6.1 ms</td><td class="l dim">seq scan</td></tr>
+        <tr><td class="l">COUNT/MIN/MAX, 443k-row stream</td><td class="l dim">seq scan</td><td class="l dim">seq scan</td><td class="l dim">seq scan</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note"><b>The composite index never appears in a plan.</b> DuckDB&rsquo;s ART index over <code>(ref_uri, ts)</code> is keyed on the concatenated tuple, so an equality predicate on the <code>ref_uri</code> prefix alone cannot drive a lookup &mdash; and both of main&rsquo;s templates filter on exactly that. It is the most expensive configuration to build (52.2 B/row, 5.24 GB) and returns nothing for it. The <code>(ref_uri)</code> index does get used, and DuckDB&rsquo;s optimizer correctly declines it once the predicate stops being selective.</p>
+
+  <h2 class="sec">Ingest cost, same three stores</h2>
+  <div class="tblwrap">
+    <table>
+      <caption>All three stores were fed from one parse of each CSV (the Python pipeline is index-independent), so only the per-store SQL differs. Total = shared pipeline 2,198 s + that store&rsquo;s DELETE/INSERT/COMMIT + its final checkpoint.</caption>
+      <thead><tr><th class="l">Store</th><th>store SQL</th><th>final checkpoint</th><th>total ingest</th><th>rows/s</th><th>DB size</th><th>B/row</th></tr></thead>
+      <tbody>
+        <tr><td class="l">no index</td><td class="win">125.8 s</td><td class="win">0.45 s</td><td class="win">2,324 s</td><td class="win">43,150</td><td class="win">0.68 GB</td><td class="win">6.7</td></tr>
+        <tr><td class="l">idx (ref_uri)</td><td class="lose">364.3 s</td><td class="lose">45.8 s</td><td>2,608 s</td><td>38,454</td><td>2.93 GB</td><td>29.2</td></tr>
+        <tr><td class="l">idx (ref_uri, ts)</td><td>346.9 s</td><td>4.1 s</td><td>2,549 s</td><td>39,346</td><td class="lose">5.24 GB</td><td class="lose">52.2</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="find">
+    <h2>Key findings</h2>
+    <ul>
+      <li><b>The composite <code>(ref_uri, ts)</code> index is dead weight for these two templates.</b> It never appears in a query plan, measures within &plusmn;2% of no index on <code>timeseries_info</code> under interleaved control, and is the largest store on disk (5.24 GB, 52.2 B/row) and 10% slower to ingest. Every cost, no benefit.</li>
+      <li><b><code>(ref_uri)</code> is the only index DuckDB will use here &mdash; and it is transformative exactly where it applies.</b> A 3-row stream queried without a time bound goes from 194 ms to <b>1.59 ms (122&times;)</b>, and its <code>timeseries_info</code> from ~400 ms to 6 ms. Everywhere else it costs 1.2&times;&ndash;1.8&times;, because the fallback scan runs against a file 4&times; larger.</li>
+      <li><b>On this dataset the tax dominates the benefit</b>, because 226 of 229 streams hold 443,790 rows each &mdash; the selective case is 3 streams. That ratio is a property of DPR SCADA data (every stream sampled at the same cadence), not of acquirium; a deployment with many short-lived or sparse streams would flip the verdict toward <code>(ref_uri)</code>.</li>
+      <li><b>Bounded queries are cheap regardless of index.</b> Anything up to a day of one stream (&le;8,575 rows) answers in 3.6&ndash;10.6 ms in every configuration, and DuckDB&rsquo;s zone maps prune the time range without help. Only unbounded full-stream reads reach the hundreds of milliseconds.</li>
+      <li><b>A ~3.6&ndash;4.6 ms floor sits under every <code>timeseries()</code> call</b> and is pure per-call overhead &mdash; a fresh <code>duckdb.connect()</code> per invocation plus plan and Arrow-reader setup. For a 7-row query that is essentially the entire latency. Pooling or reusing read connections would cut small-query latency by roughly half, and unlike the index question it costs nothing in storage or ingest.</li>
+      <li><b>Empty results are correctly cheap</b> (0.83&ndash;1.08 ms): the time-range predicate is pruned by zone maps before any data is touched.</li>
+    </ul>
+  </div>
+
+  <p class="method"><b>Method.</b> <code>local_ingest_bench/query_bench.py</code>. Three stores built from the same DPR CSVs to 100,296,256 rows each; every CSV is parsed, melted, assembled and value-split <b>once</b> and the resulting frame handed to all three stores, so only the store-specific DELETE+INSERT+COMMIT is repeated and no data is wasted. <code>timeseries()</code> and <code>timeseries_info()</code> are copied verbatim from <code>git show main:src/acquirium/Storage/duckdb_store.py</code>, including the fresh-connection-per-read, the streamed Arrow reader, the value-mode branching, and the write-connection lock on the aggregate. The 20 <code>timeseries()</code> specs are generated from the store&rsquo;s own contents and every window is anchored on a timestamp taken by <code>OFFSET</code> from the target stream, so a gap in the SCADA record cannot silently produce an empty window; all 20 were executed and asserted before timing &mdash; 19 non-empty (3 &rarr; 443,790 rows), 1 deliberately empty. <b>Caveats:</b> single-threaded client, warm OS cache, one machine; the sequential sweep is order-sensitive at the ~15% level, which is why the <code>timeseries_info</code> comparison is repeated interleaved. Raw per-call data in <code>results/query-bench/20260812-162825/results.json</code>; the three stores are kept in <code>local_ingest_bench/tmp_db/</code>.</p>
+
+  <footer><span>acqbench &middot; query_bench &middot; companion to ingest-path.html</span><span>2026-08-12</span></footer>
+</div>
