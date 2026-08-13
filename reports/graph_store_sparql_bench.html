@@ -1,0 +1,477 @@
+<title>Graph Store SPARQL Bench</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-0:#f5f5f3; --surface-1:#fcfcfb; --surface-2:#efefec;
+  --border:#dedcd6; --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#7b7a75;
+  --series-1:#2a78d6; --series-2:#eb6834;
+  --good:#0b7a4b; --bad:#b3261e; --grid:#e6e5e0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0:#121211; --surface-1:#1a1a19; --surface-2:#232322;
+    --border:#3a3a37; --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#94938b;
+    --series-1:#3987e5; --series-2:#d95926;
+    --good:#43c08a; --bad:#e66767; --grid:#2e2e2b;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0:#121211; --surface-1:#1a1a19; --surface-2:#232322;
+  --border:#3a3a37; --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#94938b;
+  --series-1:#3987e5; --series-2:#d95926;
+  --good:#43c08a; --bad:#e66767; --grid:#2e2e2b;
+}
+* { box-sizing:border-box; }
+body { background:var(--surface-0); color:var(--text-primary); margin:0;
+  font:15px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif; }
+.wrap { max-width:1000px; margin:0 auto; padding:40px 22px 80px; }
+h1 { font-size:29px; margin:0 0 6px; letter-spacing:-.02em; }
+h2 { font-size:20px; margin:44px 0 12px; letter-spacing:-.01em;
+  padding-bottom:7px; border-bottom:1px solid var(--border); }
+h3 { font-size:15px; margin:26px 0 8px; color:var(--text-secondary); }
+.sub { color:var(--text-secondary); }
+p { color:var(--text-secondary); }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px;
+  background:var(--surface-2); padding:1px 5px; border-radius:4px; color:var(--text-primary); }
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin:22px 0 8px; }
+.tile { background:var(--surface-1); border:1px solid var(--border); border-radius:11px; padding:14px 16px; }
+.tile .k { font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); }
+.tile .v { font-size:26px; font-weight:640; margin-top:5px; letter-spacing:-.02em; }
+.tile .n { font-size:12.5px; color:var(--text-secondary); margin-top:3px; }
+.tw { overflow-x:auto; margin:14px 0; }
+table { border-collapse:collapse; width:100%; font-size:13.5px; background:var(--surface-1);
+  border:1px solid var(--border); border-radius:10px; }
+th,td { padding:8px 11px; text-align:left; border-bottom:1px solid var(--border); white-space:nowrap; }
+th { font-size:11.5px; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--text-muted); font-weight:600; background:var(--surface-2); }
+tr:last-child td { border-bottom:none; }
+td.num { text-align:right; font-variant-numeric:tabular-nums; }
+.win-d { color:var(--series-2); font-weight:600; }
+.win-m { color:var(--series-1); font-weight:600; }
+.ok { color:var(--good); } .warn { color:var(--bad); }
+.fig { margin:20px 0 8px; background:var(--surface-1); border:1px solid var(--border);
+  border-radius:11px; padding:14px 16px 8px; }
+figcaption { display:flex; justify-content:space-between; align-items:baseline;
+  gap:12px; margin-bottom:2px; flex-wrap:wrap; }
+figcaption b { font-size:14.5px; }
+.unit { color:var(--text-muted); font-size:12px; }
+.legend { display:flex; gap:16px; margin:6px 0 4px; font-size:12.5px; color:var(--text-secondary); }
+.lg { display:flex; align-items:center; gap:6px; }
+.lg i { width:11px; height:11px; border-radius:3px; display:inline-block; }
+.i-win { background:var(--series-2); } .i-lose { background:var(--series-1); }
+.chart { width:100%; height:auto; display:block; overflow:visible; }
+.grid { stroke:var(--grid); stroke-width:1; }
+.axis { stroke:var(--border); stroke-width:1; }
+.parity { stroke:var(--text-muted); stroke-width:1.5; stroke-dasharray:5 4; opacity:.7; }
+.tick { fill:var(--text-muted); font-size:11px; }
+.tick-y { text-anchor:end; } .tick-x { text-anchor:middle; }
+.axlab { fill:var(--text-secondary); font-size:12px; text-anchor:middle; }
+.barlab { fill:var(--text-secondary); font-size:10.5px; text-anchor:middle;
+  font-variant-numeric:tabular-nums; }
+.dot-win { fill:var(--series-2); fill-opacity:.72; stroke:var(--surface-1); stroke-width:2; }
+.dot-lose { fill:var(--series-1); fill-opacity:.72; stroke:var(--surface-1); stroke-width:2; }
+.tag { font-size:10.5px; background:var(--surface-2); color:var(--text-secondary);
+  padding:1px 5px; border-radius:4px; }
+pre.code { background:var(--surface-2); border:1px solid var(--border); border-radius:8px;
+  padding:11px 14px; overflow-x:auto; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:12.5px; color:var(--text-primary); margin:12px 0; }
+td.src { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11.5px;
+  color:var(--text-muted); }
+.note { background:var(--surface-1); border-left:3px solid var(--series-1);
+  border-radius:0 8px 8px 0; padding:11px 15px; margin:16px 0; font-size:13.5px; }
+ul { color:var(--text-secondary); padding-left:20px; }
+li { margin:4px 0; }
+</style>
+<div class="wrap">
+<h1>Graph store SPARQL latency — <code>main</code> vs <code>graph-store-derived-cache</code></h1>
+<p class="sub">DPR deployment model. 185 unique SPARQL queries harvested from
+<code>acquirium/.run_logs</code>; 177 of them complete inside a 20&nbsp;s budget on
+both branches and form the timed corpus. Both branches run that identical corpus against a
+disposable <code>OxigraphGraphStore</code> on the same machine (8 cores, 24&nbsp;GB).</p>
+
+<div class="tiles">
+  <div class="tile"><div class="k">Median query p50</div>
+    <div class="v">11.56 ms</div>
+    <div class="n">derived · main 11.85 ms</div></div>
+  <div class="tile"><div class="k">Queries faster on derived</div>
+    <div class="v">96 / 177</div>
+    <div class="n">by per-query p50</div></div>
+  <div class="tile"><div class="k">Head-of-line blocking</div>
+    <div class="v">1.06× <span class="unit">vs 3,028×</span></div>
+    <div class="n">cheap query behind a heavy one</div></div>
+  <div class="tile"><div class="k">Write p50 under 4 readers</div>
+    <div class="v">52.1 ms</div>
+    <div class="n">derived · main 2,213.4 ms</div></div>
+</div>
+
+<div class="note">
+<b>What actually changed.</b> On <code>main</code>, <code>sparql_query</code> holds the store's
+<code>RLock</code> across both the Oxigraph call <em>and</em> the row materialization, and any write
+invalidates the imports-union graph so the next union query re-materializes data + full ontology
+closure synchronously, on the caller's thread. On
+<code>graph-store-derived-cache</code>, inference is run by a single-flight background thread and
+published into a named graph; queries take the lock only for the lazy Oxigraph call and
+materialize rows outside it, reading the last published view unless
+<code>wait_for_fresh=True</code>.
+</div>
+
+<h2>Setup</h2>
+<div class="tw"><table>
+<tr><th>&nbsp;</th><th>main</th><th>derived</th></tr>
+<tr><td>Commit</td><td><code>19bada7</code></td><td><code>75c1821</code></td></tr>
+<tr><td>Store init (bundled ontologies)</td><td class="num">29.7 s</td>
+    <td class="num">26.7 s</td></tr>
+<tr><td>Insert <code>union-dpr-model.ttl</code></td><td class="num">4,273 ms</td>
+    <td class="num">960 ms</td></tr>
+<tr><td>First fresh/union query (cache build)</td><td class="num">1,025 ms</td>
+    <td class="num">4,998 ms</td></tr>
+<tr><td>Triples, data only</td><td class="num">7,743</td>
+    <td class="num">7,743</td></tr>
+<tr><td>Triples, with dependencies</td><td class="num">18,949</td>
+    <td class="num">18,949</td></tr>
+</table></div>
+<p>Insert is cheaper on the branch because the closure refresh is deferred to the background
+rebuild; that deferred cost reappears in the first fresh query. The sum of the two is the
+fair comparison for a cold write-then-read.</p>
+
+
+<p class='ok'>✓ 175 of 177 queries returned identical row
+counts on both branches. The 2 that differ both do so for structural reasons,
+not because inference changed the data:</p>
+<ul><li><code>056ed59dbb</code> — main 4831, derived 4827</li><li><code>ef28b4e7d8</code> — main 1, derived 2</li></ul>
+<p><code>ef28b4e7d8</code> is <code>SELECT ?g (COUNT(*)) WHERE { GRAPH ?g {…} }</code> — it
+counts named graphs, and the branch deliberately has two (inferred data + dependency closure)
+where main materializes one merged union graph. <code>056ed59dbb</code> is an unbound-predicate
+scan over everything; the 4-row gap is the ontology-declaration triples that the two layouts
+place differently. Note the data-graph triple counts are identical
+(7,743 /
+18,949 on both), i.e.
+<code>shifty.infer</code> adds no triples for this model — so the latency comparison is
+like-for-like.</p>
+
+<h2>Serial query latency</h2>
+<p>One thread, 10 timed reps per query after warm-up.
+Total corpus p50 sum: main 82,690 ms vs derived 86,181 ms.</p>
+<figure class="fig"><figcaption><b>Per-query p50 latency</b><span class="unit">177 queries · below the line = derived faster (96/177)</span></figcaption><div class="legend"><span class="lg"><i class="i-win"></i>derived faster</span><span class="lg"><i class="i-lose"></i>main faster</span></div><svg viewBox="0 0 560 520" class="chart" role="img" aria-label="per-query p50 latency, main versus derived"><line x1="74.3" x2="74.3" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="462.2" y2="462.2" class="grid"/><text x="74.3" y="492.0" class="tick tick-x">0.1</text><text x="54" y="466.2" class="tick tick-y">0.1</text><line x1="104.9" x2="104.9" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="432.9" y2="432.9" class="grid"/><text x="104.9" y="492.0" class="tick tick-x">0.2</text><text x="54" y="436.9" class="tick tick-y">0.2</text><line x1="145.2" x2="145.2" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="394.2" y2="394.2" class="grid"/><text x="145.2" y="492.0" class="tick tick-x">0.5</text><text x="54" y="398.2" class="tick tick-y">0.5</text><line x1="175.8" x2="175.8" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="364.9" y2="364.9" class="grid"/><text x="175.8" y="492.0" class="tick tick-x">1</text><text x="54" y="368.9" class="tick tick-y">1</text><line x1="206.3" x2="206.3" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="335.7" y2="335.7" class="grid"/><text x="206.3" y="492.0" class="tick tick-x">2</text><text x="54" y="339.7" class="tick tick-y">2</text><line x1="246.7" x2="246.7" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="297.0" y2="297.0" class="grid"/><text x="246.7" y="492.0" class="tick tick-x">5</text><text x="54" y="301.0" class="tick tick-y">5</text><line x1="277.3" x2="277.3" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="267.7" y2="267.7" class="grid"/><text x="277.3" y="492.0" class="tick tick-x">10</text><text x="54" y="271.7" class="tick tick-y">10</text><line x1="307.8" x2="307.8" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="238.4" y2="238.4" class="grid"/><text x="307.8" y="492.0" class="tick tick-x">20</text><text x="54" y="242.4" class="tick tick-y">20</text><line x1="348.2" x2="348.2" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="199.7" y2="199.7" class="grid"/><text x="348.2" y="492.0" class="tick tick-x">50</text><text x="54" y="203.7" class="tick tick-y">50</text><line x1="378.7" x2="378.7" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="170.5" y2="170.5" class="grid"/><text x="378.7" y="492.0" class="tick tick-x">100</text><text x="54" y="174.5" class="tick tick-y">100</text><line x1="409.3" x2="409.3" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="141.2" y2="141.2" class="grid"/><text x="409.3" y="492.0" class="tick tick-x">200</text><text x="54" y="145.2" class="tick tick-y">200</text><line x1="449.7" x2="449.7" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="102.5" y2="102.5" class="grid"/><text x="449.7" y="492.0" class="tick tick-x">500</text><text x="54" y="106.5" class="tick tick-y">500</text><line x1="480.2" x2="480.2" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="73.2" y2="73.2" class="grid"/><text x="480.2" y="492.0" class="tick tick-x">1000</text><text x="54" y="77.2" class="tick tick-y">1000</text><line x1="510.7" x2="510.7" y1="14" y2="474" class="grid"/><line x1="62" x2="542" y1="44.0" y2="44.0" class="grid"/><text x="510.7" y="492.0" class="tick tick-x">2000</text><text x="54" y="48.0" class="tick tick-y">2000</text><line x1="62.0" y1="474.0" x2="542.0" y2="14.0" class="parity"/><circle cx="108.5" cy="432.7" r="5" class="dot-win"><title>89706a0396 union=False rows=0
+main 0.22ms / derived 0.20ms</title></circle><circle cx="248.6" cy="301.3" r="5" class="dot-win"><title>cf127de3a4 union=True rows=11
+main 5.22ms / derived 4.51ms</title></circle><circle cx="275.5" cy="273.4" r="5" class="dot-win"><title>789a6c51df union=True rows=215
+main 9.60ms / derived 8.74ms</title></circle><circle cx="247.5" cy="301.6" r="5" class="dot-win"><title>7825fac474 union=True rows=8
+main 5.08ms / derived 4.48ms</title></circle><circle cx="250.2" cy="298.6" r="5" class="dot-win"><title>4a1034f3ba union=True rows=16
+main 5.41ms / derived 4.81ms</title></circle><circle cx="499.3" cy="59.1" r="5" class="dot-win"><title>38000eb69b union=True rows=6
+main 1542.20ms / derived 1398.14ms</title></circle><circle cx="273.6" cy="274.2" r="5" class="dot-win"><title>6b0988dee3 union=True rows=109
+main 9.19ms / derived 8.57ms</title></circle><circle cx="126.4" cy="415.7" r="5" class="dot-win"><title>d9b5fc2434 union=False rows=0
+main 0.33ms / derived 0.30ms</title></circle><circle cx="92.2" cy="449.5" r="5" class="dot-win"><title>f7c7f852e6 union=False rows=0
+main 0.15ms / derived 0.14ms</title></circle><circle cx="136.9" cy="407.2" r="5" class="dot-win"><title>c03df339bf union=False rows=0
+main 0.41ms / derived 0.37ms</title></circle><circle cx="403.4" cy="151.0" r="5" class="dot-win"><title>056ed59dbb union=True rows=4827
+main 175.21ms / derived 158.65ms</title></circle><circle cx="396.6" cy="154.0" r="5" class="dot-win"><title>7b9fcd52c8 union=True rows=17
+main 150.02ms / derived 147.73ms</title></circle><circle cx="99.0" cy="449.8" r="5" class="dot-win"><title>3bd0a578c1 union=True rows=1
+main 0.17ms / derived 0.13ms</title></circle><circle cx="192.2" cy="355.2" r="5" class="dot-win"><title>dc6676dd93 union=True rows=13
+main 1.45ms / derived 1.26ms</title></circle><circle cx="506.2" cy="47.5" r="5" class="dot-lose"><title>f6e60e2830 union=True rows=0
+main 1804.18ms / derived 1840.53ms</title></circle><circle cx="506.9" cy="46.5" r="5" class="dot-lose"><title>774b117bcf union=True rows=0
+main 1832.99ms / derived 1882.80ms</title></circle><circle cx="160.5" cy="381.5" r="5" class="dot-win"><title>db140427d8 union=True rows=0
+main 0.71ms / derived 0.68ms</title></circle><circle cx="116.9" cy="431.7" r="5" class="dot-win"><title>e13d71a470 union=True rows=0
+main 0.26ms / derived 0.21ms</title></circle><circle cx="279.1" cy="261.6" r="5" class="dot-lose"><title>2f6de4d66e union=True rows=176
+main 10.43ms / derived 11.56ms</title></circle><circle cx="249.7" cy="296.0" r="5" class="dot-win"><title>906bf52b8e union=True rows=16
+main 5.35ms / derived 5.12ms</title></circle><circle cx="395.5" cy="151.3" r="5" class="dot-lose"><title>f5d3436ea6 union=True rows=17
+main 146.28ms / derived 157.49ms</title></circle><circle cx="245.8" cy="300.9" r="5" class="dot-win"><title>101d743264 union=True rows=8
+main 4.90ms / derived 4.56ms</title></circle><circle cx="165.2" cy="379.4" r="5" class="dot-win"><title>36cf82746e union=True rows=8
+main 0.79ms / derived 0.71ms</title></circle><circle cx="363.1" cy="185.7" r="5" class="dot-win"><title>89b2b4836d union=True rows=219
+main 70.13ms / derived 69.74ms</title></circle><circle cx="280.8" cy="265.0" r="5" class="dot-win"><title>ef9199db09 union=True rows=17
+main 10.84ms / derived 10.66ms</title></circle><circle cx="186.4" cy="358.6" r="5" class="dot-win"><title>de638cf3d4 union=True rows=0
+main 1.27ms / derived 1.16ms</title></circle><circle cx="154.4" cy="388.7" r="5" class="dot-win"><title>929d5355da union=True rows=0
+main 0.61ms / derived 0.57ms</title></circle><circle cx="303.8" cy="237.0" r="5" class="dot-lose"><title>8030f594e4 union=True rows=8
+main 18.26ms / derived 20.71ms</title></circle><circle cx="313.0" cy="231.2" r="5" class="dot-lose"><title>35857643ab union=True rows=109
+main 22.48ms / derived 23.74ms</title></circle><circle cx="302.3" cy="242.0" r="5" class="dot-lose"><title>9a65ffec30 union=True rows=273
+main 17.64ms / derived 18.36ms</title></circle><circle cx="511.2" cy="43.3" r="5" class="dot-lose"><title>0b95fc1ab5 union=True rows=0
+main 2022.72ms / derived 2029.58ms</title></circle><circle cx="514.2" cy="42.9" r="5" class="dot-win"><title>59287ff775 union=True rows=0
+main 2162.39ms / derived 2051.52ms</title></circle><circle cx="348.0" cy="199.2" r="5" class="dot-lose"><title>dccce4cb4a union=True rows=1
+main 49.81ms / derived 50.70ms</title></circle><circle cx="187.9" cy="359.0" r="5" class="dot-win"><title>c89d54dce0 union=True rows=0
+main 1.32ms / derived 1.15ms</title></circle><circle cx="179.5" cy="367.7" r="5" class="dot-win"><title>00fbd94a66 union=True rows=6
+main 1.09ms / derived 0.94ms</title></circle><circle cx="255.6" cy="296.3" r="5" class="dot-win"><title>410653b36a union=True rows=29
+main 6.12ms / derived 5.08ms</title></circle><circle cx="278.9" cy="270.1" r="5" class="dot-win"><title>e9e20b72d6 union=True rows=1
+main 10.38ms / derived 9.46ms</title></circle><circle cx="514.4" cy="43.1" r="5" class="dot-win"><title>2ad2580b54 union=True rows=0
+main 2172.91ms / derived 2043.20ms</title></circle><circle cx="510.3" cy="42.9" r="5" class="dot-lose"><title>36a214b393 union=True rows=1
+main 1981.56ms / derived 2051.68ms</title></circle><circle cx="243.4" cy="297.4" r="5" class="dot-lose"><title>06a71ef025 union=True rows=1
+main 4.64ms / derived 4.96ms</title></circle><circle cx="349.7" cy="200.1" r="5" class="dot-win"><title>4a51ca0268 union=True rows=872
+main 51.77ms / derived 49.52ms</title></circle><circle cx="220.8" cy="324.9" r="5" class="dot-win"><title>b4c8d13656 union=True rows=155
+main 2.78ms / derived 2.58ms</title></circle><circle cx="296.6" cy="249.9" r="5" class="dot-win"><title>da4f3a3be4 union=True rows=219
+main 15.52ms / derived 15.25ms</title></circle><circle cx="492.1" cy="57.5" r="5" class="dot-lose"><title>fdea62d715 union=True rows=1
+main 1309.76ms / derived 1449.90ms</title></circle><circle cx="153.4" cy="389.5" r="5" class="dot-win"><title>d5116387e4 union=True rows=1
+main 0.60ms / derived 0.56ms</title></circle><circle cx="97.4" cy="452.1" r="5" class="dot-win"><title>53ee99f49e union=True rows=1
+main 0.17ms / derived 0.13ms</title></circle><circle cx="345.5" cy="200.0" r="5" class="dot-lose"><title>09fb4f85c4 union=True rows=3
+main 47.07ms / derived 49.71ms</title></circle><circle cx="159.3" cy="382.3" r="5" class="dot-win"><title>0e4bc80875 union=True rows=1
+main 0.69ms / derived 0.66ms</title></circle><circle cx="171.3" cy="371.0" r="5" class="dot-win"><title>5186144bf7 union=True rows=5
+main 0.90ms / derived 0.87ms</title></circle><circle cx="473.7" cy="78.6" r="5" class="dot-lose"><title>2cd0dbb58a union=True rows=6
+main 863.41ms / derived 880.58ms</title></circle><circle cx="394.3" cy="154.7" r="5" class="dot-lose"><title>910e6fadfa union=True rows=17
+main 142.22ms / derived 145.33ms</title></circle><circle cx="305.5" cy="240.4" r="5" class="dot-lose"><title>5560001a20 union=True rows=1
+main 18.98ms / derived 19.09ms</title></circle><circle cx="180.8" cy="361.9" r="5" class="dot-win"><title>5856656281 union=True rows=1
+main 1.12ms / derived 1.07ms</title></circle><circle cx="235.7" cy="308.8" r="5" class="dot-win"><title>7f15ed136d union=True rows=1
+main 3.89ms / derived 3.78ms</title></circle><circle cx="398.5" cy="153.1" r="5" class="dot-win"><title>d7d47b6e90 union=True rows=29
+main 156.77ms / derived 150.82ms</title></circle><circle cx="504.6" cy="47.5" r="5" class="dot-lose"><title>110dec4014 union=True rows=0
+main 1738.74ms / derived 1838.60ms</title></circle><circle cx="205.5" cy="337.8" r="5" class="dot-win"><title>5ad7b2af31 union=True rows=0
+main 1.96ms / derived 1.90ms</title></circle><circle cx="137.0" cy="406.9" r="5" class="dot-win"><title>464ac1db50 union=True rows=0
+main 0.41ms / derived 0.37ms</title></circle><circle cx="104.7" cy="441.0" r="5" class="dot-win"><title>122c994ef2 union=True rows=0
+main 0.20ms / derived 0.17ms</title></circle><circle cx="179.6" cy="363.4" r="5" class="dot-win"><title>975ddc4626 union=True rows=0
+main 1.09ms / derived 1.04ms</title></circle><circle cx="504.4" cy="46.9" r="5" class="dot-lose"><title>b170d81e46 union=True rows=0
+main 1732.07ms / derived 1864.00ms</title></circle><circle cx="504.4" cy="40.3" r="5" class="dot-lose"><title>9e17ec987e union=True rows=0
+main 1733.56ms / derived 2180.44ms</title></circle><circle cx="190.3" cy="332.9" r="5" class="dot-lose"><title>82a3d501d2 union=True rows=3
+main 1.39ms / derived 2.14ms</title></circle><circle cx="509.1" cy="40.0" r="5" class="dot-lose"><title>3f941f0a21 union=True rows=0
+main 1925.70ms / derived 2197.38ms</title></circle><circle cx="509.4" cy="39.5" r="5" class="dot-lose"><title>4b908e8ce6 union=True rows=0
+main 1941.29ms / derived 2221.80ms</title></circle><circle cx="509.8" cy="34.4" r="5" class="dot-lose"><title>543e798d56 union=True rows=0
+main 1957.91ms / derived 2507.08ms</title></circle><circle cx="509.7" cy="41.5" r="5" class="dot-lose"><title>727e00fb29 union=True rows=0
+main 1953.09ms / derived 2120.59ms</title></circle><circle cx="509.2" cy="43.1" r="5" class="dot-lose"><title>ee0a02b40a union=True rows=0
+main 1932.20ms / derived 2042.37ms</title></circle><circle cx="511.5" cy="44.0" r="5" class="dot-win"><title>47490ef54a union=True rows=0
+main 2032.61ms / derived 1998.02ms</title></circle><circle cx="509.3" cy="44.4" r="5" class="dot-lose"><title>b16de5a025 union=True rows=0
+main 1936.52ms / derived 1979.05ms</title></circle><circle cx="101.0" cy="444.0" r="5" class="dot-win"><title>90946ee5fc union=True rows=1
+main 0.18ms / derived 0.15ms</title></circle><circle cx="98.7" cy="448.3" r="5" class="dot-win"><title>a9ea4df41e union=True rows=1
+main 0.17ms / derived 0.14ms</title></circle><circle cx="97.4" cy="450.1" r="5" class="dot-win"><title>ebc806ffe1 union=True rows=1
+main 0.17ms / derived 0.13ms</title></circle><circle cx="97.2" cy="452.4" r="5" class="dot-win"><title>754cd5b2ca union=True rows=1
+main 0.17ms / derived 0.13ms</title></circle><circle cx="96.9" cy="452.4" r="5" class="dot-win"><title>505a5568c5 union=True rows=1
+main 0.17ms / derived 0.13ms</title></circle><circle cx="97.4" cy="451.4" r="5" class="dot-win"><title>f1a4523cb7 union=True rows=1
+main 0.17ms / derived 0.13ms</title></circle><circle cx="507.5" cy="45.8" r="5" class="dot-lose"><title>4b372b1d7d union=True rows=0
+main 1859.09ms / derived 1915.87ms</title></circle><circle cx="521.3" cy="46.4" r="5" class="dot-win"><title>6d1f307f42 union=True rows=0
+main 2540.73ms / derived 1888.72ms</title></circle><circle cx="284.7" cy="264.4" r="5" class="dot-win"><title>29f76132b6 union=True rows=8
+main 11.85ms / derived 10.83ms</title></circle><circle cx="350.7" cy="199.6" r="5" class="dot-win"><title>f3d288d1ea union=True rows=7
+main 52.88ms / derived 50.14ms</title></circle><circle cx="359.7" cy="192.8" r="5" class="dot-win"><title>3ba321b15d union=True rows=0
+main 64.92ms / derived 58.97ms</title></circle><circle cx="354.7" cy="196.9" r="5" class="dot-win"><title>660f4a7739 union=True rows=1
+main 57.93ms / derived 53.53ms</title></circle><circle cx="369.2" cy="193.6" r="5" class="dot-win"><title>38f0b6a990 union=True rows=0
+main 80.57ms / derived 57.83ms</title></circle><circle cx="482.9" cy="69.1" r="5" class="dot-lose"><title>03644ef1bf union=True rows=0
+main 1063.29ms / derived 1101.79ms</title></circle><circle cx="248.3" cy="300.6" r="5" class="dot-win"><title>c60ac3ad8c union=True rows=1
+main 5.18ms / derived 4.59ms</title></circle><circle cx="495.3" cy="55.8" r="5" class="dot-lose"><title>68dc15bc20 union=True rows=6
+main 1410.20ms / derived 1510.43ms</title></circle><circle cx="228.7" cy="314.6" r="5" class="dot-win"><title>dc8d8def70 union=True rows=191
+main 3.33ms / derived 3.29ms</title></circle><circle cx="231.5" cy="315.0" r="5" class="dot-win"><title>d9e2388345 union=True rows=191
+main 3.54ms / derived 3.27ms</title></circle><circle cx="321.0" cy="213.1" r="5" class="dot-lose"><title>39a3ff417f union=True rows=1555
+main 26.99ms / derived 36.47ms</title></circle><circle cx="105.7" cy="434.0" r="5" class="dot-win"><title>a836d18bf0 union=True rows=0
+main 0.20ms / derived 0.20ms</title></circle><circle cx="184.6" cy="350.4" r="5" class="dot-lose"><title>a56b771e5a union=True rows=10
+main 1.22ms / derived 1.41ms</title></circle><circle cx="396.2" cy="147.9" r="5" class="dot-lose"><title>bf0c81771c union=True rows=29
+main 148.52ms / derived 170.63ms</title></circle><circle cx="398.1" cy="152.5" r="5" class="dot-win"><title>2aca7ba93e union=True rows=1
+main 155.22ms / derived 152.85ms</title></circle><circle cx="371.3" cy="180.1" r="5" class="dot-win"><title>6f98420898 union=True rows=1
+main 84.53ms / derived 79.58ms</title></circle><circle cx="394.5" cy="153.6" r="5" class="dot-lose"><title>9225d421f8 union=True rows=215
+main 142.90ms / derived 148.98ms</title></circle><circle cx="398.1" cy="143.1" r="5" class="dot-lose"><title>2fc009a33b union=True rows=79
+main 155.17ms / derived 191.10ms</title></circle><circle cx="245.0" cy="288.5" r="5" class="dot-lose"><title>ffc157531a union=True rows=229
+main 4.81ms / derived 6.11ms</title></circle><circle cx="101.0" cy="444.5" r="5" class="dot-win"><title>1a26bf2389 union=True rows=0
+main 0.18ms / derived 0.15ms</title></circle><circle cx="396.6" cy="150.4" r="5" class="dot-lose"><title>b3f17d991c union=True rows=17
+main 150.18ms / derived 160.79ms</title></circle><circle cx="515.2" cy="38.9" r="5" class="dot-lose"><title>617781d62e union=True rows=0
+main 2211.83ms / derived 2252.99ms</title></circle><circle cx="394.1" cy="152.4" r="5" class="dot-lose"><title>161c37292b union=True rows=215
+main 141.90ms / derived 153.54ms</title></circle><circle cx="396.4" cy="152.7" r="5" class="dot-lose"><title>54d342eebb union=True rows=79
+main 149.49ms / derived 152.42ms</title></circle><circle cx="394.2" cy="153.1" r="5" class="dot-lose"><title>3327eb545d union=True rows=17
+main 142.15ms / derived 150.71ms</title></circle><circle cx="394.2" cy="154.0" r="5" class="dot-lose"><title>9cbea9c3fa union=True rows=17
+main 141.92ms / derived 147.80ms</title></circle><circle cx="512.0" cy="37.3" r="5" class="dot-lose"><title>e03a811aca union=True rows=1
+main 2059.67ms / derived 2339.27ms</title></circle><circle cx="273.8" cy="270.3" r="5" class="dot-lose"><title>916d417345 union=True rows=215
+main 9.25ms / derived 9.40ms</title></circle><circle cx="309.1" cy="218.5" r="5" class="dot-lose"><title>c5ccc6af06 union=True rows=1
+main 20.59ms / derived 32.10ms</title></circle><circle cx="405.4" cy="143.8" r="5" class="dot-lose"><title>44f5f0a2ed union=True rows=17
+main 183.24ms / derived 188.03ms</title></circle><circle cx="394.2" cy="157.0" r="5" class="dot-win"><title>cdb498e91a union=True rows=1
+main 142.03ms / derived 137.42ms</title></circle><circle cx="322.7" cy="213.8" r="5" class="dot-lose"><title>ef28b4e7d8 union=True rows=2
+main 28.03ms / derived 35.85ms</title></circle><circle cx="183.5" cy="357.9" r="5" class="dot-win"><title>f79ad28d12 union=True rows=9
+main 1.19ms / derived 1.18ms</title></circle><circle cx="196.0" cy="346.1" r="5" class="dot-win"><title>f2719f159e union=True rows=16
+main 1.58ms / derived 1.56ms</title></circle><circle cx="207.2" cy="332.5" r="5" class="dot-lose"><title>b082b5eb51 union=True rows=0
+main 2.04ms / derived 2.15ms</title></circle><circle cx="207.0" cy="332.5" r="5" class="dot-lose"><title>65db2bcd36 union=True rows=0
+main 2.03ms / derived 2.16ms</title></circle><circle cx="206.8" cy="332.8" r="5" class="dot-lose"><title>ca514b4822 union=True rows=0
+main 2.02ms / derived 2.14ms</title></circle><circle cx="206.7" cy="332.1" r="5" class="dot-lose"><title>d9c2136156 union=True rows=0
+main 2.02ms / derived 2.18ms</title></circle><circle cx="206.8" cy="324.6" r="5" class="dot-lose"><title>beda08efa5 union=True rows=0
+main 2.02ms / derived 2.60ms</title></circle><circle cx="207.4" cy="330.2" r="5" class="dot-lose"><title>ccc762421d union=True rows=0
+main 2.05ms / derived 2.28ms</title></circle><circle cx="126.0" cy="418.7" r="5" class="dot-win"><title>e231071258 union=True rows=1
+main 0.32ms / derived 0.28ms</title></circle><circle cx="208.6" cy="332.2" r="5" class="dot-lose"><title>63501b869c union=True rows=0
+main 2.11ms / derived 2.17ms</title></circle><circle cx="184.2" cy="355.7" r="5" class="dot-lose"><title>8088d00376 union=True rows=0
+main 1.21ms / derived 1.24ms</title></circle><circle cx="186.8" cy="355.2" r="5" class="dot-win"><title>36e78cfb66 union=True rows=0
+main 1.28ms / derived 1.26ms</title></circle><circle cx="183.9" cy="354.8" r="5" class="dot-lose"><title>f50e232a2e union=True rows=0
+main 1.20ms / derived 1.27ms</title></circle><circle cx="183.6" cy="350.6" r="5" class="dot-lose"><title>6c277214db union=True rows=0
+main 1.19ms / derived 1.41ms</title></circle><circle cx="183.6" cy="356.6" r="5" class="dot-lose"><title>4ae0fc4427 union=True rows=0
+main 1.20ms / derived 1.22ms</title></circle><circle cx="183.5" cy="356.8" r="5" class="dot-lose"><title>5035b7aaa8 union=True rows=0
+main 1.19ms / derived 1.21ms</title></circle><circle cx="183.0" cy="356.2" r="5" class="dot-lose"><title>2c584010f7 union=True rows=0
+main 1.18ms / derived 1.23ms</title></circle><circle cx="347.6" cy="199.2" r="5" class="dot-lose"><title>f9eda3c074 union=True rows=4
+main 49.39ms / derived 50.61ms</title></circle><circle cx="251.3" cy="288.1" r="5" class="dot-lose"><title>89741ab600 union=True rows=75
+main 5.55ms / derived 6.16ms</title></circle><circle cx="338.5" cy="206.7" r="5" class="dot-lose"><title>11cdc6333b union=True rows=750
+main 40.15ms / derived 42.45ms</title></circle><circle cx="246.8" cy="271.2" r="5" class="dot-lose"><title>31c769e565 union=True rows=16
+main 5.01ms / derived 9.21ms</title></circle><circle cx="338.2" cy="203.0" r="5" class="dot-lose"><title>6c38866376 union=True rows=750
+main 39.90ms / derived 46.30ms</title></circle><circle cx="129.3" cy="408.2" r="5" class="dot-lose"><title>1ec3b1a66a union=True rows=2
+main 0.35ms / derived 0.36ms</title></circle><circle cx="315.8" cy="214.8" r="5" class="dot-lose"><title>529df4b785 union=True rows=381
+main 23.99ms / derived 34.99ms</title></circle><circle cx="298.9" cy="240.4" r="5" class="dot-lose"><title>cf3dad00ac union=True rows=235
+main 16.33ms / derived 19.07ms</title></circle><circle cx="507.5" cy="41.4" r="5" class="dot-lose"><title>e3c4c9cb51 union=True rows=0
+main 1857.00ms / derived 2124.65ms</title></circle><circle cx="510.7" cy="45.3" r="5" class="dot-win"><title>fe6634a043 union=True rows=0
+main 2000.29ms / derived 1936.56ms</title></circle><circle cx="509.9" cy="45.6" r="5" class="dot-win"><title>d9449a25e6 union=True rows=0
+main 1959.95ms / derived 1925.48ms</title></circle><circle cx="508.9" cy="41.9" r="5" class="dot-lose"><title>61a8f401f3 union=True rows=0
+main 1917.29ms / derived 2101.28ms</title></circle><circle cx="508.9" cy="37.2" r="5" class="dot-lose"><title>5180f5224a union=True rows=0
+main 1920.20ms / derived 2347.45ms</title></circle><circle cx="509.5" cy="35.7" r="5" class="dot-lose"><title>33e1099805 union=True rows=0
+main 1943.51ms / derived 2430.48ms</title></circle><circle cx="509.2" cy="44.1" r="5" class="dot-lose"><title>227f6e19d2 union=True rows=0
+main 1931.54ms / derived 1991.32ms</title></circle><circle cx="508.6" cy="41.5" r="5" class="dot-lose"><title>dc1bc43e25 union=True rows=0
+main 1906.79ms / derived 2119.79ms</title></circle><circle cx="507.7" cy="43.1" r="5" class="dot-lose"><title>507caba9b8 union=True rows=0
+main 1866.55ms / derived 2039.19ms</title></circle><circle cx="514.4" cy="44.3" r="5" class="dot-win"><title>c3f95743d6 union=True rows=0
+main 2173.39ms / derived 1982.96ms</title></circle><circle cx="514.3" cy="45.3" r="5" class="dot-win"><title>29f57c817f union=True rows=0
+main 2166.18ms / derived 1938.04ms</title></circle><circle cx="507.1" cy="45.2" r="5" class="dot-lose"><title>dbe1250e6e union=True rows=0
+main 1839.84ms / derived 1941.44ms</title></circle><circle cx="507.5" cy="42.8" r="5" class="dot-lose"><title>99257bb32a union=True rows=0
+main 1858.29ms / derived 2054.15ms</title></circle><circle cx="507.1" cy="45.2" r="5" class="dot-lose"><title>19d5359514 union=True rows=0
+main 1841.93ms / derived 1943.32ms</title></circle><circle cx="142.0" cy="405.5" r="5" class="dot-win"><title>1d2db1315c union=True rows=7
+main 0.46ms / derived 0.38ms</title></circle><circle cx="135.4" cy="411.5" r="5" class="dot-win"><title>8b28c8843e union=True rows=0
+main 0.40ms / derived 0.33ms</title></circle><circle cx="126.1" cy="420.9" r="5" class="dot-win"><title>e357dd404c union=True rows=0
+main 0.32ms / derived 0.27ms</title></circle><circle cx="141.0" cy="405.1" r="5" class="dot-win"><title>c3119504c5 union=True rows=7
+main 0.45ms / derived 0.39ms</title></circle><circle cx="140.3" cy="406.1" r="5" class="dot-win"><title>cbfd14b5e6 union=True rows=7
+main 0.45ms / derived 0.38ms</title></circle><circle cx="132.3" cy="414.4" r="5" class="dot-win"><title>34be94cf36 union=True rows=3
+main 0.37ms / derived 0.31ms</title></circle><circle cx="134.7" cy="412.8" r="5" class="dot-win"><title>f7287d6b03 union=True rows=4
+main 0.39ms / derived 0.32ms</title></circle><circle cx="121.4" cy="422.5" r="5" class="dot-win"><title>ab0905cb83 union=True rows=0
+main 0.29ms / derived 0.26ms</title></circle><circle cx="272.7" cy="273.3" r="5" class="dot-win"><title>15ebd9a9ee union=True rows=215
+main 9.01ms / derived 8.75ms</title></circle><circle cx="284.2" cy="262.0" r="5" class="dot-win"><title>b0dac1fdf2 union=True rows=215
+main 11.69ms / derived 11.44ms</title></circle><circle cx="346.7" cy="202.6" r="5" class="dot-win"><title>4e3648638a union=True rows=1
+main 48.37ms / derived 46.76ms</title></circle><circle cx="349.1" cy="197.8" r="5" class="dot-lose"><title>109e26bcff union=True rows=0
+main 51.07ms / derived 52.41ms</title></circle><circle cx="350.4" cy="198.1" r="5" class="dot-win"><title>dec0a0cca5 union=True rows=3
+main 52.56ms / derived 51.96ms</title></circle><circle cx="450.9" cy="102.8" r="5" class="dot-win"><title>5d5a6410c7 union=True rows=1
+main 513.79ms / derived 496.76ms</title></circle><circle cx="350.6" cy="198.3" r="5" class="dot-win"><title>1288c71f96 union=True rows=0
+main 52.81ms / derived 51.75ms</title></circle><circle cx="451.7" cy="102.9" r="5" class="dot-win"><title>b98253733c union=True rows=1
+main 523.51ms / derived 494.83ms</title></circle><circle cx="345.0" cy="202.1" r="5" class="dot-lose"><title>29cfbcde1f union=True rows=0
+main 46.56ms / derived 47.27ms</title></circle><circle cx="504.7" cy="49.7" r="5" class="dot-win"><title>85e64e23d7 union=True rows=0
+main 1743.99ms / derived 1743.57ms</title></circle><circle cx="486.6" cy="76.3" r="5" class="dot-win"><title>c8b9e337b9 union=True rows=0
+main 1155.14ms / derived 929.91ms</title></circle><circle cx="483.0" cy="68.9" r="5" class="dot-lose"><title>b880575d8f union=True rows=0
+main 1065.65ms / derived 1107.87ms</title></circle><circle cx="480.0" cy="71.1" r="5" class="dot-lose"><title>c7a51da6a3 union=True rows=0
+main 996.00ms / derived 1051.10ms</title></circle><circle cx="186.8" cy="355.8" r="5" class="dot-win"><title>f105101aa8 union=True rows=0
+main 1.28ms / derived 1.24ms</title></circle><circle cx="186.4" cy="356.2" r="5" class="dot-win"><title>32aae12cbf union=True rows=0
+main 1.27ms / derived 1.23ms</title></circle><circle cx="115.9" cy="429.9" r="5" class="dot-win"><title>29ed4f9ed5 union=True rows=0
+main 0.26ms / derived 0.21ms</title></circle><circle cx="115.4" cy="430.3" r="5" class="dot-win"><title>20483646c8 union=True rows=0
+main 0.25ms / derived 0.21ms</title></circle><circle cx="115.1" cy="430.3" r="5" class="dot-win"><title>5a7fe2b363 union=True rows=0
+main 0.25ms / derived 0.21ms</title></circle><circle cx="115.1" cy="430.7" r="5" class="dot-win"><title>a777361c7d union=True rows=0
+main 0.25ms / derived 0.21ms</title></circle><circle cx="114.9" cy="430.9" r="5" class="dot-win"><title>ddaafe0887 union=True rows=0
+main 0.25ms / derived 0.21ms</title></circle><text x="302.0" y="512" class="axlab">main p50 (ms, log)</text><text transform="translate(14,244.0) rotate(-90)" class="axlab">derived p50 (ms, log)</text></svg></figure>
+
+<h3>Biggest wins for the derived cache</h3>
+<div class="tw"><table>
+<tr><th>query</th><th>logged</th><th>rows</th><th>graphs</th><th>main p50 ms</th><th>derived p50 ms</th><th>verdict</th></tr>
+<tr><td><code>38f0b6a990</code></td><td class='num'>2</td><td class='num'>0</td><td>deps</td><td class='num'>80.57</td><td class='num'>57.83</td><td class='win-d'>derived 1.4×</td></tr><tr><td><code>6d1f307f42</code></td><td class='num'>2</td><td class='num'>0</td><td>deps</td><td class='num'>2,540.73</td><td class='num'>1,888.72</td><td class='win-d'>derived 1.3×</td></tr><tr><td><code>754cd5b2ca</code></td><td class='num'>2</td><td class='num'>1</td><td>deps</td><td class='num'>0.17</td><td class='num'>0.13</td><td class='win-d'>derived 1.3×</td></tr><tr><td><code>53ee99f49e</code></td><td class='num'>3</td><td class='num'>1</td><td>deps</td><td class='num'>0.17</td><td class='num'>0.13</td><td class='win-d'>derived 1.3×</td></tr><tr><td><code>505a5568c5</code></td><td class='num'>2</td><td class='num'>1</td><td>deps</td><td class='num'>0.17</td><td class='num'>0.13</td><td class='win-d'>derived 1.3×</td></tr><tr><td><code>f1a4523cb7</code></td><td class='num'>2</td><td class='num'>1</td><td>deps</td><td class='num'>0.17</td><td class='num'>0.13</td><td class='win-d'>derived 1.3×</td></tr><tr><td><code>3bd0a578c1</code></td><td class='num'>10</td><td class='num'>1</td><td>deps</td><td class='num'>0.17</td><td class='num'>0.13</td><td class='win-d'>derived 1.3×</td></tr><tr><td><code>e13d71a470</code></td><td class='num'>6</td><td class='num'>0</td><td>deps</td><td class='num'>0.26</td><td class='num'>0.21</td><td class='win-d'>derived 1.3×</td></tr>
+</table></div>
+
+<h3>Biggest regressions on the derived cache</h3>
+<div class="tw"><table>
+<tr><th>query</th><th>logged</th><th>rows</th><th>graphs</th><th>main p50 ms</th><th>derived p50 ms</th><th>verdict</th></tr>
+<tr><td><code>31c769e565</code></td><td class='num'>1</td><td class='num'>16</td><td>deps</td><td class='num'>5.01</td><td class='num'>9.21</td><td class='win-m'>main 1.8×</td></tr><tr><td><code>c5ccc6af06</code></td><td class='num'>1</td><td class='num'>1</td><td>deps</td><td class='num'>20.59</td><td class='num'>32.10</td><td class='win-m'>main 1.6×</td></tr><tr><td><code>82a3d501d2</code></td><td class='num'>2</td><td class='num'>3</td><td>deps</td><td class='num'>1.39</td><td class='num'>2.14</td><td class='win-m'>main 1.5×</td></tr><tr><td><code>529df4b785</code></td><td class='num'>1</td><td class='num'>381</td><td>deps</td><td class='num'>23.99</td><td class='num'>34.99</td><td class='win-m'>main 1.5×</td></tr><tr><td><code>39a3ff417f</code></td><td class='num'>1</td><td class='num'>1555</td><td>deps</td><td class='num'>26.99</td><td class='num'>36.47</td><td class='win-m'>main 1.4×</td></tr><tr><td><code>beda08efa5</code></td><td class='num'>1</td><td class='num'>0</td><td>deps</td><td class='num'>2.02</td><td class='num'>2.60</td><td class='win-m'>main 1.3×</td></tr><tr><td><code>543e798d56</code></td><td class='num'>2</td><td class='num'>0</td><td>deps</td><td class='num'>1,957.91</td><td class='num'>2,507.08</td><td class='win-m'>main 1.3×</td></tr><tr><td><code>ef28b4e7d8</code></td><td class='num'>1</td><td class='num'>1</td><td>deps</td><td class='num'>28.03</td><td class='num'>35.85</td><td class='win-m'>main 1.3×</td></tr>
+</table></div>
+
+
+<h2>Head-of-line blocking <span class="tag">the headline</span></h2>
+<p>The sweep above runs every reader on the same expensive mix, which hides the difference.
+This test does not: one thread loops an expensive query (<code>6d1f307f42</code>,
+~2,808&nbsp;ms) while the main thread issues a cheap one
+(a single bound-predicate lookup, ~0.6&nbsp;ms alone). Same query, same model, both branches.</p>
+<div class="tiles">
+  <div class="tile"><div class="k">main — cheap query</div>
+    <div class="v">0.68 → 2,053 ms</div>
+    <div class="n">3,028× slower under load</div></div>
+  <div class="tile"><div class="k">derived — cheap query</div>
+    <div class="v">0.56 → 0.59 ms</div>
+    <div class="n">1.06× — essentially unaffected</div></div>
+  <div class="tile"><div class="k">cheap queries in 20 s</div>
+    <div class="v">30,126 <span class="unit">vs 10</span></div>
+    <div class="n">derived vs main</div></div>
+  <div class="tile"><div class="k">throughput ratio</div>
+    <div class="v">3,013×</div>
+    <div class="n">1,506 vs 0.5 q/s</div></div>
+</div>
+<figure class="fig"><figcaption><b>Cheap-query p50 latency, idle vs under a heavy query</b><span class="unit">ms (lower is better)</span></figcaption><div class="legend"><span class="lg"><i style="background:var(--series-1)"></i>main</span> <span class="lg"><i style="background:var(--series-2)"></i>derived</span></div><svg viewBox="0 0 720 300" class="chart" role="img" aria-label="Cheap-query p50 latency, idle vs under a heavy query"><line x1="64" x2="704" y1="258.0" y2="258.0" class="grid"/><text x="56" y="262.0" class="tick tick-y">0</text><line x1="64" x2="704" y1="197.5" y2="197.5" class="grid"/><text x="56" y="201.5" class="tick tick-y">590</text><line x1="64" x2="704" y1="137.0" y2="137.0" class="grid"/><text x="56" y="141.0" class="tick tick-y">1,180</text><line x1="64" x2="704" y1="76.5" y2="76.5" class="grid"/><text x="56" y="80.5" class="tick tick-y">1,771</text><line x1="64" x2="704" y1="16.0" y2="16.0" class="grid"/><text x="56" y="20.0" class="tick tick-y">2,361</text><rect x="195.0" y="257.9" width="28.0" height="0.1" rx="4" fill="var(--series-1)"><title>main @ alone: 0.7ms (lower is better)</title></rect><rect x="225.0" y="257.9" width="28.0" height="0.1" rx="4" fill="var(--series-2)"><title>derived @ alone: 0.6ms (lower is better)</title></rect><text x="224.0" y="278.0" class="tick tick-x">alone</text><rect x="515.0" y="47.6" width="28.0" height="210.4" rx="4" fill="var(--series-1)"><title>main @ while a heavy query runs: 2,053.0ms (lower is better)</title></rect><text x="529.0" y="42.6" class="barlab">2,053</text><rect x="545.0" y="257.9" width="28.0" height="0.1" rx="4" fill="var(--series-2)"><title>derived @ while a heavy query runs: 0.6ms (lower is better)</title></rect><text x="544.0" y="278.0" class="tick tick-x">while a heavy query runs</text><line x1="64" x2="704" y1="258" y2="258" class="axis"/></svg></figure>
+<figure class="fig"><figcaption><b>Cheap-query throughput while a heavy query runs</b><span class="unit">queries/sec</span></figcaption><div class="legend"><span class="lg"><i style="background:var(--series-1)"></i>main</span> <span class="lg"><i style="background:var(--series-2)"></i>derived</span></div><svg viewBox="0 0 720 300" class="chart" role="img" aria-label="Cheap-query throughput while a heavy query runs"><line x1="64" x2="704" y1="258.0" y2="258.0" class="grid"/><text x="56" y="262.0" class="tick tick-y">0</text><line x1="64" x2="704" y1="197.5" y2="197.5" class="grid"/><text x="56" y="201.5" class="tick tick-y">433</text><line x1="64" x2="704" y1="137.0" y2="137.0" class="grid"/><text x="56" y="141.0" class="tick tick-y">866</text><line x1="64" x2="704" y1="76.5" y2="76.5" class="grid"/><text x="56" y="80.5" class="tick tick-y">1,299</text><line x1="64" x2="704" y1="16.0" y2="16.0" class="grid"/><text x="56" y="20.0" class="tick tick-y">1,732</text><rect x="355.0" y="257.9" width="28.0" height="0.1" rx="4" fill="var(--series-1)"><title>main @ cheap queries completed per second: 0.5queries/sec</title></rect><rect x="385.0" y="47.6" width="28.0" height="210.4" rx="4" fill="var(--series-2)"><title>derived @ cheap queries completed per second: 1,506.3queries/sec</title></rect><text x="399.0" y="42.6" class="barlab">1,506</text><text x="384.0" y="278.0" class="tick tick-x">cheap queries completed per second</text><line x1="64" x2="704" y1="258" y2="258" class="axis"/></svg></figure>
+<div class="note">
+On <code>main</code> a cheap query behind one expensive query waits for the expensive query to
+finish — the global <code>RLock</code> is held across execution <em>and</em> row materialization,
+so latency goes from sub-millisecond to over two seconds and only
+10 cheap queries complete in 20&nbsp;s. On the branch the same cheap
+query is unaffected (1.06×) and
+30,126 complete. This is the concurrency property the new architecture
+actually buys.
+</div>
+
+
+
+<h2>Queries that never finish</h2>
+<p>8 of 185 exceeded a 20&nbsp;s watchdog — on
+<b>both</b> branches, the same set. They are excluded from the timed comparison above and listed
+here instead, because a storage change cannot fix them.</p>
+
+<p>The discriminator is a single feature: an <b>unbound-predicate join</b>
+(<code>?v0 ?p_e0_1 ?v1</code>), where the predicate is a variable rather than a fixed IRI. It
+costs about 240× on this model, and these 8 are its tail:</p>
+<div class='tw'><table><tr><th>shape</th><th>queries</th><th>median</th><th>max</th></tr><tr><td>no unbound predicate</td><td class='num'>134</td><td class='num'>5.5 ms</td><td class='num'>500 ms</td></tr><tr><td>has <code>?v0 ?p ?v1</code></td><td class='num'>43</td><td class='num win-m'>2,004 ms</td><td class='num'>2,808 ms</td></tr><tr><td>the 8 below</td><td class='num'>8</td><td class='num warn'>&gt;20,000 ms</td><td class='num'>—</td></tr></table></div>
+
+<div class="tw"><table>
+<tr><th>query</th><th>logged</th><th>max hops</th><th>UNION branches</th><th>NOT IN</th>
+<th>endpoints</th><th>chars</th><th>source log</th></tr>
+<tr><td><code>39bdd704c0</code></td><td class='num'>2</td><td class='num'>6</td><td class='num'>6</td><td class='num'>12</td><td>Pump → Tank</td><td class='num'>9,238</td><td class='src'>acq_log_1.log,acq_log_2.log</td></tr><tr><td><code>571d4ac1fa</code></td><td class='num'>1</td><td class='num'>3</td><td class='num'>6</td><td class='num'>0</td><td>Pump → Tank</td><td class='num'>994</td><td class='src'>acq_log_20.txt</td></tr><tr><td><code>990a6a4c86</code></td><td class='num'>1</td><td class='num'>6</td><td class='num'>3</td><td class='num'>6</td><td>Pump → Tank</td><td class='num'>4,981</td><td class='src'>acq_log_6.log</td></tr><tr><td><code>df09af53ba</code></td><td class='num'>1</td><td class='num'>8</td><td class='num'>5</td><td class='num'>12</td><td>Pump → Valve → Tank</td><td class='num'>9,853</td><td class='src'>acq_log_6.log</td></tr><tr><td><code>91613d29f9</code></td><td class='num'>1</td><td class='num'>8</td><td class='num'>5</td><td class='num'>12</td><td>Pump → Valve → Tank</td><td class='num'>9,840</td><td class='src'>acq_log_6.log</td></tr><tr><td><code>da826756a3</code></td><td class='num'>1</td><td class='num'>8</td><td class='num'>5</td><td class='num'>12</td><td>Pump → Valve → Tank</td><td class='num'>9,859</td><td class='src'>acq_log_6.log</td></tr><tr><td><code>3d40790f4a</code></td><td class='num'>1</td><td class='num'>8</td><td class='num'>5</td><td class='num'>12</td><td>Pump → Valve → Tank</td><td class='num'>9,896</td><td class='src'>acq_log_6.log</td></tr><tr><td><code>9cd6d47915</code></td><td class='num'>1</td><td class='num'>6</td><td class='num'>3</td><td class='num'>6</td><td>Pump → Tank</td><td class='num'>5,089</td><td class='src'>acq_log_7.log</td></tr>
+</table></div>
+
+<p>All of them are <code>explore</code> "connected within N hops" traversals, compiled as UNION
+branches of increasing path length with every predicate left as a variable. The fatal branch
+looks like this — three chained joins, all predicates unbound, with both endpoints constrained
+only by a <code>subClassOf*</code> type subquery:</p>
+<pre class="code">{ ?v0 ?p_e0_1 ?x_e0_1 . ?x_e0_1 ?p_e0_2 ?x_e0_2 . ?x_e0_2 ?p_e0_3 ?v1 . }</pre>
+<p>Over 18,949 triples that is close to a
+cartesian walk, and the deepest of these go to 8 hops. The <code>NOT IN</code> lists (up to 12
+excluded predicates) are the generator pruning structural predicates like <code>s223:cnx</code>
+after the fact; the join still enumerates everything first, then filters. Four of the eight are
+byte-for-byte the same query but for one terminal property lookup, so there are really three
+distinct shapes here. The fix is a bounded predicate alternation in the compiler
+(<code>?v0 (s223:cnx|s223:connectsTo|…)/… ?v1</code>) rather than a bare <code>?p</code> at each
+hop.</p>
+
+<div class="note">
+<b>A slow query is worse than it looks on <code>main</code>.</b> While probing, a query abandoned
+at the watchdog on <code>main</code> left every <em>subsequent</em> query in that process timing
+out too — including trivial ones — because the global <code>RLock</code> is still held by the
+abandoned query. The probe harness had to restart the process after each timeout to make any
+progress. That is the same mechanism as the head-of-line result above, in its most extreme form:
+on <code>main</code> one runaway query takes the whole graph store offline.
+</div>
+
+
+<h2>Concurrent reads, uniform mix</h2>
+<p>Reader threads draw from a frequency-weighted mix of the 12 hottest
+queries; 40 operations each.</p>
+<figure class="fig"><figcaption><b>Query throughput vs concurrent readers</b><span class="unit">queries/sec</span></figcaption><div class="legend"><span class="lg"><i style="background:var(--series-1)"></i>main</span> <span class="lg"><i style="background:var(--series-2)"></i>derived</span></div><svg viewBox="0 0 720 300" class="chart" role="img" aria-label="Query throughput vs concurrent readers"><line x1="64" x2="704" y1="258.0" y2="258.0" class="grid"/><text x="56" y="262.0" class="tick tick-y">0</text><line x1="64" x2="704" y1="197.5" y2="197.5" class="grid"/><text x="56" y="201.5" class="tick tick-y">3</text><line x1="64" x2="704" y1="137.0" y2="137.0" class="grid"/><text x="56" y="141.0" class="tick tick-y">6</text><line x1="64" x2="704" y1="76.5" y2="76.5" class="grid"/><text x="56" y="80.5" class="tick tick-y">8</text><line x1="64" x2="704" y1="16.0" y2="16.0" class="grid"/><text x="56" y="20.0" class="tick tick-y">11</text><rect x="99.0" y="116.6" width="28.0" height="141.4" rx="4" fill="var(--series-1)"><title>main @ 1: 6.6queries/sec</title></rect><text x="113.0" y="111.6" class="barlab">7</text><rect x="129.0" y="124.3" width="28.0" height="133.7" rx="4" fill="var(--series-2)"><title>derived @ 1: 6.2queries/sec</title></rect><text x="143.0" y="119.3" class="barlab">6</text><text x="128.0" y="278.0" class="tick tick-x">1</text><rect x="227.0" y="80.4" width="28.0" height="177.6" rx="4" fill="var(--series-1)"><title>main @ 2: 8.3queries/sec</title></rect><text x="241.0" y="75.4" class="barlab">8</text><rect x="257.0" y="62.4" width="28.0" height="195.6" rx="4" fill="var(--series-2)"><title>derived @ 2: 9.1queries/sec</title></rect><text x="271.0" y="57.4" class="barlab">9</text><text x="256.0" y="278.0" class="tick tick-x">2</text><rect x="355.0" y="67.7" width="28.0" height="190.3" rx="4" fill="var(--series-1)"><title>main @ 4: 8.9queries/sec</title></rect><text x="369.0" y="62.7" class="barlab">9</text><rect x="385.0" y="47.6" width="28.0" height="210.4" rx="4" fill="var(--series-2)"><title>derived @ 4: 9.8queries/sec</title></rect><text x="399.0" y="42.6" class="barlab">10</text><text x="384.0" y="278.0" class="tick tick-x">4</text><rect x="483.0" y="96.6" width="28.0" height="161.4" rx="4" fill="var(--series-1)"><title>main @ 8: 7.5queries/sec</title></rect><text x="497.0" y="91.6" class="barlab">8</text><rect x="513.0" y="81.0" width="28.0" height="177.0" rx="4" fill="var(--series-2)"><title>derived @ 8: 8.3queries/sec</title></rect><text x="527.0" y="76.0" class="barlab">8</text><text x="512.0" y="278.0" class="tick tick-x">8</text><rect x="611.0" y="91.5" width="28.0" height="166.5" rx="4" fill="var(--series-1)"><title>main @ 16: 7.8queries/sec</title></rect><text x="625.0" y="86.5" class="barlab">8</text><rect x="641.0" y="77.8" width="28.0" height="180.2" rx="4" fill="var(--series-2)"><title>derived @ 16: 8.4queries/sec</title></rect><text x="655.0" y="72.8" class="barlab">8</text><text x="640.0" y="278.0" class="tick tick-x">16</text><line x1="64" x2="704" y1="258" y2="258" class="axis"/></svg></figure>
+<figure class="fig"><figcaption><b>Query p95 latency vs concurrent readers</b><span class="unit">ms (lower is better)</span></figcaption><div class="legend"><span class="lg"><i style="background:var(--series-1)"></i>main</span> <span class="lg"><i style="background:var(--series-2)"></i>derived</span></div><svg viewBox="0 0 720 300" class="chart" role="img" aria-label="Query p95 latency vs concurrent readers"><line x1="64" x2="704" y1="258.0" y2="258.0" class="grid"/><text x="56" y="262.0" class="tick tick-y">0</text><line x1="64" x2="704" y1="197.5" y2="197.5" class="grid"/><text x="56" y="201.5" class="tick tick-y">1,630</text><line x1="64" x2="704" y1="137.0" y2="137.0" class="grid"/><text x="56" y="141.0" class="tick tick-y">3,260</text><line x1="64" x2="704" y1="76.5" y2="76.5" class="grid"/><text x="56" y="80.5" class="tick tick-y">4,890</text><line x1="64" x2="704" y1="16.0" y2="16.0" class="grid"/><text x="56" y="20.0" class="tick tick-y">6,520</text><rect x="99.0" y="206.7" width="28.0" height="51.3" rx="4" fill="var(--series-1)"><title>main @ 1: 1,381.9ms (lower is better)</title></rect><text x="113.0" y="201.7" class="barlab">1,382</text><rect x="129.0" y="203.5" width="28.0" height="54.5" rx="4" fill="var(--series-2)"><title>derived @ 1: 1,469.5ms (lower is better)</title></rect><text x="143.0" y="198.5" class="barlab">1,470</text><text x="128.0" y="278.0" class="tick tick-x">1</text><rect x="227.0" y="206.1" width="28.0" height="51.9" rx="4" fill="var(--series-1)"><title>main @ 2: 1,398.4ms (lower is better)</title></rect><text x="241.0" y="201.1" class="barlab">1,398</text><rect x="257.0" y="205.7" width="28.0" height="52.3" rx="4" fill="var(--series-2)"><title>derived @ 2: 1,409.2ms (lower is better)</title></rect><text x="271.0" y="200.7" class="barlab">1,409</text><text x="256.0" y="278.0" class="tick tick-x">2</text><rect x="355.0" y="193.3" width="28.0" height="64.7" rx="4" fill="var(--series-1)"><title>main @ 4: 1,742.3ms (lower is better)</title></rect><text x="369.0" y="188.3" class="barlab">1,742</text><rect x="385.0" y="200.1" width="28.0" height="57.9" rx="4" fill="var(--series-2)"><title>derived @ 4: 1,559.0ms (lower is better)</title></rect><text x="399.0" y="195.1" class="barlab">1,559</text><text x="384.0" y="278.0" class="tick tick-x">4</text><rect x="483.0" y="146.1" width="28.0" height="111.9" rx="4" fill="var(--series-1)"><title>main @ 8: 3,015.5ms (lower is better)</title></rect><text x="497.0" y="141.1" class="barlab">3,016</text><rect x="513.0" y="182.3" width="28.0" height="75.7" rx="4" fill="var(--series-2)"><title>derived @ 8: 2,040.5ms (lower is better)</title></rect><text x="527.0" y="177.3" class="barlab">2,040</text><text x="512.0" y="278.0" class="tick tick-x">8</text><rect x="611.0" y="47.6" width="28.0" height="210.4" rx="4" fill="var(--series-1)"><title>main @ 16: 5,669.7ms (lower is better)</title></rect><text x="625.0" y="42.6" class="barlab">5,670</text><rect x="641.0" y="79.4" width="28.0" height="178.6" rx="4" fill="var(--series-2)"><title>derived @ 16: 4,810.8ms (lower is better)</title></rect><text x="655.0" y="74.4" class="barlab">4,811</text><text x="640.0" y="278.0" class="tick tick-x">16</text><line x1="64" x2="704" y1="258" y2="258" class="axis"/></svg></figure>
+<div class="tw"><table>
+<tr><th>readers</th><th>main q/s</th><th>derived q/s</th><th>verdict</th>
+<th>main p50</th><th>derived p50</th><th>main p95</th><th>derived p95</th><th>derived q/s <span class="tag">fresh</span></th></tr>
+<tr><td class='num'>1</td><td class='num'>6.6</td><td class='num'>6.2</td><td class='win-m'>main 1.1×</td><td class='num'>9.14</td><td class='num'>9.02</td><td class='num'>1,381.85</td><td class='num'>1,469.55</td><td class='num'>6.4</td></tr><tr><td class='num'>2</td><td class='num'>8.3</td><td class='num'>9.1</td><td class='win-d'>derived 1.1×</td><td class='num'>143.72</td><td class='num'>12.41</td><td class='num'>1,398.38</td><td class='num'>1,409.19</td><td class='num'>9.0</td></tr><tr><td class='num'>4</td><td class='num'>8.9</td><td class='num'>9.8</td><td class='win-d'>derived 1.1×</td><td class='num'>166.13</td><td class='num'>151.46</td><td class='num'>1,742.31</td><td class='num'>1,559.00</td><td class='num'>8.6</td></tr><tr><td class='num'>8</td><td class='num'>7.5</td><td class='num'>8.3</td><td class='win-d'>derived 1.1×</td><td class='num'>470.84</td><td class='num'>489.92</td><td class='num'>3,015.54</td><td class='num'>2,040.47</td><td class='num'>8.8</td></tr><tr><td class='num'>16</td><td class='num'>7.8</td><td class='num'>8.4</td><td class='win-d'>derived 1.1×</td><td class='num'>1,758.01</td><td class='num'>1,684.44</td><td class='num'>5,669.72</td><td class='num'>4,810.77</td><td class='num'>7.1</td></tr>
+</table></div>
+<p class="warn"><b>Read this one carefully: it is a negative result.</b> Neither branch scales on
+this workload — throughput is flat near 7–9&nbsp;q/s from 1 to 16 readers on both, and p50
+degrades roughly in proportion to reader count. When every thread runs the same expensive mix,
+the branch's advantage disappears: Oxigraph query evaluation still happens inside the lock, and
+what falls outside it (row materialization) is Python, so the GIL serializes it anyway. The
+derived cache does not make an all-heavy read workload parallel. Its win shows up when queries
+have <em>different</em> costs — see the head-of-line section above.</p>
+<p>The <code>fresh</code> column is the branch running every read with
+<code>wait_for_fresh=True</code>, i.e. opting out of eventual consistency. With no writer running
+the cache is already current, so it costs only the extra condition check — it tracks the
+published numbers closely.</p>
+
+<h2>Reads under a concurrent writer</h2>
+<p>This is where the architectures diverge most: a writer inserts small graphs while readers
+query. Every write invalidates the derived state.</p>
+<figure class="fig"><figcaption><b>Write latency while readers are active</b><span class="unit">ms (lower is better)</span></figcaption><div class="legend"><span class="lg"><i style="background:var(--series-1)"></i>main</span> <span class="lg"><i style="background:var(--series-2)"></i>derived</span></div><svg viewBox="0 0 720 300" class="chart" role="img" aria-label="Write latency while readers are active"><line x1="64" x2="704" y1="258.0" y2="258.0" class="grid"/><text x="56" y="262.0" class="tick tick-y">0</text><line x1="64" x2="704" y1="197.5" y2="197.5" class="grid"/><text x="56" y="201.5" class="tick tick-y">738</text><line x1="64" x2="704" y1="137.0" y2="137.0" class="grid"/><text x="56" y="141.0" class="tick tick-y">1,476</text><line x1="64" x2="704" y1="76.5" y2="76.5" class="grid"/><text x="56" y="80.5" class="tick tick-y">2,215</text><line x1="64" x2="704" y1="16.0" y2="16.0" class="grid"/><text x="56" y="20.0" class="tick tick-y">2,953</text><rect x="195.0" y="76.6" width="28.0" height="181.4" rx="4" fill="var(--series-1)"><title>main @ 4: 2,213.4ms (lower is better)</title></rect><text x="209.0" y="71.6" class="barlab">2,213</text><rect x="225.0" y="253.7" width="28.0" height="4.3" rx="4" fill="var(--series-2)"><title>derived @ 4: 52.1ms (lower is better)</title></rect><text x="224.0" y="278.0" class="tick tick-x">4</text><rect x="515.0" y="47.6" width="28.0" height="210.4" rx="4" fill="var(--series-1)"><title>main @ 8: 2,567.6ms (lower is better)</title></rect><text x="529.0" y="42.6" class="barlab">2,568</text><rect x="545.0" y="155.9" width="28.0" height="102.1" rx="4" fill="var(--series-2)"><title>derived @ 8: 1,246.3ms (lower is better)</title></rect><text x="559.0" y="150.9" class="barlab">1,246</text><text x="544.0" y="278.0" class="tick tick-x">8</text><line x1="64" x2="704" y1="258" y2="258" class="axis"/></svg></figure>
+<figure class="fig"><figcaption><b>Read p50 latency while a writer is active</b><span class="unit">ms (lower is better)</span></figcaption><div class="legend"><span class="lg"><i style="background:var(--series-1)"></i>main</span> <span class="lg"><i style="background:var(--series-2)"></i>derived</span></div><svg viewBox="0 0 720 300" class="chart" role="img" aria-label="Read p50 latency while a writer is active"><line x1="64" x2="704" y1="258.0" y2="258.0" class="grid"/><text x="56" y="262.0" class="tick tick-y">0</text><line x1="64" x2="704" y1="197.5" y2="197.5" class="grid"/><text x="56" y="201.5" class="tick tick-y">644</text><line x1="64" x2="704" y1="137.0" y2="137.0" class="grid"/><text x="56" y="141.0" class="tick tick-y">1,289</text><line x1="64" x2="704" y1="76.5" y2="76.5" class="grid"/><text x="56" y="80.5" class="tick tick-y">1,933</text><line x1="64" x2="704" y1="16.0" y2="16.0" class="grid"/><text x="56" y="20.0" class="tick tick-y">2,577</text><rect x="195.0" y="55.7" width="28.0" height="202.3" rx="4" fill="var(--series-1)"><title>main @ 4: 2,154.9ms (lower is better)</title></rect><text x="209.0" y="50.7" class="barlab">2,155</text><rect x="225.0" y="238.7" width="28.0" height="19.3" rx="4" fill="var(--series-2)"><title>derived @ 4: 205.7ms (lower is better)</title></rect><text x="224.0" y="278.0" class="tick tick-x">4</text><rect x="515.0" y="47.6" width="28.0" height="210.4" rx="4" fill="var(--series-1)"><title>main @ 8: 2,241.2ms (lower is better)</title></rect><text x="529.0" y="42.6" class="barlab">2,241</text><rect x="545.0" y="128.2" width="28.0" height="129.8" rx="4" fill="var(--series-2)"><title>derived @ 8: 1,382.8ms (lower is better)</title></rect><text x="559.0" y="123.2" class="barlab">1,383</text><text x="544.0" y="278.0" class="tick tick-x">8</text><line x1="64" x2="704" y1="258" y2="258" class="axis"/></svg></figure>
+<div class="tw"><table>
+<tr><th>readers</th><th>main read p50</th><th>derived read p50</th>
+<th>main write p50</th><th>derived write p50</th><th>main read q/s</th><th>derived read q/s</th></tr>
+<tr><td class='num'>4</td><td class='num'>2,154.9</td><td class='num'>205.7</td><td class='num'>2,213.4</td><td class='num'>52.1</td><td class='num'>1.8</td><td class='num'>4.3</td></tr><tr><td class='num'>8</td><td class='num'>2,241.2</td><td class='num'>1,382.8</td><td class='num'>2,567.6</td><td class='num'>1,246.3</td><td class='num'>3.1</td><td class='num'>4.2</td></tr><tr class='sub'><td>8 <span class='tag'>fresh</span></td><td>—</td><td class='num'>375.4</td><td>—</td><td class='num'>2.2</td><td>—</td><td class='num'>6.0</td></tr>
+</table></div>
+
+<h2>What this adds up to</h2>
+<ul>
+<li><b>Single-query latency is roughly a wash.</b> Median p50 11.85&nbsp;ms on main vs
+11.56&nbsp;ms on the branch; the branch is meaningfully ahead only on the expensive
+queries, where the pre-materialized inferred graph saves re-deriving work.</li>
+<li><b>Uniform concurrent reads do not scale on either branch.</b> This is the honest negative
+result — do not claim concurrency scaling from this workload.</li>
+<li><b>Mixed-cost concurrency is where the architecture pays.</b> A cheap query behind an
+expensive one goes from 3,028× slower to
+1.06× — the difference between a graph store that a slow query takes
+offline and one that keeps serving.</li>
+<li><b>Writes no longer stall readers.</b> Under 4 concurrent readers a write costs
+2,213&nbsp;ms on main and
+52&nbsp;ms on the branch, because the
+closure rebuild moved off the caller's thread.</li>
+<li><b>Bad query plans are unchanged.</b> The same 8 queries exceed 20&nbsp;s on both branches.
+Those are an <code>explore</code>-builder codegen problem (unbound-predicate joins), not a
+storage one, and the derived cache does not address them.</li>
+<li>The corpus is DPR-only, harvested from real runs. Queries against acquirium's driver
+metadata return 0 rows here because the disposable store has no registered drivers; they are
+kept because they still exercise the non-dependency code path.</li>
+</ul>
+</div>

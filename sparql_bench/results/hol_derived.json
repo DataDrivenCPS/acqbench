@@ -1,0 +1,38 @@
+{
+  "branch": "derived",
+  "heavy_id": "6d1f307f42",
+  "heavy_probe_ms": 1877.89475,
+  "heavy_union": true,
+  "is_derived": true,
+  "cheap_rows": 50,
+  "baseline": {
+    "count": 40,
+    "min_ms": 0.547,
+    "p50_ms": 0.557,
+    "p95_ms": 0.636,
+    "p99_ms": 0.734,
+    "max_ms": 0.795,
+    "mean_ms": 0.573
+  },
+  "under_load": {
+    "count": 30126,
+    "min_ms": 0.565,
+    "p50_ms": 0.591,
+    "p95_ms": 0.827,
+    "p99_ms": 1.188,
+    "max_ms": 54.665,
+    "mean_ms": 0.654
+  },
+  "heavy": {
+    "count": 10,
+    "min_ms": 2021.83,
+    "p50_ms": 2105.629,
+    "p95_ms": 2263.549,
+    "p99_ms": 2277.433,
+    "max_ms": 2280.904,
+    "mean_ms": 2132.634
+  },
+  "heavy_errors": [],
+  "blocking_factor_p50": 1.06,
+  "cheap_qps_under_load": 1506.3
+}

@@ -1,0 +1,38 @@
+{
+  "branch": "main",
+  "heavy_id": "6d1f307f42",
+  "heavy_probe_ms": 2808.266083,
+  "heavy_union": true,
+  "is_derived": false,
+  "cheap_rows": 50,
+  "baseline": {
+    "count": 40,
+    "min_ms": 0.628,
+    "p50_ms": 0.678,
+    "p95_ms": 0.889,
+    "p99_ms": 0.928,
+    "max_ms": 0.935,
+    "mean_ms": 0.7
+  },
+  "under_load": {
+    "count": 10,
+    "min_ms": 1832.574,
+    "p50_ms": 2053.042,
+    "p95_ms": 2261.677,
+    "p99_ms": 2303.573,
+    "max_ms": 2314.046,
+    "mean_ms": 2066.153
+  },
+  "heavy": {
+    "count": 11,
+    "min_ms": 1903.345,
+    "p50_ms": 2076.844,
+    "p95_ms": 2274.923,
+    "p99_ms": 2306.586,
+    "max_ms": 2314.503,
+    "mean_ms": 2093.993
+  },
+  "heavy_errors": [],
+  "blocking_factor_p50": 3028.09,
+  "cheap_qps_under_load": 0.5
+}
