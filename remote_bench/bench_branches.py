@@ -37,7 +37,37 @@ from pathlib import Path
 from typing import Any
 
 REPO_URL = "https://github.com/DataDrivenCPS/acquirium.git"
-BRANCHES = ["ums-duckdb-fix", "main"]        # new branch first, per request
+
+# A variant is a branch plus an optional source patch applied after clone, so we
+# can measure "the fix branch, but with an index" without owning a fork.
+VARIANTS = [
+    {"name": "ums-duckdb-fix", "branch": "ums-duckdb-fix", "patch": None},
+    {"name": "main", "branch": "main", "patch": None},
+    {"name": "ums-duckdb-fix-idxref", "branch": "ums-duckdb-fix", "patch": "idx_ref"},
+]
+BRANCHES = [v["name"] for v in VARIANTS]     # run order; new branch first, per request
+VARIANT = {v["name"]: v for v in VARIANTS}
+
+# Inserted straight after the timeseries table DDL in DuckDBStore.ensure_table.
+_IDX_ANCHOR = "            _timeseries_table_ddl(TIMESERIES_TABLE),"
+_IDX_PATCH = (_IDX_ANCHOR + "\n"
+              '            f"CREATE INDEX IF NOT EXISTS idx_ref ON {TIMESERIES_TABLE} (ref_id)",')
+
+
+def apply_patch(repo: Path, patch: str) -> str:
+    """Apply a named source patch to a fresh clone. Returns a description."""
+    if patch != "idx_ref":
+        raise ValueError(f"unknown patch {patch!r}")
+    f = repo / "src" / "acquirium" / "Storage" / "duckdb_store.py"
+    src = f.read_text()
+    if "idx_ref" in src:
+        return "idx_ref already present (no-op)"
+    if src.count(_IDX_ANCHOR) != 1:
+        raise RuntimeError(f"patch anchor found {src.count(_IDX_ANCHOR)}x in {f}; refusing to guess")
+    f.write_text(src.replace(_IDX_ANCHOR, _IDX_PATCH))
+    return "added CREATE INDEX idx_ref ON timeseries (ref_id)"
+
+
 PY_VERSION = "3.12"                          # system python is 3.14; pin a supported one
 
 BOOT_TIMEOUT_S = 1800        # cold boot builds the embedding cache; be generous
@@ -85,6 +115,7 @@ class Bench:
 
     def prepare(self, branch: str) -> tuple[Path, Path, Path]:
         """Clone the branch, build a venv, lay out a run directory."""
+        spec = VARIANT[branch]
         bdir = self.root / branch.replace("/", "_")
         repo, rundir = bdir / "repo", bdir / "run"
         venv_py = bdir / ".venv" / "bin" / "python"
@@ -92,8 +123,10 @@ class Bench:
         if not (repo / ".git").exists():
             shutil.rmtree(repo, ignore_errors=True)
             repo.parent.mkdir(parents=True, exist_ok=True)
-            self.run(["git", "clone", "--depth", "1", "--branch", branch, REPO_URL, str(repo)],
+            self.run(["git", "clone", "--depth", "1", "--branch", spec["branch"], REPO_URL, str(repo)],
                      timeout=900)
+            if spec["patch"]:
+                self.log(f"{branch}: patch -> {apply_patch(repo, spec['patch'])}")
         head = self.run(["git", "-C", str(repo), "rev-parse", "HEAD"]).stdout.strip()
         self.log(f"{branch}: HEAD={head}")
 
@@ -279,6 +312,12 @@ watch_dir         = "{raw}"
                                  timeout=600)
                     if c.returncode == 0:
                         out["db_row_count"] = int(c.stdout.strip())
+                    ix = self.run([str(venv_py), "-c",
+                                   f"import duckdb;print([r[0] for r in duckdb.connect(r'{db}',read_only=True)"
+                                   f".execute(\"SELECT index_name FROM duckdb_indexes() "
+                                   f"WHERE table_name='timeseries'\").fetchall()])"], timeout=600)
+                    if ix.returncode == 0:
+                        out["timeseries_indexes"] = ix.stdout.strip()
             except Exception as e:
                 out["db_check_error"] = str(e)
         out["finished"] = datetime.now(timezone.utc).isoformat()
