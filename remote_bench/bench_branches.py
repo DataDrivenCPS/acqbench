@@ -44,7 +44,11 @@ VARIANTS = [
     {"name": "ums-duckdb-fix", "branch": "ums-duckdb-fix", "patch": None},
     {"name": "main", "branch": "main", "patch": None},
     {"name": "ums-duckdb-fix-idxref", "branch": "ums-duckdb-fix", "patch": "idx_ref"},
+    # hot/cold staging branch: query it mid-ingest, right after, and 20 min later
+    {"name": "ums-duckdb-fix-2", "branch": "ums-duckdb-fix-2", "patch": None,
+     "passes": ["during", "after", "after+20min"]},
 ]
+SETTLE_S = 1200          # the "20 minutes after ingestion" wait
 BRANCHES = [v["name"] for v in VARIANTS]     # run order; new branch first, per request
 VARIANT = {v["name"]: v for v in VARIANTS}
 
@@ -222,8 +226,11 @@ watch_dir         = "{raw}"
 
     # ------------------------------------------------------------- ingest
 
-    def ingest(self, rundir: Path, venv_py: Path) -> dict[str, Any]:
+    def ingest(self, rundir: Path, venv_py: Path, midpoint_cb=None) -> dict[str, Any]:
+        """midpoint_cb, if given, is invoked once at ~50% of files and its
+        wall time is recorded so ingest rate can be reported with and without it."""
         server_log = rundir / "server.log"
+        cb_done, cb_window = midpoint_cb is None, {}
         t0 = time.time()
         # config is a positional argument on `driver start` (unlike `server --config`)
         r = self.run([str(venv_py.parent / "acquirium"), "driver", "start", "driver.toml"],
@@ -243,6 +250,14 @@ watch_dir         = "{raw}"
                 el = time.time() - t0
                 self.log(f"  ingest {n}/{target} files, {rows:,} rows, "
                          f"{rows/max(el,1):,.0f} rows/s, {el/60:.1f} min")
+            if not cb_done and seen >= target // 2:
+                self.log(f"--- running mid-ingest query pass at {seen}/{target} files ---")
+                t_cb0, files_at_start = time.time(), seen
+                cb_window = midpoint_cb(seen, rows)
+                cb_window.update({"files_at_start": files_at_start,
+                                  "wall_s": round(time.time() - t_cb0, 1)})
+                cb_done = True
+                self.log(f"--- mid-ingest query pass done in {cb_window['wall_s']}s ---")
             if seen >= target:
                 self.log(f"ingest complete: {target} files")
                 break
@@ -253,9 +268,16 @@ watch_dir         = "{raw}"
                 self.log(f"!! ingest timeout at {seen}/{target}")
                 break
         wall = time.time() - t0
-        return {"files_ingested": seen, "files_total": target, "rows_inserted": rows,
-                "wall_s": round(wall, 1), "rows_per_s": round(rows / max(wall, 1), 1),
-                "complete": seen >= target}
+        res = {"files_ingested": seen, "files_total": target, "rows_inserted": rows,
+               "wall_s": round(wall, 1), "rows_per_s": round(rows / max(wall, 1), 1),
+               "complete": seen >= target}
+        if cb_window:
+            # the mid-ingest query pass steals wall time from ingestion; report both
+            net = wall - cb_window["wall_s"]
+            res["mid_pass"] = cb_window
+            res["wall_s_excl_mid_pass"] = round(net, 1)
+            res["rows_per_s_excl_mid_pass"] = round(rows / max(net, 1), 1)
+        return res
 
     # -------------------------------------------------------------- query
 
@@ -287,11 +309,28 @@ watch_dir         = "{raw}"
             self.start_server(rundir, venv_py, port)
             out["boot_s"] = round(time.time() - boot0, 1)
 
-            out["ingest"] = self.ingest(rundir, venv_py)
+            passes = VARIANT[branch].get("passes") or ["after"]
+            out["query_passes"] = {}
+
+            def mid_pass(files, rows):
+                r = self.query_bench(port, venv_py)
+                out["query_passes"]["during"] = {**r, "at_files": files, "at_rows": rows}
+                self.save(branch, out)
+                return {"at_rows": rows}
+
+            out["ingest"] = self.ingest(
+                rundir, venv_py, midpoint_cb=mid_pass if "during" in passes else None)
             self.save(branch, out)
 
-            out["query"] = self.query_bench(port, venv_py)
+            out["query_passes"]["after"] = self.query_bench(port, venv_py)
+            out["query"] = out["query_passes"]["after"]      # canonical for the report
             self.save(branch, out)
+
+            if "after+20min" in passes:
+                self.log(f"settling {SETTLE_S}s before the final query pass …")
+                time.sleep(SETTLE_S)
+                out["query_passes"]["after+20min"] = self.query_bench(port, venv_py)
+                self.save(branch, out)
         except Exception as e:
             out["error"] = f"{type(e).__name__}: {e}"
             self.log(f"!! branch {branch} failed: {out['error']}")
@@ -318,6 +357,13 @@ watch_dir         = "{raw}"
                                    f"WHERE table_name='timeseries'\").fetchall()])"], timeout=600)
                     if ix.returncode == 0:
                         out["timeseries_indexes"] = ix.stdout.strip()
+                    hc = self.run([str(venv_py), "-c",
+                                   f"import duckdb;c=duckdb.connect(r'{db}',read_only=True);"
+                                   f"t=[r[0] for r in c.execute('SHOW TABLES').fetchall()];"
+                                   f"print({{n:c.execute(f'SELECT count(*) FROM \"{{n}}\"').fetchone()[0] "
+                                   f"for n in t if 'timeseries' in n}})"], timeout=900)
+                    if hc.returncode == 0:
+                        out["table_row_counts"] = hc.stdout.strip()
             except Exception as e:
                 out["db_check_error"] = str(e)
         out["finished"] = datetime.now(timezone.utc).isoformat()
