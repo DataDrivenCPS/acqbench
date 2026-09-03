@@ -1,0 +1,342 @@
+<title>App Path Bench</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-0:#f5f5f3; --surface-1:#fcfcfb; --surface-2:#efefec;
+  --border:#dedcd6; --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#7b7a75;
+  --series-1:#2a78d6; --series-2:#eb6834;
+  --good:#0b7a4b; --bad:#b3261e; --grid:#e6e5e0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0:#121211; --surface-1:#1a1a19; --surface-2:#232322;
+    --border:#3a3a37; --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#94938b;
+    --series-1:#3987e5; --series-2:#d95926;
+    --good:#43c08a; --bad:#e66767; --grid:#2e2e2b;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0:#121211; --surface-1:#1a1a19; --surface-2:#232322;
+  --border:#3a3a37; --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#94938b;
+  --series-1:#3987e5; --series-2:#d95926;
+  --good:#43c08a; --bad:#e66767; --grid:#2e2e2b;
+}
+* { box-sizing:border-box; }
+body { background:var(--surface-0); color:var(--text-primary); margin:0;
+  font:15px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif; }
+.wrap { max-width:1000px; margin:0 auto; padding:40px 22px 80px; }
+h1 { font-size:29px; margin:0 0 6px; letter-spacing:-.02em; }
+h2 { font-size:20px; margin:44px 0 12px; letter-spacing:-.01em;
+  padding-bottom:7px; border-bottom:1px solid var(--border); }
+h3 { font-size:15px; margin:26px 0 8px; color:var(--text-secondary); }
+.sub { color:var(--text-secondary); }
+p { color:var(--text-secondary); }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px;
+  background:var(--surface-2); padding:1px 5px; border-radius:4px; color:var(--text-primary); }
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin:22px 0 8px; }
+.tile { background:var(--surface-1); border:1px solid var(--border); border-radius:11px; padding:14px 16px; }
+.tile .k { font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); }
+.tile .v { font-size:25px; font-weight:640; margin-top:5px; letter-spacing:-.02em; }
+.tile .n { font-size:12.5px; color:var(--text-secondary); margin-top:3px; }
+.tw { overflow-x:auto; margin:14px 0; }
+table { border-collapse:collapse; width:100%; font-size:13.5px; background:var(--surface-1);
+  border:1px solid var(--border); border-radius:10px; }
+th,td { padding:8px 11px; text-align:left; border-bottom:1px solid var(--border); white-space:nowrap; }
+th { font-size:11.5px; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--text-muted); font-weight:600; background:var(--surface-2); }
+tr:last-child td { border-bottom:none; }
+td.num { text-align:right; font-variant-numeric:tabular-nums; }
+.win-b { color:var(--series-2); font-weight:600; }
+.win-m { color:var(--series-1); font-weight:600; }
+.ok { color:var(--good); } .warn { color:var(--bad); font-weight:600; }
+.fig { margin:20px 0 8px; background:var(--surface-1); border:1px solid var(--border);
+  border-radius:11px; padding:14px 16px 8px; }
+figcaption { display:flex; justify-content:space-between; align-items:baseline;
+  gap:12px; margin-bottom:2px; flex-wrap:wrap; }
+figcaption b { font-size:14.5px; }
+.unit { color:var(--text-muted); font-size:12px; }
+.figfoot { font-size:12px; color:var(--text-muted); margin:6px 2px 4px; white-space:normal; }
+.legend { display:flex; gap:16px; margin:6px 0 4px; font-size:12.5px; color:var(--text-secondary); }
+.lg { display:flex; align-items:center; gap:6px; }
+.lg i { width:11px; height:11px; border-radius:3px; display:inline-block; }
+.chart { width:100%; height:auto; display:block; overflow:visible; }
+.grid { stroke:var(--grid); stroke-width:1; }
+.axis { stroke:var(--border); stroke-width:1; }
+.tick { fill:var(--text-muted); font-size:11px; }
+.tick-y { text-anchor:end; } .tick-x { text-anchor:middle; }
+.barlab { fill:var(--text-secondary); font-size:10.5px; text-anchor:middle;
+  font-variant-numeric:tabular-nums; }
+pre.code { background:var(--surface-2); border:1px solid var(--border); border-radius:8px;
+  padding:11px 14px; overflow-x:auto; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:12.5px; color:var(--text-primary); margin:12px 0; }
+.note { background:var(--surface-1); border-left:3px solid var(--series-1);
+  border-radius:0 8px 8px 0; padding:11px 15px; margin:16px 0; font-size:13.5px; }
+.note.bad { border-left-color:var(--bad); }
+.note.good { border-left-color:var(--good); }
+ul { color:var(--text-secondary); padding-left:20px; }
+li { margin:4px 0; }
+</style>
+<div class="wrap">
+<h1>App path — <code>main</code> vs <code>ums-apps-improve</code></h1>
+<p class="sub">Both refs run their own <code>acquirium server</code> (DuckDB backend, warm
+embedding cache, one at a time) on this laptop, on a throwaway port. Apps are registered and
+run through the HTTP API from the ref's own client, so each branch exercises its native
+path; every number below comes from the same app source and the same trigger receiver.</p>
+
+<div class="tiles">
+  <div class="tile"><div class="k">50 concurrent registrations</div>
+    <div class="v warn">main: server dead</div>
+    <div class="n">0 of 50 returned in 300 s; <code>/health</code> stopped answering.
+      Branch: 16 of 50, server responsive throughout.</div></div>
+  <div class="tile"><div class="k">/apps/list p95 during a 25-app storm</div>
+    <div class="v">14.7 ms</div>
+    <div class="n">branch · main ≥60,000 ms (probe timeout)</div></div>
+  <div class="tile"><div class="k">Server polls, 25 apps @ 1 s</div>
+    <div class="v">2.34/s</div>
+    <div class="n">branch · main 23.68/s
+      of <code>/graph_version</code></div></div>
+  <div class="tile"><div class="k">Slow app, 5 s run on a 1 s tick</div>
+    <div class="v">10 runs</div>
+    <div class="n">branch, 51 ticks skipped · main 50 runs,
+      up to 7 at once</div></div>
+</div>
+
+<h2>1 · Concurrent registration, and what it does to the rest of the API</h2>
+<p>Each row registers N apps at once from N client threads and starts them keep-alive, while a
+background probe hits <code>/health</code> and <code>/apps/list</code> every 250 ms.
+<code>/apps/list</code> takes the app supervisor's record lock; <code>/health</code> takes no
+lock but shares the same bounded request threadpool — so the two together separate "the lock is
+held" from "the whole server is gone".</p>
+
+<div class="tw"><table>
+<tr><th rowspan="2">Apps</th><th colspan="2">Registered</th><th colspan="2">Wall clock</th>
+    <th colspan="2">/apps/list p95</th><th colspan="2">/health p95</th></tr>
+<tr><th>main</th><th>branch</th><th>main</th><th>branch</th>
+    <th>main</th><th>branch</th><th>main</th><th>branch</th></tr>
+<tr>
+  <td class="num">1</td>
+  <td class="num ">1/1</td><td class="num ">1/1</td>
+  <td class="num">2.1 s</td>
+  <td class="num">2.2 s</td>
+  <td class="num">1,753 ms</td>
+  <td class="num">15 ms</td>
+  <td class="num">35 ms</td>
+  <td class="num">20 ms</td>
+</tr><tr>
+  <td class="num">10</td>
+  <td class="num ">10/10</td><td class="num ">10/10</td>
+  <td class="num">22.0 s</td>
+  <td class="num">28.2 s</td>
+  <td class="num">21,584 ms</td>
+  <td class="num">9 ms</td>
+  <td class="num">62 ms</td>
+  <td class="num">16 ms</td>
+</tr><tr>
+  <td class="num">25</td>
+  <td class="num ">25/25</td><td class="num ">25/25</td>
+  <td class="num">71.8 s</td>
+  <td class="num">79.8 s</td>
+  <td class="num">60,002 ms</td>
+  <td class="num">15 ms</td>
+  <td class="num">50 ms</td>
+  <td class="num">26 ms</td>
+</tr><tr>
+  <td class="num">50</td>
+  <td class="num warn">0/50</td><td class="num warn">16/50</td>
+  <td class="num">300.2 s</td>
+  <td class="num">101.8 s</td>
+  <td class="num">60,085 ms</td>
+  <td class="num">6 ms</td>
+  <td class="num">60,003 ms</td>
+  <td class="num">6 ms</td>
+</tr>
+</table></div>
+
+<figure class="fig"><figcaption><b>/apps/list p95 while N registrations are in flight</b><span class="unit">ms (lower is better)</span></figcaption><div class="legend"><span class="lg"><i style="background:var(--series-1)"></i>main</span> <span class="lg"><i style="background:var(--series-2)"></i>ums-apps-improve</span></div><svg viewBox="0 0 720 300" class="chart" role="img" aria-label="/apps/list p95 while N registrations are in flight"><line x1="70" x2="704" y1="258.0" y2="258.0" class="grid"/><text x="62" y="262.0" class="tick tick-y">0</text><line x1="70" x2="704" y1="197.5" y2="197.5" class="grid"/><text x="62" y="201.5" class="tick tick-y">17,725</text><line x1="70" x2="704" y1="137.0" y2="137.0" class="grid"/><text x="62" y="141.0" class="tick tick-y">35,450</text><line x1="70" x2="704" y1="76.5" y2="76.5" class="grid"/><text x="62" y="80.5" class="tick tick-y">53,175</text><line x1="70" x2="704" y1="16.0" y2="16.0" class="grid"/><text x="62" y="20.0" class="tick tick-y">70,900</text><rect x="116.2" y="252.0" width="32.0" height="6.0" rx="4" fill="var(--series-1)"><title>main @ 1 apps: 1,752.6ms (lower is better)</title></rect><rect x="150.2" y="257.9" width="32.0" height="0.1" rx="4" fill="var(--series-2)"><title>ums-apps-improve @ 1 apps: 15.0ms (lower is better)</title></rect><text x="149.2" y="278.0" class="tick tick-x">1 apps</text><rect x="274.8" y="184.3" width="32.0" height="73.7" rx="4" fill="var(--series-1)"><title>main @ 10 apps: 21,583.6ms (lower is better)</title></rect><text x="290.8" y="179.3" class="barlab">21,584</text><rect x="308.8" y="258.0" width="32.0" height="0.0" rx="4" fill="var(--series-2)"><title>ums-apps-improve @ 10 apps: 8.9ms (lower is better)</title></rect><text x="307.8" y="278.0" class="tick tick-x">10 apps</text><rect x="433.2" y="53.2" width="32.0" height="204.8" rx="4" fill="var(--series-1)"><title>main @ 25 apps: 60,001.8ms (lower is better)</title></rect><text x="449.2" y="48.2" class="barlab">60,002</text><rect x="467.2" y="257.9" width="32.0" height="0.1" rx="4" fill="var(--series-2)"><title>ums-apps-improve @ 25 apps: 14.7ms (lower is better)</title></rect><text x="466.2" y="278.0" class="tick tick-x">25 apps</text><rect x="591.8" y="52.9" width="32.0" height="205.1" rx="4" fill="var(--series-1)"><title>main @ 50 apps: 60,084.7ms (lower is better)</title></rect><text x="607.8" y="47.9" class="barlab">60,085</text><rect x="625.8" y="258.0" width="32.0" height="0.0" rx="4" fill="var(--series-2)"><title>ums-apps-improve @ 50 apps: 6.1ms (lower is better)</title></rect><text x="624.8" y="278.0" class="tick tick-x">50 apps</text><line x1="70" x2="704" y1="258" y2="258" class="axis"/></svg><p class="figfoot">main's 60,000 ms bars are the probe's own timeout — the true value is unbounded. At 50 the server never answered again, in either repetition.</p></figure>
+<figure class="fig"><figcaption><b>Wall clock until every registration returned</b><span class="unit">s (lower is better)</span></figcaption><div class="legend"><span class="lg"><i style="background:var(--series-1)"></i>main</span> <span class="lg"><i style="background:var(--series-2)"></i>ums-apps-improve</span></div><svg viewBox="0 0 720 300" class="chart" role="img" aria-label="Wall clock until every registration returned"><line x1="70" x2="704" y1="258.0" y2="258.0" class="grid"/><text x="62" y="262.0" class="tick tick-y">0</text><line x1="70" x2="704" y1="197.5" y2="197.5" class="grid"/><text x="62" y="201.5" class="tick tick-y">89</text><line x1="70" x2="704" y1="137.0" y2="137.0" class="grid"/><text x="62" y="141.0" class="tick tick-y">177</text><line x1="70" x2="704" y1="76.5" y2="76.5" class="grid"/><text x="62" y="80.5" class="tick tick-y">266</text><line x1="70" x2="704" y1="16.0" y2="16.0" class="grid"/><text x="62" y="20.0" class="tick tick-y">354</text><rect x="116.2" y="256.6" width="32.0" height="1.4" rx="4" fill="var(--series-1)"><title>main @ 1 apps: 2.1s (lower is better)</title></rect><rect x="150.2" y="256.5" width="32.0" height="1.5" rx="4" fill="var(--series-2)"><title>ums-apps-improve @ 1 apps: 2.2s (lower is better)</title></rect><text x="149.2" y="278.0" class="tick tick-x">1 apps</text><rect x="274.8" y="243.0" width="32.0" height="15.0" rx="4" fill="var(--series-1)"><title>main @ 10 apps: 22.0s (lower is better)</title></rect><rect x="308.8" y="238.7" width="32.0" height="19.3" rx="4" fill="var(--series-2)"><title>ums-apps-improve @ 10 apps: 28.2s (lower is better)</title></rect><text x="307.8" y="278.0" class="tick tick-x">10 apps</text><rect x="433.2" y="209.0" width="32.0" height="49.0" rx="4" fill="var(--series-1)"><title>main @ 25 apps: 71.8s (lower is better)</title></rect><text x="449.2" y="204.0" class="barlab">72</text><rect x="467.2" y="203.5" width="32.0" height="54.5" rx="4" fill="var(--series-2)"><title>ums-apps-improve @ 25 apps: 79.8s (lower is better)</title></rect><text x="483.2" y="198.5" class="barlab">80</text><text x="466.2" y="278.0" class="tick tick-x">25 apps</text><rect x="591.8" y="52.9" width="32.0" height="205.1" rx="4" fill="var(--series-1)"><title>main @ 50 apps: 300.2s (lower is better)</title></rect><text x="607.8" y="47.9" class="barlab">300</text><rect x="625.8" y="188.4" width="32.0" height="69.6" rx="4" fill="var(--series-2)"><title>ums-apps-improve @ 50 apps: 101.8s (lower is better)</title></rect><text x="641.8" y="183.4" class="barlab">102</text><text x="624.8" y="278.0" class="tick tick-x">50 apps</text><line x1="70" x2="704" y1="258" y2="258" class="axis"/></svg><p class="figfoot">main's 50-app bar is the 300 s budget expiring with 0 of 50 returned, not a completed run.</p></figure>
+
+<div class="note bad"><b>main deadlocks at 50 concurrent registrations.</b>
+Not "slows down" — stops. None of the 50 requests returned inside the 300 s budget, the probe's
+<code>/health</code> calls started timing out too, and the server never recovered: it had to be
+killed. <code>AppSupervisor.register_app</code> holds <code>_lock</code> across
+<code>ray.get(actor.register)</code>, and that actor call re-enters the same server over HTTP.
+Every sync endpoint runs on one bounded threadpool, so once enough registration requests are
+parked on the lock there is no thread left to serve the callback the lock-holder is waiting for.
+This reproduced twice — once during registration, once while deleting 50 apps.</div>
+
+<div class="note good"><b>The branch's lock split works.</b> Registration reserves the app name
+with a placeholder and serializes only the build on a separate <code>_build_lock</code> that no
+request path takes. The visible effect is dramatic: <code>/apps/list</code> p95 stays between
+6.1 and
+15.0 ms at every count, versus
+main's climb to the 60 s probe ceiling by 25 apps.</div>
+
+<h3>The control: the same 10 apps, one at a time</h3>
+<p>Serial registration removes contention entirely, so what is left is the per-app cost and
+whatever the lock blocks anyway.</p>
+<div class="tw"><table>
+<tr><th>Metric</th><th>main</th><th>ums-apps-improve</th><th></th></tr>
+<tr><td>Wall clock for 10 apps</td><td class="num">27.7 s</td>
+    <td class="num">20.2 s</td>
+    <td class="win-b">branch 1.4×</td></tr>
+<tr><td>Registration p50</td><td class="num">2,526 ms</td>
+    <td class="num">1,645 ms</td>
+    <td class="win-b">branch 1.5×</td></tr>
+<tr><td>/apps/list p95 during it</td><td class="num">3,124 ms</td>
+    <td class="num">5.0 ms</td>
+    <td class="win-b">branch 628.6×</td></tr>
+</table></div>
+<p>Even with one registration in flight, main parks <code>/apps/list</code> for seconds — the
+lock is held for the whole build, not just the dict update. The branch's faster registration is
+partly the dropped <code>resolve_dependencies</code> pass (main runs an extra
+<code>resolved_nodes()</code> SPARQL per query at registration; the branch removed
+<code>depends_on</code> entirely).</p>
+
+<div class="note bad"><b>New on the branch: most of a 50-way registration storm fails with HTTP 400.</b>
+The supervisor builds an <code>Acquirium(...)</code> client <em>inside</em> the request handler,
+and that constructor health-checks the server it is already running in
+(<code>_wait_for_server</code>, 3 s read timeout, 60 s budget, over <code>localhost</code>).
+Under 50-way concurrency that self-call times out and registration fails with a misleading
+<code>ConnectionError: … did not answer /health within 60s … Is the server running?</code>.
+On a cold server only 16–20 of 50
+survive it. The server stays healthy, so this is a bounded failure rather than main's total
+one — but it is a real regression risk at scale, and the error text points at the wrong thing.
+Numbers below.</div>
+
+<h3>The 50-app case, re-measured</h3>
+<p>The first pass at 50 apps overlapped a macOS idle sleep, so it was thrown away and run
+again on its own — two repetitions per ref, each on a freshly booted server, the whole thing
+wrapped in <code>caffeinate -dimsu</code>. Each cell also records the gap between its wall
+clock and its monotonic clock, which is how a sleep would show up (macOS pauses the monotonic
+clock while suspended, so a slept run looks <em>fast</em>, not slow). All four gaps are zero.</p>
+
+<div class="tw"><table>
+<tr><th>Ref</th><th>Rep</th><th>Registered</th><th>Wall clock</th>
+    <th>/apps/list p95</th><th>/health p95</th><th>Clock gap</th><th>Server after</th></tr>
+<tr><td>main</td><td class="num">rep 1</td><td class="num warn">0/50</td><td class="num">300.2 s</td><td class="num">60,084.7 ms</td><td class="num">60,003.3 ms</td><td class="num">-0.0 s</td><td class="warn">dead</td></tr><tr><td>main</td><td class="num">rep 2</td><td class="num warn">0/50</td><td class="num">300.2 s</td><td class="num">60,006.0 ms</td><td class="num">60,004.4 ms</td><td class="num">0.0 s</td><td class="warn">dead</td></tr><tr><td>ums-apps-improve</td><td class="num">rep 1</td><td class="num warn">16/50</td><td class="num">101.8 s</td><td class="num">6.1 ms</td><td class="num">6.4 ms</td><td class="num">-0.0 s</td><td class="ok">alive</td></tr><tr><td>ums-apps-improve</td><td class="num">rep 2</td><td class="num warn">20/50</td><td class="num">114.0 s</td><td class="num">6.9 ms</td><td class="num">7.1 ms</td><td class="num">0.0 s</td><td class="ok">alive</td></tr>
+</table></div>
+
+<p><b>main reproduces exactly.</b> Both repetitions: 0 of 50 returned inside 300 s, both probe
+endpoints timing out, teardown unable to remove a single app, server dead afterwards. Three
+observations of the same deadlock now, including the discarded one.</p>
+
+<p><b>The branch's failure rate is worse than the first pass suggested.</b> On a cold server
+only 16 and 20 of 50 registrations
+succeed; the earlier 38/50 came at the end of an escalation, on a
+server whose Ray workers were already warm from the 1/10/25 counts, so each registration
+finished well inside the 60 s self-check budget. Cold, the storm is slow enough that the
+supervisor's own health check gives up. The client-side error is now captured verbatim:</p>
+<pre class="code">Acquirium server at http://localhost:8811 did not answer /health within 60s (last error: HTTPConnectionPool(host=&#x27;localhost&#x27;, port=8811): Read timed out. (read timeout=3.0)). Is the server running? Start it with: acquiri</pre>
+<p>What makes it self-inflicted: each of the 50 in-flight registrations builds its own
+<code>Acquirium</code>, which polls <code>/health</code> every 3 s for up to 60 s — so the
+failing requests generate the very load that starves the endpoint they are waiting on. Note the
+server itself stays fine throughout: <code>/apps/list</code> p95 is
+6.1 ms and all 50 apps tear down in
+2.2 s.</p>
+
+<h2>2 · Steady state: 25 apps on a 1 s interval</h2>
+<p>All 25 apps online first, then a 90 s measurement window. Everything here is measured inside
+that window; the ramp is excluded.</p>
+
+<div class="tw"><table>
+<tr><th>Metric</th><th>main</th><th>ums-apps-improve</th><th>Winner</th></tr>
+<tr><td>Ticks delivered per second</td><td class="num">23.53</td><td class="num">24.44</td><td class="win-b">branch 1.0×</td></tr><tr><td>Tick period p50</td><td class="num">1,010 ms</td><td class="num">1,000 ms</td><td class="win-b">branch 1.0×</td></tr><tr><td>Tick period p95</td><td class="num">2,004 ms</td><td class="num">1,021 ms</td><td class="win-b">branch 2.0×</td></tr><tr><td>App run duration p50</td><td class="num">243 ms</td><td class="num">89 ms</td><td class="win-b">branch 2.7×</td></tr><tr><td>Server read inside a run p50</td><td class="num">222 ms</td><td class="num">71 ms</td><td class="win-b">branch 3.1×</td></tr><tr><td>In-app compute p95</td><td class="num">32.3 ms</td><td class="num">19.1 ms</td><td class="win-b">branch 1.7×</td></tr><tr><td>/graph_version requests per second</td><td class="num">23.68</td><td class="num">2.34</td><td class="win-b">branch 10.1×</td></tr><tr><td>/apps/list p95</td><td class="num">82.0 ms</td><td class="num">13.7 ms</td><td class="win-b">branch 6.0×</td></tr><tr><td>/health p50</td><td class="num">20.5 ms</td><td class="num">6.3 ms</td><td class="win-b">branch 3.3×</td></tr><tr><td>Server-tree CPU, mean</td><td class="num">347 %</td><td class="num">315 %</td><td class="win-b">branch 1.1×</td></tr><tr><td>Server-tree RSS, peak</td><td class="num">4,740 MB</td><td class="num">6,318 MB</td><td class="win-m">main 1.3×</td></tr>
+</table></div>
+
+<figure class="fig"><figcaption><b>Steady state: 25 apps on a 1 s interval</b><span class="unit">mixed units, all lower-is-better</span></figcaption><div class="legend"><span class="lg"><i style="background:var(--series-1)"></i>main</span> <span class="lg"><i style="background:var(--series-2)"></i>ums-apps-improve</span></div><svg viewBox="0 0 720 300" class="chart" role="img" aria-label="Steady state: 25 apps on a 1 s interval"><line x1="70" x2="704" y1="258.0" y2="258.0" class="grid"/><text x="62" y="262.0" class="tick tick-y">0</text><line x1="70" x2="704" y1="197.5" y2="197.5" class="grid"/><text x="62" y="201.5" class="tick tick-y">59</text><line x1="70" x2="704" y1="137.0" y2="137.0" class="grid"/><text x="62" y="141.0" class="tick tick-y">118</text><line x1="70" x2="704" y1="76.5" y2="76.5" class="grid"/><text x="62" y="80.5" class="tick tick-y">177</text><line x1="70" x2="704" y1="16.0" y2="16.0" class="grid"/><text x="62" y="20.0" class="tick tick-y">236</text><rect x="116.2" y="233.8" width="32.0" height="24.2" rx="4" fill="var(--series-1)"><title>main @ /graph_version req/s: 23.7mixed units, all lower-is-better</title></rect><text x="132.2" y="228.8" class="barlab">24</text><rect x="150.2" y="255.6" width="32.0" height="2.4" rx="4" fill="var(--series-2)"><title>ums-apps-improve @ /graph_version req/s: 2.3mixed units, all lower-is-better</title></rect><text x="149.2" y="278.0" class="tick tick-x">/graph_version req/s</text><rect x="274.8" y="52.9" width="32.0" height="205.1" rx="4" fill="var(--series-1)"><title>main @ tick period p95 ÷10 ms: 200.4mixed units, all lower-is-better</title></rect><text x="290.8" y="47.9" class="barlab">200</text><rect x="308.8" y="153.4" width="32.0" height="104.6" rx="4" fill="var(--series-2)"><title>ums-apps-improve @ tick period p95 ÷10 ms: 102.1mixed units, all lower-is-better</title></rect><text x="324.8" y="148.4" class="barlab">102</text><text x="307.8" y="278.0" class="tick tick-x">tick period p95 ÷10 ms</text><rect x="433.2" y="235.2" width="32.0" height="22.8" rx="4" fill="var(--series-1)"><title>main @ run read p50 ÷10 ms: 22.2mixed units, all lower-is-better</title></rect><rect x="467.2" y="250.7" width="32.0" height="7.3" rx="4" fill="var(--series-2)"><title>ums-apps-improve @ run read p50 ÷10 ms: 7.1mixed units, all lower-is-better</title></rect><text x="466.2" y="278.0" class="tick tick-x">run read p50 ÷10 ms</text><rect x="591.8" y="249.6" width="32.0" height="8.4" rx="4" fill="var(--series-1)"><title>main @ /apps/list p95 ÷10 ms: 8.2mixed units, all lower-is-better</title></rect><rect x="625.8" y="256.6" width="32.0" height="1.4" rx="4" fill="var(--series-2)"><title>ums-apps-improve @ /apps/list p95 ÷10 ms: 1.4mixed units, all lower-is-better</title></rect><text x="624.8" y="278.0" class="tick tick-x">/apps/list p95 ÷10 ms</text><line x1="70" x2="704" y1="258" y2="258" class="axis"/></svg><p class="figfoot">Latencies are divided by 10 so they share one axis with the request rate.</p></figure>
+
+<p><b>Where the polling went.</b> On main every app calls <code>graph_status()</code> on the
+server <em>once per tick</em>, so the poll rate is the fleet's tick rate: 23.68 req/s
+for 25 apps at 1 s. The branch floors graph polling at <code>max(interval, 10 s)</code>,
+independent of how fast the app runs: 2.34 req/s.
+That is a whole request per tick removed from a five-request tick — and it is the request that
+sat in front of the run on the actor's own thread.</p>
+
+<p><b>And the tick grid holds.</b> main's loop waits <code>interval</code> <em>after</em> each
+run finishes, so the period is interval + run time and drifts:
+p95 2,004 ms against a 1,000 ms request. The branch's
+<code>IntervalScheduler</code> schedules from the previous deadline, so p95 is
+1,021 ms.</p>
+
+<h2>3 · When a run outlasts its interval</h2>
+<p>One app, 1 s interval, each run sleeping 5 s, for 60 s. A tick can only be honoured every
+5 s; the question is what the runtime does with the other four.</p>
+
+<div class="tw"><table>
+<tr><th>Metric</th><th>main</th><th>ums-apps-improve</th><th>Winner</th></tr>
+<tr><td>Runs dispatched in the 60 s window</td><td class="num">50</td><td class="num">10</td><td class="win-b">branch 5.0×</td></tr><tr><td>Ticks the app actually completed</td><td class="num">55</td><td class="num">10</td><td class="win-b">branch 5.5×</td></tr><tr><td>Peak concurrent runs</td><td class="num">7</td><td class="num">1</td><td class="win-b">branch 7.0×</td></tr><tr><td>Ticks skipped (reported by the app)</td><td class="num">—</td><td class="num">51</td><td class="">—</td></tr><tr><td>Server-tree RSS growth</td><td class="num">892 MB</td><td class="num">116 MB</td><td class="win-b">branch 7.7×</td></tr><tr><td>Server-tree CPU, mean</td><td class="num">49 %</td><td class="num">18 %</td><td class="win-b">branch 2.7×</td></tr>
+</table></div>
+
+<div class="note bad"><b>main piles up.</b> It dispatched 50 runs for an app
+that can complete about 12, running up to 7 concurrently and leaving
+5 still in flight when the window closed. Nothing
+bounds this: a slow app on a fast interval keeps spawning Ray tasks. The branch dispatched
+10, skipped 51 ticks and counted them, and never had more
+than 1 run in flight.</div>
+
+<h3>run_timeout</h3>
+<p>Branch only. A deliberately hung run (<code>time.sleep(3600)</code>, no cancellation point)
+with <code>run_timeout=3</code>:
+recorded <b>5 timeouts</b> in
+20 s and kept skipping ticks (15 skipped)
+instead of stalling. On main the parameter does not exist:
+<code>TypeError: Acquirium.run_app() got an unexpected keyword argument &#x27;run_timeout&#x27;</code> — a hung run there is unrecoverable short of killing the app.</p>
+
+<h2>4 · EnvSpec (branch only)</h2>
+<p>An app declaring <code>pip: ["cowsay==6.1"]</code> gets a persistent overlay venv under
+<code>&lt;data_dir&gt;/envs/&lt;fingerprint&gt;</code>, handed to Ray as
+<code>py_executable</code>. Undeclared apps keep the inherit-the-server-env path and pay nothing.</p>
+<div class="tw"><table>
+<tr><th>Case</th><th>register</th><th>first tick after run</th></tr>
+<tr><td>No env declared (baseline)</td><td class="num">1.75 s</td><td class="num">—</td></tr>
+<tr><td>Cold: env built for the first time</td><td class="num">11.38 s</td><td class="num">4.04 s</td></tr>
+<tr><td>Warm: same fingerprint reused</td><td class="num">4.03 s</td><td class="num">0.51 s</td></tr>
+</table></div>
+<p>For one small pure-Python wheel the cold build costs about
+9.6 s
+over a plain registration and the warm path about
+2.3 s.
+A real dependency set (idaes, watertap) will be minutes, not seconds — the thing that matters is
+that it is paid once and survives restarts, and that it happens outside both supervisor locks so
+a cold build cannot stall other registrations. On main the parameter does not exist:
+<code>TypeError: Acquirium.register_app() got an unexpected keyword argument &#x27;env&#x27;</code>.</p>
+
+<h2>5 · What this adds up to</h2>
+<ul>
+<li><b>The branch fixes a server-killing bug.</b> 50 concurrent registrations deadlock main
+permanently; the branch survives them with the rest of the API answering in single-digit
+milliseconds. That alone justifies the change.</li>
+<li><b>Registration itself is not faster under load.</b> Both refs serialize the build — the
+branch just moved it to a lock nothing else takes. Registering 25 apps still takes
+72 s (main) / 80 s (branch),
+and per-app p50 grows linearly with N on both. If registration throughput matters, that build
+lock is the next thing to attack.</li>
+<li><b>Steady-state server load drops by the poll rate.</b> One fewer request per app per tick,
+10.1×
+less <code>/graph_version</code> traffic, and app runs come back
+branch 2.7× faster at p50.</li>
+<li><b>Overrun protection is real and cheap.</b> No pile-up, no unbounded Ray task growth, and
+the skip counter is visible in <code>/apps/list</code>.</li>
+<li><b>One new problem to fix before merge:</b> the in-handler <code>Acquirium(...)</code>
+self-health-check that fails roughly two thirds of a cold 50-way registration storm. It should not health-check the
+server it runs inside, and it should not reach itself through <code>localhost</code>.</li>
+</ul>
+
+<h2>Caveats</h2>
+<ul>
+<li>One laptop, one run per cell, no repetitions — treat 10-20% differences as noise. The
+findings above are all order-of-magnitude or categorical (dead / not dead).</li>
+<li>Apps are read-only and trivial (one bound query, ~18 ms of local compute). Nothing here says
+how a real soft sensor behaves; it isolates runtime overhead, not app work.</li>
+<li>The registration storm is deliberately hostile — N clients registering simultaneously.
+Deployments that register apps from a config file at boot hit the serial path instead, where
+main survives but still blocks <code>/apps/list</code> for seconds per app.</li>
+<li>50 apps was the agreed ceiling for this machine; neither ref's actual app-count limit was
+probed.</li>
+<li>Teardown of 50 apps also wedged main once (no timeout on the stop/deregister actor calls;
+the branch bounds them at 10 s and then kills). It is reported here as an observation, not a
+measured comparison — the harness stops hammering a wedged server rather than characterising it.</li>
+</ul>
+</div>
