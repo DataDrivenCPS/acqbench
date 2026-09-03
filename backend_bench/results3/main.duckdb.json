@@ -1,0 +1,1177 @@
+{
+ "ref": "main",
+ "backend": "duckdb",
+ "tag": "main.duckdb",
+ "port": 8100,
+ "started": "2026-09-02T22:35:42.964390+00:00",
+ "head": "c09d3214a9b3784248a204f57a8f0ed605381f60",
+ "boot_s": 751.0,
+ "ingest": {
+  "files_ingested": 200,
+  "files_total": 200,
+  "rows_inserted": 136821238,
+  "complete": true,
+  "driver_start_s": 3.4,
+  "wall_s": 233.5,
+  "rows_per_s": 586041.2,
+  "log_span_first_to_last_file_s": 224.0,
+  "server_cpu_s": 345.0,
+  "pg_cpu_s": 0.0,
+  "cpu_utilisation_server": 1.48,
+  "cpu_utilisation_pg": 0.0,
+  "server_rss_mb_end": 4689,
+  "pg_rss_mb_end": 0,
+  "log_error_lines": 0,
+  "timeline": [
+   {
+    "t_s": 13.4,
+    "files": 6,
+    "rows": 4405475
+   },
+   {
+    "t_s": 23.4,
+    "files": 15,
+    "rows": 11017583
+   },
+   {
+    "t_s": 33.4,
+    "files": 23,
+    "rows": 16893888
+   },
+   {
+    "t_s": 43.4,
+    "files": 31,
+    "rows": 22849695
+   },
+   {
+    "t_s": 53.4,
+    "files": 39,
+    "rows": 28921959
+   },
+   {
+    "t_s": 63.4,
+    "files": 51,
+    "rows": 34236678
+   },
+   {
+    "t_s": 73.4,
+    "files": 60,
+    "rows": 40215718
+   },
+   {
+    "t_s": 83.4,
+    "files": 69,
+    "rows": 46242959
+   },
+   {
+    "t_s": 93.4,
+    "files": 78,
+    "rows": 52550169
+   },
+   {
+    "t_s": 103.4,
+    "files": 86,
+    "rows": 58448587
+   },
+   {
+    "t_s": 113.4,
+    "files": 95,
+    "rows": 65103849
+   },
+   {
+    "t_s": 123.4,
+    "files": 104,
+    "rows": 71052782
+   },
+   {
+    "t_s": 133.5,
+    "files": 113,
+    "rows": 76579037
+   },
+   {
+    "t_s": 143.5,
+    "files": 122,
+    "rows": 82805121
+   },
+   {
+    "t_s": 153.5,
+    "files": 133,
+    "rows": 89176301
+   },
+   {
+    "t_s": 163.5,
+    "files": 141,
+    "rows": 95150744
+   },
+   {
+    "t_s": 173.5,
+    "files": 150,
+    "rows": 101351747
+   },
+   {
+    "t_s": 183.5,
+    "files": 159,
+    "rows": 107341505
+   },
+   {
+    "t_s": 193.5,
+    "files": 168,
+    "rows": 114110596
+   },
+   {
+    "t_s": 203.5,
+    "files": 176,
+    "rows": 120220375
+   },
+   {
+    "t_s": 213.5,
+    "files": 184,
+    "rows": 126343523
+   },
+   {
+    "t_s": 223.5,
+    "files": 192,
+    "rows": 132257261
+   },
+   {
+    "t_s": 233.5,
+    "files": 200,
+    "rows": 136821238
+   }
+  ]
+ },
+ "query_log": "#  1 P1 full range                  rows=  535547 cold=336.31 p50=324.67 ms \n#  2 P1 full range desc             rows=  535547 cold=328.02 p50=325.75 ms \n#  3 P1 90 days                     rows=  535547 cold=326.53 p50=325.47 ms \n#  4 P1 30 days                     rows=  211095 cold=137.88 p50=137.81 ms \n#  5 P1 7 days                      rows=   59675 cold=44.48 p50=43.32 ms \n#  6 P1 1 day                       rows=    8553 cold=12.36 p50=11.6 ms \n#  7 P1 6 hours                     rows=    2136 cold=8.74 p50=6.66 ms \n#  8 P1 1 hour                      rows=     348 cold=5.1 p50=4.35 ms \n#  9 P1 10 min                      rows=      50 cold=6.37 p50=3.91 ms \n# 10 P1 1 min                       rows=       4 cold=3.9 p50=3.63 ms \n# 11 P1 1 day, 45 days back         rows=    8483 cold=10.2 p50=10.61 ms \n# 12 P1 1 hour, 45 days back        rows=     361 cold=7.82 p50=5.47 ms \n# 13 P2 30 days                     rows=  211095 cold=135.55 p50=133.17 ms \n# 14 P2 1 day                       rows=    8553 cold=11.38 p50=10.87 ms \n# 15 P2 1 hour                      rows=     348 cold=7.09 p50=5.3 ms \n# 16 P2 numeric full                rows=  535547 cold=332.45 p50=337.7 ms \n# 17 T1 text full range             rows=  535547 cold=326.04 p50=329.39 ms \n# 18 T1 text 1 day                  rows=    8553 cold=12.76 p50=10.31 ms \n# 19 T1 text 1 hour                 rows=     348 cold=6.55 p50=4.96 ms \n# 20 T1 text mode 1 day             rows=    8553 cold=10.92 p50=11.32 ms \n# 21 R1 ref-uri full range          rows=  535547 cold=323.09 p50=325.98 ms \n# 22 R1 ref-uri 7 days              rows=   59675 cold=46.01 p50=43.4 ms \n# 23 P1 latest 1 desc               rows=       1 cold=17.0 p50=16.19 ms \n# 24 P1 latest 100 desc             rows=     100 cold=6.66 p50=5.22 ms \n# 25 P1 limit 1000 asc              rows=    1000 cold=27.26 p50=27.74 ms \n# 26 P1 30 days limit 10000         rows=   10000 cold=118.42 p50=117.61 ms \n# 27 P1 numeric 30 days             rows=  211095 cold=138.74 p50=135.97 ms \n# 28 P1 coalesce 1 day              rows=    8553 cold=13.42 p50=13.61 ms \n# 29 EMPTY P1 window after data     rows=       0 cold=4.31 p50=2.75 ms \n# 30 EMPTY unregistered uri         rows=       0 cold=1.78 p50=1.73 ms \n",
+ "query": {
+  "queries_file": "/home/vmuser/acq_bench3/results/queries.json",
+  "reps": 10,
+  "warmup": 2,
+  "ran": "2026-09-02T22:52:53.191868+00:00",
+  "results": [
+   {
+    "id": 1,
+    "label": "P1 full range",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate"
+    },
+    "cold_ms": 336.31,
+    "rows": 535547,
+    "bytes": 37491432,
+    "n": 10,
+    "lat_ms": [
+     328.17,
+     329.46,
+     324.62,
+     326.6,
+     324.67,
+     323.77,
+     329.16,
+     324.48,
+     326.87,
+     321.52
+    ],
+    "p50_ms": 324.67,
+    "mean_ms": 325.93,
+    "p95_ms": 329.46,
+    "min_ms": 321.52,
+    "max_ms": 329.46,
+    "stdev_ms": 2.42,
+    "rows_per_s": 1643128.0,
+    "mb_per_s": 115.03,
+    "server_cpu_s_per_req": 1.1
+   },
+   {
+    "id": 2,
+    "label": "P1 full range desc",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "order": "desc"
+    },
+    "cold_ms": 328.02,
+    "rows": 535547,
+    "bytes": 37491432,
+    "n": 10,
+    "lat_ms": [
+     322.13,
+     325.99,
+     328.55,
+     323.83,
+     324.2,
+     326.35,
+     323.1,
+     325.75,
+     331.04,
+     327.27
+    ],
+    "p50_ms": 325.75,
+    "mean_ms": 325.82,
+    "p95_ms": 331.04,
+    "min_ms": 322.13,
+    "max_ms": 331.04,
+    "stdev_ms": 2.54,
+    "rows_per_s": 1643693.0,
+    "mb_per_s": 115.07,
+    "server_cpu_s_per_req": 1.1
+   },
+   {
+    "id": 3,
+    "label": "P1 90 days",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-05-14T13:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 326.53,
+    "rows": 535547,
+    "bytes": 37491432,
+    "n": 10,
+    "lat_ms": [
+     323.65,
+     322.01,
+     323.67,
+     325.47,
+     330.46,
+     328.17,
+     328.4,
+     327.91,
+     331.7,
+     322.43
+    ],
+    "p50_ms": 325.47,
+    "mean_ms": 326.39,
+    "p95_ms": 331.7,
+    "min_ms": 322.01,
+    "max_ms": 331.7,
+    "stdev_ms": 3.24,
+    "rows_per_s": 1640833.0,
+    "mb_per_s": 114.87,
+    "server_cpu_s_per_req": 1.1
+   },
+   {
+    "id": 4,
+    "label": "P1 30 days",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-07-13T13:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 137.88,
+    "rows": 211095,
+    "bytes": 14778208,
+    "n": 10,
+    "lat_ms": [
+     139.12,
+     136.23,
+     139.12,
+     136.35,
+     139.36,
+     137.81,
+     135.11,
+     136.71,
+     139.89,
+     139.55
+    ],
+    "p50_ms": 137.81,
+    "mean_ms": 137.92,
+    "p95_ms": 139.89,
+    "min_ms": 135.11,
+    "max_ms": 139.89,
+    "stdev_ms": 1.62,
+    "rows_per_s": 1530531.0,
+    "mb_per_s": 107.15,
+    "server_cpu_s_per_req": 0.5
+   },
+   {
+    "id": 5,
+    "label": "P1 7 days",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-08-05T13:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 44.48,
+    "rows": 59675,
+    "bytes": 4178016,
+    "n": 10,
+    "lat_ms": [
+     42.6,
+     43.01,
+     43.98,
+     43.08,
+     44.16,
+     43.55,
+     43.62,
+     42.8,
+     44.23,
+     43.32
+    ],
+    "p50_ms": 43.32,
+    "mean_ms": 43.44,
+    "p95_ms": 44.23,
+    "min_ms": 42.6,
+    "max_ms": 44.23,
+    "stdev_ms": 0.54,
+    "rows_per_s": 1373884.0,
+    "mb_per_s": 96.19,
+    "server_cpu_s_per_req": 0.1
+   },
+   {
+    "id": 6,
+    "label": "P1 1 day",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-08-11T13:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 12.36,
+    "rows": 8553,
+    "bytes": 599216,
+    "n": 10,
+    "lat_ms": [
+     13.91,
+     11.9,
+     11.33,
+     11.6,
+     12.25,
+     11.38,
+     11.18,
+     11.73,
+     11.6,
+     11.74
+    ],
+    "p50_ms": 11.6,
+    "mean_ms": 11.86,
+    "p95_ms": 13.91,
+    "min_ms": 11.18,
+    "max_ms": 13.91,
+    "stdev_ms": 0.74,
+    "rows_per_s": 721009.0,
+    "mb_per_s": 50.51,
+    "server_cpu_s_per_req": 0.1
+   },
+   {
+    "id": 7,
+    "label": "P1 6 hours",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-08-12T07:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 8.74,
+    "rows": 2136,
+    "bytes": 150024,
+    "n": 10,
+    "lat_ms": [
+     7.32,
+     6.79,
+     5.71,
+     5.85,
+     7.1,
+     7.17,
+     6.66,
+     5.63,
+     5.95,
+     6.73
+    ],
+    "p50_ms": 6.66,
+    "mean_ms": 6.49,
+    "p95_ms": 7.32,
+    "min_ms": 5.63,
+    "max_ms": 7.32,
+    "stdev_ms": 0.61,
+    "rows_per_s": 329103.0,
+    "mb_per_s": 23.11,
+    "server_cpu_s_per_req": 0.0
+   },
+   {
+    "id": 8,
+    "label": "P1 1 hour",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-08-12T12:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 5.1,
+    "rows": 348,
+    "bytes": 24864,
+    "n": 10,
+    "lat_ms": [
+     4.99,
+     4.44,
+     4.35,
+     4.25,
+     4.2,
+     4.35,
+     4.27,
+     4.26,
+     5.41,
+     5.76
+    ],
+    "p50_ms": 4.35,
+    "mean_ms": 4.63,
+    "p95_ms": 5.76,
+    "min_ms": 4.2,
+    "max_ms": 5.76,
+    "stdev_ms": 0.53,
+    "rows_per_s": 75179.0,
+    "mb_per_s": 5.37,
+    "server_cpu_s_per_req": 0.0
+   },
+   {
+    "id": 9,
+    "label": "P1 10 min",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-08-12T13:34:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 6.37,
+    "rows": 50,
+    "bytes": 4008,
+    "n": 10,
+    "lat_ms": [
+     5.17,
+     4.52,
+     4.02,
+     3.49,
+     3.46,
+     3.63,
+     4.15,
+     4.18,
+     3.68,
+     3.91
+    ],
+    "p50_ms": 3.91,
+    "mean_ms": 4.02,
+    "p95_ms": 5.17,
+    "min_ms": 3.46,
+    "max_ms": 5.17,
+    "stdev_ms": 0.5,
+    "rows_per_s": 12433.0,
+    "mb_per_s": 1.0,
+    "server_cpu_s_per_req": 0.0
+   },
+   {
+    "id": 10,
+    "label": "P1 1 min",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-08-12T13:43:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 3.9,
+    "rows": 4,
+    "bytes": 784,
+    "n": 10,
+    "lat_ms": [
+     4.87,
+     4.1,
+     3.71,
+     3.99,
+     3.68,
+     3.63,
+     3.63,
+     3.39,
+     3.43,
+     3.34
+    ],
+    "p50_ms": 3.63,
+    "mean_ms": 3.78,
+    "p95_ms": 4.87,
+    "min_ms": 3.34,
+    "max_ms": 4.87,
+    "stdev_ms": 0.43,
+    "rows_per_s": 1059.0,
+    "mb_per_s": 0.21,
+    "server_cpu_s_per_req": 0.0
+   },
+   {
+    "id": 11,
+    "label": "P1 1 day, 45 days back",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-06-27T13:44:24+00:00",
+     "end": "2026-06-28T13:44:24+00:00"
+    },
+    "cold_ms": 10.2,
+    "rows": 8483,
+    "bytes": 594312,
+    "n": 10,
+    "lat_ms": [
+     12.16,
+     12.29,
+     11.26,
+     10.28,
+     10.9,
+     10.46,
+     9.7,
+     9.38,
+     10.61,
+     10.66
+    ],
+    "p50_ms": 10.61,
+    "mean_ms": 10.77,
+    "p95_ms": 12.29,
+    "min_ms": 9.38,
+    "max_ms": 12.29,
+    "stdev_ms": 0.89,
+    "rows_per_s": 787759.0,
+    "mb_per_s": 55.19,
+    "server_cpu_s_per_req": 0.0
+   },
+   {
+    "id": 12,
+    "label": "P1 1 hour, 45 days back",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-06-28T12:44:24+00:00",
+     "end": "2026-06-28T13:44:24+00:00"
+    },
+    "cold_ms": 7.82,
+    "rows": 361,
+    "bytes": 25776,
+    "n": 10,
+    "lat_ms": [
+     5.5,
+     5.63,
+     5.09,
+     4.94,
+     5.47,
+     5.81,
+     5.37,
+     6.24,
+     5.91,
+     5.3
+    ],
+    "p50_ms": 5.47,
+    "mean_ms": 5.53,
+    "p95_ms": 6.24,
+    "min_ms": 4.94,
+    "max_ms": 6.24,
+    "stdev_ms": 0.37,
+    "rows_per_s": 65315.0,
+    "mb_per_s": 4.66,
+    "server_cpu_s_per_req": 0.1
+   },
+   {
+    "id": 13,
+    "label": "P2 30 days",
+    "params": {
+     "uri": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+     "start": "2026-07-13T13:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 135.55,
+    "rows": 211095,
+    "bytes": 14778208,
+    "n": 10,
+    "lat_ms": [
+     132.78,
+     130.96,
+     133.17,
+     133.63,
+     134.3,
+     134.21,
+     133.55,
+     133.43,
+     130.46,
+     131.76
+    ],
+    "p50_ms": 133.17,
+    "mean_ms": 132.82,
+    "p95_ms": 134.3,
+    "min_ms": 130.46,
+    "max_ms": 134.3,
+    "stdev_ms": 1.26,
+    "rows_per_s": 1589273.0,
+    "mb_per_s": 111.26,
+    "server_cpu_s_per_req": 0.5
+   },
+   {
+    "id": 14,
+    "label": "P2 1 day",
+    "params": {
+     "uri": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+     "start": "2026-08-11T13:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 11.38,
+    "rows": 8553,
+    "bytes": 599216,
+    "n": 10,
+    "lat_ms": [
+     10.87,
+     11.47,
+     10.47,
+     10.26,
+     11.09,
+     10.42,
+     9.99,
+     11.43,
+     10.98,
+     10.99
+    ],
+    "p50_ms": 10.87,
+    "mean_ms": 10.8,
+    "p95_ms": 11.47,
+    "min_ms": 9.99,
+    "max_ms": 11.47,
+    "stdev_ms": 0.47,
+    "rows_per_s": 792229.0,
+    "mb_per_s": 55.5,
+    "server_cpu_s_per_req": 0.0
+   },
+   {
+    "id": 15,
+    "label": "P2 1 hour",
+    "params": {
+     "uri": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+     "start": "2026-08-12T12:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 7.09,
+    "rows": 348,
+    "bytes": 24864,
+    "n": 10,
+    "lat_ms": [
+     5.96,
+     6.39,
+     5.3,
+     5.33,
+     5.46,
+     5.2,
+     4.54,
+     4.76,
+     6.98,
+     4.78
+    ],
+    "p50_ms": 5.3,
+    "mean_ms": 5.47,
+    "p95_ms": 6.98,
+    "min_ms": 4.54,
+    "max_ms": 6.98,
+    "stdev_ms": 0.73,
+    "rows_per_s": 63616.0,
+    "mb_per_s": 4.55,
+    "server_cpu_s_per_req": 0.0
+   },
+   {
+    "id": 16,
+    "label": "P2 numeric full",
+    "params": {
+     "uri": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+     "value_mode": "numeric"
+    },
+    "cold_ms": 332.45,
+    "rows": 535547,
+    "bytes": 37491432,
+    "n": 10,
+    "lat_ms": [
+     340.2,
+     334.31,
+     336.98,
+     330.37,
+     337.7,
+     343.98,
+     335.71,
+     337.87,
+     340.76,
+     338.08
+    ],
+    "p50_ms": 337.7,
+    "mean_ms": 337.59,
+    "p95_ms": 343.98,
+    "min_ms": 330.37,
+    "max_ms": 343.98,
+    "stdev_ms": 3.53,
+    "rows_per_s": 1586365.0,
+    "mb_per_s": 111.05,
+    "server_cpu_s_per_req": 1.2
+   },
+   {
+    "id": 17,
+    "label": "T1 text full range",
+    "params": {
+     "uri": "urn:dpr/baf-1-inlet-valve-status"
+    },
+    "cold_ms": 326.04,
+    "rows": 535547,
+    "bytes": 36942256,
+    "n": 10,
+    "lat_ms": [
+     327.79,
+     327.29,
+     324.37,
+     331.45,
+     329.39,
+     329.62,
+     333.19,
+     334.58,
+     331.14,
+     329.2
+    ],
+    "p50_ms": 329.39,
+    "mean_ms": 329.8,
+    "p95_ms": 334.58,
+    "min_ms": 324.37,
+    "max_ms": 334.58,
+    "stdev_ms": 2.82,
+    "rows_per_s": 1623843.0,
+    "mb_per_s": 112.01,
+    "server_cpu_s_per_req": 1.1
+   },
+   {
+    "id": 18,
+    "label": "T1 text 1 day",
+    "params": {
+     "uri": "urn:dpr/baf-1-inlet-valve-status",
+     "start": "2026-08-11T13:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 12.76,
+    "rows": 8553,
+    "bytes": 590616,
+    "n": 10,
+    "lat_ms": [
+     10.3,
+     10.13,
+     10.4,
+     10.31,
+     10.46,
+     10.04,
+     10.15,
+     11.08,
+     11.68,
+     11.1
+    ],
+    "p50_ms": 10.31,
+    "mean_ms": 10.56,
+    "p95_ms": 11.68,
+    "min_ms": 10.04,
+    "max_ms": 11.68,
+    "stdev_ms": 0.51,
+    "rows_per_s": 809603.0,
+    "mb_per_s": 55.91,
+    "server_cpu_s_per_req": 0.1
+   },
+   {
+    "id": 19,
+    "label": "T1 text 1 hour",
+    "params": {
+     "uri": "urn:dpr/baf-1-inlet-valve-status",
+     "start": "2026-08-12T12:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 6.55,
+    "rows": 348,
+    "bytes": 24504,
+    "n": 10,
+    "lat_ms": [
+     6.88,
+     5.08,
+     4.64,
+     4.86,
+     5.4,
+     5.45,
+     5.45,
+     4.93,
+     4.9,
+     4.96
+    ],
+    "p50_ms": 4.96,
+    "mean_ms": 5.25,
+    "p95_ms": 6.88,
+    "min_ms": 4.64,
+    "max_ms": 6.88,
+    "stdev_ms": 0.6,
+    "rows_per_s": 66223.0,
+    "mb_per_s": 4.66,
+    "server_cpu_s_per_req": 0.0
+   },
+   {
+    "id": 20,
+    "label": "T1 text mode 1 day",
+    "params": {
+     "uri": "urn:dpr/baf-1-inlet-valve-status",
+     "start": "2026-08-11T13:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00",
+     "value_mode": "text"
+    },
+    "cold_ms": 10.92,
+    "rows": 8553,
+    "bytes": 590616,
+    "n": 10,
+    "lat_ms": [
+     12.13,
+     11.58,
+     12.23,
+     11.66,
+     11.44,
+     11.32,
+     10.56,
+     10.35,
+     10.68,
+     10.67
+    ],
+    "p50_ms": 11.32,
+    "mean_ms": 11.26,
+    "p95_ms": 12.23,
+    "min_ms": 10.35,
+    "max_ms": 12.23,
+    "stdev_ms": 0.63,
+    "rows_per_s": 759570.0,
+    "mb_per_s": 52.45,
+    "server_cpu_s_per_req": 0.0
+   },
+   {
+    "id": 21,
+    "label": "R1 ref-uri full range",
+    "params": {
+     "uri": "urn:acquirium#e35376df-45df-5459-9a8a-38463bbf2c06"
+    },
+    "cold_ms": 323.09,
+    "rows": 535547,
+    "bytes": 37491432,
+    "n": 10,
+    "lat_ms": [
+     386.23,
+     391.87,
+     325.98,
+     320.37,
+     327.71,
+     329.37,
+     326.11,
+     324.74,
+     325.49,
+     321.08
+    ],
+    "p50_ms": 325.98,
+    "mean_ms": 337.9,
+    "p95_ms": 391.87,
+    "min_ms": 320.37,
+    "max_ms": 391.87,
+    "stdev_ms": 25.74,
+    "rows_per_s": 1584945.0,
+    "mb_per_s": 110.96,
+    "server_cpu_s_per_req": 1.1
+   },
+   {
+    "id": 22,
+    "label": "R1 ref-uri 7 days",
+    "params": {
+     "uri": "urn:acquirium#e35376df-45df-5459-9a8a-38463bbf2c06",
+     "start": "2026-08-05T13:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00"
+    },
+    "cold_ms": 46.01,
+    "rows": 59675,
+    "bytes": 4178016,
+    "n": 10,
+    "lat_ms": [
+     43.59,
+     43.4,
+     43.11,
+     44.77,
+     44.19,
+     44.14,
+     44.32,
+     43.14,
+     42.64,
+     42.96
+    ],
+    "p50_ms": 43.4,
+    "mean_ms": 43.63,
+    "p95_ms": 44.77,
+    "min_ms": 42.64,
+    "max_ms": 44.77,
+    "stdev_ms": 0.66,
+    "rows_per_s": 1367850.0,
+    "mb_per_s": 95.77,
+    "server_cpu_s_per_req": 0.1
+   },
+   {
+    "id": 23,
+    "label": "P1 latest 1 desc",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "limit": 1,
+     "order": "desc"
+    },
+    "cold_ms": 17.0,
+    "rows": 1,
+    "bytes": 576,
+    "n": 10,
+    "lat_ms": [
+     16.8,
+     15.07,
+     16.19,
+     16.37,
+     16.11,
+     16.29,
+     16.32,
+     15.78,
+     16.54,
+     15.38
+    ],
+    "p50_ms": 16.19,
+    "mean_ms": 16.08,
+    "p95_ms": 16.8,
+    "min_ms": 15.07,
+    "max_ms": 16.8,
+    "stdev_ms": 0.5,
+    "rows_per_s": 62.0,
+    "mb_per_s": 0.04,
+    "server_cpu_s_per_req": 0.1
+   },
+   {
+    "id": 24,
+    "label": "P1 latest 100 desc",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "limit": 100,
+     "order": "desc"
+    },
+    "cold_ms": 6.66,
+    "rows": 100,
+    "bytes": 7504,
+    "n": 10,
+    "lat_ms": [
+     5.92,
+     5.22,
+     4.88,
+     5.14,
+     5.94,
+     5.3,
+     4.67,
+     5.35,
+     5.29,
+     4.72
+    ],
+    "p50_ms": 5.22,
+    "mean_ms": 5.24,
+    "p95_ms": 5.94,
+    "min_ms": 4.67,
+    "max_ms": 5.94,
+    "stdev_ms": 0.41,
+    "rows_per_s": 19077.0,
+    "mb_per_s": 1.43,
+    "server_cpu_s_per_req": 0.0
+   },
+   {
+    "id": 25,
+    "label": "P1 limit 1000 asc",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "limit": 1000
+    },
+    "cold_ms": 27.26,
+    "rows": 1000,
+    "bytes": 70504,
+    "n": 10,
+    "lat_ms": [
+     27.82,
+     27.21,
+     29.71,
+     28.08,
+     26.83,
+     27.88,
+     27.54,
+     27.75,
+     27.74,
+     27.44
+    ],
+    "p50_ms": 27.74,
+    "mean_ms": 27.8,
+    "p95_ms": 29.71,
+    "min_ms": 26.83,
+    "max_ms": 29.71,
+    "stdev_ms": 0.72,
+    "rows_per_s": 35971.0,
+    "mb_per_s": 2.54,
+    "server_cpu_s_per_req": 0.1
+   },
+   {
+    "id": 26,
+    "label": "P1 30 days limit 10000",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-07-13T13:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00",
+     "limit": 10000
+    },
+    "cold_ms": 118.42,
+    "rows": 10000,
+    "bytes": 700504,
+    "n": 10,
+    "lat_ms": [
+     118.0,
+     117.61,
+     117.42,
+     118.65,
+     117.32,
+     117.96,
+     118.52,
+     118.76,
+     117.01,
+     117.52
+    ],
+    "p50_ms": 117.61,
+    "mean_ms": 117.88,
+    "p95_ms": 118.76,
+    "min_ms": 117.01,
+    "max_ms": 118.76,
+    "stdev_ms": 0.57,
+    "rows_per_s": 84835.0,
+    "mb_per_s": 5.94,
+    "server_cpu_s_per_req": 0.5
+   },
+   {
+    "id": 27,
+    "label": "P1 numeric 30 days",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-07-13T13:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00",
+     "value_mode": "numeric"
+    },
+    "cold_ms": 138.74,
+    "rows": 211095,
+    "bytes": 14778208,
+    "n": 10,
+    "lat_ms": [
+     136.74,
+     135.97,
+     134.21,
+     135.81,
+     137.78,
+     136.38,
+     134.23,
+     135.33,
+     136.07,
+     137.97
+    ],
+    "p50_ms": 135.97,
+    "mean_ms": 136.05,
+    "p95_ms": 137.97,
+    "min_ms": 134.21,
+    "max_ms": 137.97,
+    "stdev_ms": 1.21,
+    "rows_per_s": 1551606.0,
+    "mb_per_s": 108.62,
+    "server_cpu_s_per_req": 0.5
+   },
+   {
+    "id": 28,
+    "label": "P1 coalesce 1 day",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-08-11T13:44:24+00:00",
+     "end": "2026-08-12T13:44:24+00:00",
+     "value_mode": "coalesce"
+    },
+    "cold_ms": 13.42,
+    "rows": 8553,
+    "bytes": 606944,
+    "n": 10,
+    "lat_ms": [
+     13.76,
+     12.86,
+     13.08,
+     13.87,
+     13.61,
+     12.95,
+     14.31,
+     15.62,
+     14.71,
+     13.43
+    ],
+    "p50_ms": 13.61,
+    "mean_ms": 13.82,
+    "p95_ms": 15.62,
+    "min_ms": 12.86,
+    "max_ms": 15.62,
+    "stdev_ms": 0.82,
+    "rows_per_s": 618866.0,
+    "mb_per_s": 43.92,
+    "server_cpu_s_per_req": 0.0
+   },
+   {
+    "id": 29,
+    "label": "EMPTY P1 window after data",
+    "params": {
+     "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "start": "2026-09-11T13:44:24+00:00",
+     "end": "2026-10-11T13:44:24+00:00"
+    },
+    "cold_ms": 4.31,
+    "rows": 0,
+    "bytes": 240,
+    "n": 10,
+    "lat_ms": [
+     2.93,
+     2.71,
+     2.78,
+     2.77,
+     2.69,
+     2.88,
+     2.75,
+     2.68,
+     2.8,
+     2.59
+    ],
+    "p50_ms": 2.75,
+    "mean_ms": 2.76,
+    "p95_ms": 2.93,
+    "min_ms": 2.59,
+    "max_ms": 2.93,
+    "stdev_ms": 0.09,
+    "rows_per_s": 0.0,
+    "mb_per_s": 0.09,
+    "server_cpu_s_per_req": 0.0
+   },
+   {
+    "id": 30,
+    "label": "EMPTY unregistered uri",
+    "params": {
+     "uri": "urn:dpr/does-not-exist"
+    },
+    "cold_ms": 1.78,
+    "rows": 0,
+    "bytes": 240,
+    "n": 10,
+    "lat_ms": [
+     2.06,
+     1.87,
+     1.71,
+     1.73,
+     1.85,
+     1.7,
+     1.7,
+     1.82,
+     1.7,
+     1.78
+    ],
+    "p50_ms": 1.73,
+    "mean_ms": 1.79,
+    "p95_ms": 2.06,
+    "min_ms": 1.7,
+    "max_ms": 2.06,
+    "stdev_ms": 0.11,
+    "rows_per_s": 0.0,
+    "mb_per_s": 0.13,
+    "server_cpu_s_per_req": 0.0
+   }
+  ]
+ },
+ "peak_rss_mb": {
+  "server_rss_mb": 5530,
+  "pg_rss_mb": 0
+ },
+ "db": {
+  "db_bytes": 7335063552,
+  "row_count": 136775393,
+  "streams": 257,
+  "value_kinds": "[('text', 81), ('numeric', 176)]",
+  "bytes_per_row": 53.61
+ },
+ "finished": "2026-09-02T22:53:13.498868+00:00"
+}
