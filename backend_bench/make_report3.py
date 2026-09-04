@@ -29,6 +29,7 @@ DB = {tag: o.get("db", {}) for tag, _, _, o in R}
 TS = [x for x in R if x[3].get("backend") == "timescale"]
 DK = [x for x in R if x[3].get("backend") == "duckdb"]
 ts_base, ts_fix = (TS[0], TS[-1]) if len(TS) >= 2 else (None, None)
+dk_base, dk_fix = (DK[0], DK[-1]) if len(DK) >= 2 else (None, None)
 
 # ---------------------------------------------------------------- charts
 def line_chart(series, w=900, h=260, xlabel="minutes", ylabel="M rows"):
@@ -92,12 +93,12 @@ for tag, label, cls, o in R:
     i = ING[tag]
     tiles += (f'<div class=tile><div class=k>{E(label)} ingest</div><div class=v style="color:var(--{cls})">{f0(i.get("rows_per_s"))} rows/s</div>'
               f'<div class=n>{i.get("rows_inserted",0):,} rows · {mins(i.get("wall_s"))} · {gb(DB[tag].get("db_bytes"))} on disk{"" if i.get("complete") else " · ⚠ incomplete"}</div></div>')
-if ts_base and ts_fix:
-    b, f = ts_base, ts_fix
+for name, b, f in (("timescale", ts_base, ts_fix), ("duckdb", dk_base, dk_fix)):
+    if not (b and f): continue
     sp = (ING[f[0]].get("rows_per_s") or 0) / (ING[b[0]].get("rows_per_s") or 1)
     dr = (DB[b[0]].get("db_bytes") or 0) / (DB[f[0]].get("db_bytes") or 1)
     mr = med_ratio(QM[b[0]], QM[f[0]])
-    tiles += (f'<div class=tile><div class=k>fix vs main · timescale</div><div class=v>{sp:.2f}× ingest · {dr:.2f}× smaller</div>'
+    tiles += (f'<div class=tile><div class=k>fix vs main · {name}</div><div class=v>{sp:.2f}× ingest · {dr:.2f}× smaller</div>'
               f'<div class=n>median query p50 ratio fix ÷ main = {f2(mr)} (&lt;1 = fix faster)</div></div>')
 
 # ---------------------------------------------------------------- ingest table
@@ -140,7 +141,8 @@ hdr = "<tr><th>#</th><th>query</th><th>rows</th>" + "".join(
     f"<th>{E(l)} p50</th><th>p95</th><th>cold</th><th>cpu ms</th>" for _, l, _, _ in R)
 ratios = []
 if ts_base and ts_fix: ratios.append(("fix ÷ main (ts) p50", ts_base[0], ts_fix[0]))
-if DK and ts_fix: ratios.append((f"{ts_fix[1]} ÷ {DK[0][1]} p50", DK[0][0], ts_fix[0]))
+if dk_base and dk_fix: ratios.append(("fix ÷ main (duck) p50", dk_base[0], dk_fix[0]))
+if DK and ts_fix: ratios.append((f"{ts_fix[1]} ÷ {DK[-1][1]} p50", DK[-1][0], ts_fix[0]))
 hdr += "".join(f"<th>{E(n)}</th>" for n, _, _ in ratios) + "</tr>"
 qt = "<table>" + hdr
 bars = []

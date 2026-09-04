@@ -1,0 +1,6 @@
+{"variants":[
+ {"label":"main (09-04)","file":"results5/main.timescale.json","baseline":"results5/main.timescale.json","samples":"results5/main.timescale.samples.jsonl","cls":"series-2","path":"psycopg, ON CONFLICT upsert","schema":"text ref_uri · unique(ref_uri,ts) + 4 partial + ts"},
+ {"label":"old fix-1 (09-02)","file":"results3/ums-timescale-fix.timescale.json","baseline":"results3/main.timescale.json","samples":"results3/ums-timescale-fix.timescale.samples.jsonl","cls":"series-3","path":"psycopg, ON CONFLICT upsert","schema":"text ref_uri · unique(ref_uri,ts) + ts"},
+ {"label":"new fix-1 (09-04)","file":"results5/ums-timescale-fix.timescale.json","baseline":"results5/main.timescale.json","samples":"results5/ums-timescale-fix.timescale.samples.jsonl","cls":"series-4","path":"psycopg, ON CONFLICT upsert","schema":"int ref_id · unique(ref_id,ts) + ts"},
+ {"label":"fix-2 (09-04)","file":"results4/ums-timescale-fix-2.timescale.json","baseline":"results4/main.timescale.json","samples":"results4/ums-timescale-fix-2.timescale.samples.jsonl","cls":"series-5","path":"DuckDB postgres ext, delete + insert","schema":"int ref_id · unique(ref_id,ts) + ts"}],
+ "duckdb":"results4/main.duckdb.json","queries":"results5/queries.json","findings":"results5/findings.html"}
