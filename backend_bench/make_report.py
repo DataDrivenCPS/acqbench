@@ -166,7 +166,8 @@ tsdb = T.get("tsdb", {})
 errs = "".join(f'<div class="note bad"><b>{b} error:</b> {E(o["error"])}</div>' for b, o, _ in B if o.get("error"))
 
 CSS = open(Path(__file__).parent / "report.css").read()
-page = f"""<title>DuckDB vs TimescaleDB Backend</title>
+page = f"""<meta charset="utf-8">
+<title>DuckDB vs TimescaleDB Backend</title>
 <style>{CSS}</style>
 <div class=wrap>
 <h1>acquirium timeseries backend: DuckDB vs TimescaleDB</h1>

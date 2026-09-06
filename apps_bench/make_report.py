@@ -227,7 +227,8 @@ def main() -> int:
     sm_ser = ser_m["result"]["counts"][0]
     sb_ser = ser_b["result"]["counts"][0]
 
-    doc = f"""<title>App Path Bench</title>
+    doc = f"""<meta charset="utf-8">
+<title>App Path Bench</title>
 <style>
 :root {{
   color-scheme: light;
