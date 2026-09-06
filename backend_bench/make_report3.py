@@ -9,6 +9,8 @@ from pathlib import Path
 
 res, out = Path(sys.argv[1]), Path(sys.argv[2])
 RUNS = [tuple(x.split("=", 1)) for x in sys.argv[3].split(",")]
+TITLE = sys.argv[4] if len(sys.argv) > 4 else "acquirium timeseries backend: <code>main</code> vs <code>ums-timescale-fix</code>"
+SUBTITLE = sys.argv[5] if len(sys.argv) > 5 else "DPR trailer SCADA, 200 CSVs"
 CLS = ["series-1", "series-2", "series-3", "series-4", "series-5"]
 R = [(tag, label, CLS[i], json.load(open(res / f"{tag}.json"))) for i, (tag, label) in enumerate(RUNS)]
 Q = json.load(open(res / "queries.json"))
@@ -168,9 +170,11 @@ thr = "<table><tr><th>query</th><th>rows</th>" + "".join(f"<th>{E(l)} rows/s</th
     "".join(f"<td class=num>{f0(QM[t].get(q['id'],{}).get('rows_per_s'))}</td><td class=num>{f1(QM[t].get(q['id'],{}).get('mb_per_s'))}</td>" for t, *_ in R) + "</tr>"
     for q in big) + "</table>"
 
-def params(p): return ", ".join(f"{k}={v}" for k, v in p.items() if k != "uri")
+def params(p):
+    if p.get("kind") == "info": return f"POST /timeseries_info, {len(p['uris'])} uris"
+    return ", ".join(f"{k}={v}" for k, v in p.items() if k != "uri")
 qdef = "<table><tr><th>#</th><th>label</th><th>stream</th><th>params</th></tr>" + "".join(
-    f"<tr><td>{q['id']}</td><td>{E(q['label'])}</td><td><code>{E(q['params']['uri'])}</code></td><td>{E(params(q['params']))}</td></tr>"
+    f"<tr><td>{q['id']}</td><td>{E(q['label'])}</td><td><code>{E(q['params'].get('uri', '—'))}</code></td><td>{E(params(q['params']))}</td></tr>"
     for q in Q["queries"]) + "</table>"
 
 # ---------------------------------------------------------------- timescale state
@@ -198,12 +202,14 @@ FINDINGS = (res / "findings.html").read_text() if (res / "findings.html").exists
 CSS = open(Path(__file__).parent / "report.css").read() + "\n:root{--series-4:#8e5bd1;--series-5:#c9a300}\n"
 first, last = R[0][3], R[-1][3]
 reps, warm = first.get("query", {}).get("reps", "?"), first.get("query", {}).get("warmup", "?")
-page = f"""<title>Timescale Index Fix Benchmark</title>
+PAGE_TITLE = sys.argv[6] if len(sys.argv) > 6 else "Timescale Index Fix Benchmark"
+page = f"""<meta charset="utf-8">
+<title>{PAGE_TITLE}</title>
 <style>{CSS}</style>
 <div class=wrap>
-<h1>acquirium timeseries backend: <code>main</code> vs <code>ums-timescale-fix</code></h1>
+<h1>{TITLE}</h1>
 <p class=sub>{" · ".join(f'{E(l)}: <code>{E(o.get("ref","?"))}</code>@<code>{E(o.get("head","?")[:10])}</code>' for _, l, _, o in R)}<br>
-DPR trailer SCADA, 200 CSVs · cloud-vm (4 vCPU / 16 GiB cgroup) · {E(first.get('started','')[:16])} → {E(last.get('finished','')[:16])} UTC · runs sequential, fresh clone + venv per ref</p>
+{SUBTITLE} · cloud-vm (4 vCPU / 16 GiB cgroup) · {E(first.get('started','')[:16])} → {E(last.get('finished','')[:16])} UTC · runs sequential, fresh clone + venv per ref</p>
 {errs}
 <div class=tiles>{tiles}</div>
 {FINDINGS}
@@ -218,8 +224,8 @@ fresh container + volume per run; schema as created by the acquirium ref under t
 <figure class=fig><figcaption><b>Resident memory</b><span class=unit>GB, sampled every 5 s across boot → ingest → queries; dashed = postgres processes</span></figcaption>{rss_fig}
 {legend([(l, c) for _, l, c, _ in R])}</figure>
 
-<h2>Query latency — 30 <code>GET /timeseries</code> queries × {reps} reps</h2>
-<p>Identical frozen query set on every run (<code>queries.json</code> from the 2026-08-26 campaign: absolute timestamps anchored on the newest real row).
+<h2>Query latency — {len(Q["queries"])} queries × {reps} reps</h2>
+<p>Identical frozen query set on every run (<code>queries.json</code>, generated on the first run: absolute timestamps anchored on the newest real row).
 Per query: 1 cold request (first ever touch, reported separately), {warm} warm-ups discarded, then {reps} timed reps.
 "cpu ms" is server-side CPU per request (acquirium process tree, plus postgres processes for timescale; 100 ms resolution). Streams: P1 = <code>{E(Q['streams']['P1'])}</code>,
 P2 = <code>{E(Q['streams']['P2'])}</code>, T1 = <code>{E(Q['streams']['T1'])}</code> (text), R1 = ref-URI of "{E(Q['streams']['R1_name'])}". Anchor {E(Q['anchor'][:19])}.</p>

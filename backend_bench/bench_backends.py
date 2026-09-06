@@ -39,8 +39,17 @@ class Sampler(threading.Thread):
         super().__init__(daemon=True)
         self.path, self.sid, self.pg, self.every, self.stop = path, sid, pg, every, threading.Event()
         self.peak = {"server_rss_mb": 0, "pg_rss_mb": 0}
+        self.pg_activity: dict[str, int] = {}
 
     def sample(self) -> dict:
+        if self.pg:
+            try:
+                q = subprocess.run(["docker", "exec", TSDB_NAME, "psql", "-U", "acquirium", "-d", "acquirium", "-tA", "-c",
+                                    "SELECT left(regexp_replace(query, '\\s+', ' ', 'g'), 90) FROM pg_stat_activity WHERE datname='acquirium' AND state='active' AND query NOT ILIKE '%pg_stat_activity%'"],
+                                   capture_output=True, text=True, timeout=10).stdout
+                for line in q.splitlines():
+                    if line.strip(): self.pg_activity[line.strip()] = self.pg_activity.get(line.strip(), 0) + 1
+            except Exception: pass
         out = subprocess.run(["ps", "-eo", "sid,comm,rss,cputimes"], capture_output=True, text=True).stdout
         srss = scpu = prss = pcpu = 0.0
         for line in out.splitlines()[1:]:
@@ -78,6 +87,7 @@ class Bench:
         self.logf = open(root / "bench.log", "a", buffering=1)
         self.n_files = len(list(data.glob("*.csv")))
         self.procs: list[subprocess.Popen] = []
+        self.provenance: dict = {}
 
     def log(self, m):
         line = f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {m}"; print(line, flush=True); self.logf.write(line + "\n")
@@ -104,6 +114,17 @@ class Bench:
         self.run(["uv", "pip", "install", "--python", venv / "bin/python", "-e", "."], cwd=repo, timeout=2400, check=True)
         ver = self.run([venv / "bin/python", "-c", "import importlib.metadata as m; print(m.version('acquirium'))"]).stdout.strip()
         self.log(f"installed acquirium {ver}")
+        # provenance checks: remote head == cloned head, module imported from this clone, code signatures
+        remote = self.run(["git", "ls-remote", REPO_URL, f"refs/heads/{ref}"]).stdout.split()
+        modpath = self.run([venv / "bin/python", "-c", "import acquirium.Storage.timescale_store as t; print(t.__file__)"]).stdout.strip()
+        store_src = Path(modpath).read_text() if modpath and Path(modpath).exists() else ""
+        sigs = {k: (k in store_src) for k in ("CREATE TEMP TABLE", "ref_id", "executemany", "adbc", "postgres_query", "ON CONFLICT (ref_id, ts)", "idx_timeseries_numeric_ref_ts")}
+        self.provenance = {"ref": ref, "remote_head": remote[0] if remote else None, "cloned_head": head,
+                           "remote_matches_clone": bool(remote) and remote[0] == head, "version": ver,
+                           "store_module": modpath, "store_module_in_clone": str(repo) in modpath, "store_signatures": sigs}
+        self.log(f"provenance: {json.dumps(self.provenance)}")
+        if not self.provenance["remote_matches_clone"] or not self.provenance["store_module_in_clone"]:
+            raise RuntimeError("provenance check failed")
         return repo, venv / "bin/python", head
 
     def prepare_run(self, tag: str, backend: str, port: int) -> Path:
@@ -138,6 +159,8 @@ null_values       = ["NaN"]
     # ------------------------------------------------------------ timescale
     def tsdb_up(self) -> dict:
         self.run(["docker", "rm", "-f", "-v", TSDB_NAME])
+        self.run(["docker", "pull", TSDB_IMAGE], timeout=1200)
+        digest = self.run(["docker", "inspect", "--format", "{{index .RepoDigests 0}}", TSDB_IMAGE]).stdout.strip()
         t0 = time.time()
         self.run(["docker", "run", "-d", "--name", TSDB_NAME, "-p", "127.0.0.1:5433:5432",
                   "-e", "POSTGRES_USER=acquirium", "-e", "POSTGRES_PASSWORD=acquirium",
@@ -153,8 +176,9 @@ null_values       = ["NaN"]
             raise TimeoutError("timescaledb not ready")
         ver = self.psql("SELECT version(); SELECT extversion FROM pg_extension WHERE extname='timescaledb'; "
                         "SHOW shared_buffers; SHOW work_mem; SHOW effective_cache_size; SHOW max_parallel_workers;")
-        self.log(f"timescaledb ready in {time.time() - t0:.0f}s\n{ver}")
-        return {"image": TSDB_IMAGE, "ready_s": round(time.time() - t0, 1), "settings": ver}
+        empty = self.psql("SELECT count(*) FROM information_schema.tables WHERE table_schema='public'")
+        self.log(f"timescaledb ready in {time.time() - t0:.0f}s, digest {digest}, public tables before server start: {empty}\n{ver}")
+        return {"image": TSDB_IMAGE, "digest": digest, "ready_s": round(time.time() - t0, 1), "settings": ver, "public_tables_before_start": int(empty or 0)}
 
     def psql(self, sql: str) -> str:
         return self.run(["docker", "exec", TSDB_NAME, "psql", "-U", "acquirium", "-d", "acquirium", "-tA", "-c", sql],
@@ -167,6 +191,9 @@ null_values       = ["NaN"]
             d["hypertable"] = self.psql("SELECT table_bytes, index_bytes, toast_bytes, total_bytes FROM hypertable_detailed_size('timeseries')")
             d["chunks"] = self.psql("SELECT count(*), count(*) FILTER (WHERE is_compressed) FROM timescaledb_information.chunks WHERE hypertable_name='timeseries'")
             d["compression"] = self.psql("SELECT before_compression_total_bytes, after_compression_total_bytes FROM hypertable_compression_stats('timeseries')")
+            d["columns"] = self.psql("SELECT column_name||':'||data_type FROM information_schema.columns WHERE table_name='timeseries' ORDER BY ordinal_position")
+            d["tables"] = self.psql("SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY 1")
+            d["ref_ids"] = self.psql("SELECT count(*) FROM ref_ids") if "ref_ids" in d["tables"] else "n/a"
             d["indexes"] = self.psql("SELECT indexname, hypertable_index_size(indexname::regclass) FROM pg_indexes WHERE tablename='timeseries' ORDER BY 1")
             d["row_count"] = int(self.psql("SELECT count(*) FROM timeseries"))
             d["streams"] = int(self.psql("SELECT count(*) FROM streams"))
@@ -269,6 +296,14 @@ null_values       = ["NaN"]
             b0 = time.time()
             srv = self.start_server(rundir, venv_py, port)
             out["boot_s"] = round(time.time() - b0, 1)
+            if pg:
+                out["schema_after_boot"] = {
+                    "tables": self.psql("SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY 1"),
+                    "timeseries_columns": self.psql("SELECT column_name||':'||data_type FROM information_schema.columns WHERE table_name='timeseries' ORDER BY ordinal_position"),
+                    "timeseries_indexes": self.psql("SELECT indexname FROM pg_indexes WHERE tablename='timeseries' ORDER BY 1"),
+                    "rows": self.psql("SELECT count(*) FROM timeseries")}
+                self.log(f"schema after boot: {json.dumps(out['schema_after_boot'])}")
+            out["provenance"] = self.provenance
             sampler = Sampler(self.results / f"{tag}.samples.jsonl", srv.pid, pg); sampler.start()
             out["ingest"] = self.ingest(rundir, venv_py, sampler); self.save(tag, out)
 
@@ -284,6 +319,7 @@ null_values       = ["NaN"]
             out["query_log"] = r.stderr[-6000:]
             out["query"] = json.load(open(qres)) if qres.exists() else {"error": r.stderr[-2000:]}
             out["peak_rss_mb"] = dict(sampler.peak)
+            out["pg_activity_samples"] = dict(sorted(sampler.pg_activity.items(), key=lambda kv: -kv[1])[:40])
             if pg: out["db"] = self.tsdb_stats()
         except Exception as e:
             out["error"] = f"{type(e).__name__}: {e}"; self.log(f"!! {tag} failed: {out['error']}")

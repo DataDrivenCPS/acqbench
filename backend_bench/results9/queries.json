@@ -1,0 +1,312 @@
+{
+ "generated": "2026-08-26T22:51:20.011044+00:00",
+ "anchor": "2026-08-12T13:44:24+00:00",
+ "first_row": "2026-05-15T11:26:05+00:00",
+ "streams": {
+  "P1": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+  "P2": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+  "T1": "urn:dpr/baf-1-inlet-valve-status",
+  "R1": "urn:acquirium#e35376df-45df-5459-9a8a-38463bbf2c06",
+  "R1_name": "UV-Ultraviolet Intensity (mW/cm^2)"
+ },
+ "stream_rows": {
+  "P1": 535547,
+  "P2": 535547,
+  "T1": 535547
+ },
+ "queries": [
+  {
+   "id": 1,
+   "label": "P1 full range",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 2,
+   "label": "P1 full range desc",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "order": "desc"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 3,
+   "label": "P1 90 days",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-05-14T13:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 4,
+   "label": "P1 30 days",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-07-13T13:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 5,
+   "label": "P1 7 days",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-08-05T13:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 6,
+   "label": "P1 1 day",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-08-11T13:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 7,
+   "label": "P1 6 hours",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-08-12T07:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 8,
+   "label": "P1 1 hour",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-08-12T12:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 9,
+   "label": "P1 10 min",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-08-12T13:34:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 10,
+   "label": "P1 1 min",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-08-12T13:43:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 11,
+   "label": "P1 1 day, 45 days back",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-06-27T13:44:24+00:00",
+    "end": "2026-06-28T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 12,
+   "label": "P1 1 hour, 45 days back",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-06-28T12:44:24+00:00",
+    "end": "2026-06-28T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 13,
+   "label": "P2 30 days",
+   "params": {
+    "uri": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+    "start": "2026-07-13T13:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 14,
+   "label": "P2 1 day",
+   "params": {
+    "uri": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+    "start": "2026-08-11T13:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 15,
+   "label": "P2 1 hour",
+   "params": {
+    "uri": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+    "start": "2026-08-12T12:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 16,
+   "label": "P2 numeric full",
+   "params": {
+    "uri": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+    "value_mode": "numeric"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 17,
+   "label": "T1 text full range",
+   "params": {
+    "uri": "urn:dpr/baf-1-inlet-valve-status"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 18,
+   "label": "T1 text 1 day",
+   "params": {
+    "uri": "urn:dpr/baf-1-inlet-valve-status",
+    "start": "2026-08-11T13:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 19,
+   "label": "T1 text 1 hour",
+   "params": {
+    "uri": "urn:dpr/baf-1-inlet-valve-status",
+    "start": "2026-08-12T12:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 20,
+   "label": "T1 text mode 1 day",
+   "params": {
+    "uri": "urn:dpr/baf-1-inlet-valve-status",
+    "start": "2026-08-11T13:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00",
+    "value_mode": "text"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 21,
+   "label": "R1 ref-uri full range",
+   "params": {
+    "uri": "urn:acquirium#e35376df-45df-5459-9a8a-38463bbf2c06"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 22,
+   "label": "R1 ref-uri 7 days",
+   "params": {
+    "uri": "urn:acquirium#e35376df-45df-5459-9a8a-38463bbf2c06",
+    "start": "2026-08-05T13:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 23,
+   "label": "P1 latest 1 desc",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "limit": 1,
+    "order": "desc"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 24,
+   "label": "P1 latest 100 desc",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "limit": 100,
+    "order": "desc"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 25,
+   "label": "P1 limit 1000 asc",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "limit": 1000
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 26,
+   "label": "P1 30 days limit 10000",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-07-13T13:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00",
+    "limit": 10000
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 27,
+   "label": "P1 numeric 30 days",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-07-13T13:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00",
+    "value_mode": "numeric"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 28,
+   "label": "P1 coalesce 1 day",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-08-11T13:44:24+00:00",
+    "end": "2026-08-12T13:44:24+00:00",
+    "value_mode": "coalesce"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 29,
+   "label": "EMPTY P1 window after data",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-09-11T13:44:24+00:00",
+    "end": "2026-10-11T13:44:24+00:00"
+   },
+   "expect_empty": true
+  },
+  {
+   "id": 30,
+   "label": "EMPTY unregistered uri",
+   "params": {
+    "uri": "urn:dpr/does-not-exist"
+   },
+   "expect_empty": true
+  }
+ ]
+}

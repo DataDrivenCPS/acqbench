@@ -1,0 +1,629 @@
+{
+ "generated": "2026-09-04T23:16:42.958535+00:00",
+ "anchor": "2026-08-30T08:47:18+00:00",
+ "first_row": "2024-08-20T14:03:54+00:00",
+ "streams": {
+  "P1": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+  "P2": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+  "P3": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+  "P4": "urn:dpr/conn-ozone-generator-to-baf-1-inlet-junction-ozone-ppm",
+  "T1": "urn:dpr/baf-1-inlet-valve-status",
+  "T2": "urn:dpr/baf-2-outlet-valve-status",
+  "R1": "urn:acquirium#e35376df-45df-5459-9a8a-38463bbf2c06",
+  "R1_name": "UV-Ultraviolet Intensity (mW/cm^2)",
+  "n_live": 112
+ },
+ "stream_rows": {
+  "P1": 2763651,
+  "P2": 2763651,
+  "P3": 2763651,
+  "P4": 29129,
+  "T1": 2763650,
+  "T2": 2763650
+ },
+ "queries": [
+  {
+   "id": 1,
+   "label": "P1 full range",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 2,
+   "label": "P1 full range desc",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "order": "desc"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 3,
+   "label": "P1 90 days",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-06-01T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 4,
+   "label": "P1 30 days",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-07-31T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 5,
+   "label": "P1 7 days",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-08-23T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 6,
+   "label": "P1 1 day",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-08-29T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 7,
+   "label": "P1 6 hours",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-08-30T02:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 8,
+   "label": "P1 1 hour",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-08-30T07:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 9,
+   "label": "P1 10 min",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-08-30T08:37:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 10,
+   "label": "P1 1 min",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-08-30T08:46:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 11,
+   "label": "P1 1 day, 45 days back",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-07-15T08:47:18+00:00",
+    "end": "2026-07-16T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 12,
+   "label": "P1 1 hour, 45 days back",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-07-16T07:47:18+00:00",
+    "end": "2026-07-16T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 13,
+   "label": "P2 30 days",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-07-31T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 14,
+   "label": "P2 1 day",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-08-29T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 15,
+   "label": "P2 1 hour",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "start": "2026-08-30T07:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 16,
+   "label": "P2 numeric full",
+   "params": {
+    "uri": "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+    "value_mode": "numeric"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 17,
+   "label": "T1 text full range",
+   "params": {
+    "uri": "urn:dpr/baf-1-inlet-valve-status"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 18,
+   "label": "T1 text 1 day",
+   "params": {
+    "uri": "urn:dpr/baf-1-inlet-valve-status",
+    "start": "2026-08-29T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 19,
+   "label": "T1 text 1 hour",
+   "params": {
+    "uri": "urn:dpr/baf-1-inlet-valve-status",
+    "start": "2026-08-30T07:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 20,
+   "label": "T1 text mode 1 day",
+   "params": {
+    "uri": "urn:dpr/baf-1-inlet-valve-status",
+    "start": "2026-08-29T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00",
+    "value_mode": "text"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 21,
+   "label": "R1 ref-uri full range",
+   "params": {
+    "uri": "urn:acquirium#e35376df-45df-5459-9a8a-38463bbf2c06"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 22,
+   "label": "R1 ref-uri 7 days",
+   "params": {
+    "uri": "urn:acquirium#e35376df-45df-5459-9a8a-38463bbf2c06",
+    "start": "2026-08-23T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 23,
+   "label": "P1 latest 1 desc",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "limit": 1,
+    "order": "desc"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 24,
+   "label": "P1 latest 100 desc",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "limit": 100,
+    "order": "desc"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 25,
+   "label": "P1 limit 1000 asc",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "limit": 1000
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 26,
+   "label": "P1 30 days limit 10000",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-07-31T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00",
+    "limit": 10000
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 27,
+   "label": "P1 numeric 30 days",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-07-31T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00",
+    "value_mode": "numeric"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 28,
+   "label": "P1 coalesce 1 day",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-08-29T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00",
+    "value_mode": "coalesce"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 29,
+   "label": "EMPTY P1 window after data",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-09-29T08:47:18+00:00",
+    "end": "2026-10-29T08:47:18+00:00"
+   },
+   "expect_empty": true
+  },
+  {
+   "id": 30,
+   "label": "EMPTY unregistered uri",
+   "params": {
+    "uri": "urn:dpr/does-not-exist"
+   },
+   "expect_empty": true
+  },
+  {
+   "id": 31,
+   "label": "P1 1 year",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2025-08-30T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 32,
+   "label": "P1 180 days",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-03-03T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 33,
+   "label": "P1 full range numeric",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "value_mode": "numeric"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 34,
+   "label": "P1 90 days desc",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-06-01T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00",
+    "order": "desc"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 35,
+   "label": "P1 90 days limit 100000",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-06-01T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00",
+    "limit": 100000
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 36,
+   "label": "P1 1 year latest 1000 desc",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2025-08-30T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00",
+    "limit": 1000,
+    "order": "desc"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 37,
+   "label": "P1 1 day, 1 year back",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2025-08-29T08:47:18+00:00",
+    "end": "2025-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 38,
+   "label": "P1 1 hour, 1 year back",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2025-08-30T07:47:18+00:00",
+    "end": "2025-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 39,
+   "label": "P1 7 days, 180 days back",
+   "params": {
+    "uri": "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+    "start": "2026-02-24T08:47:18+00:00",
+    "end": "2026-03-03T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 40,
+   "label": "P3 full range",
+   "params": {
+    "uri": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 41,
+   "label": "P3 30 days",
+   "params": {
+    "uri": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+    "start": "2026-07-31T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 42,
+   "label": "P3 1 hour",
+   "params": {
+    "uri": "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+    "start": "2026-08-30T07:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 43,
+   "label": "P4 sparse full range",
+   "params": {
+    "uri": "urn:dpr/conn-ozone-generator-to-baf-1-inlet-junction-ozone-ppm"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 44,
+   "label": "P4 sparse 30 days",
+   "params": {
+    "uri": "urn:dpr/conn-ozone-generator-to-baf-1-inlet-junction-ozone-ppm",
+    "start": "2026-07-31T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 45,
+   "label": "T1 text 30 days",
+   "params": {
+    "uri": "urn:dpr/baf-1-inlet-valve-status",
+    "start": "2026-07-31T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 46,
+   "label": "T1 latest 1 desc",
+   "params": {
+    "uri": "urn:dpr/baf-1-inlet-valve-status",
+    "limit": 1,
+    "order": "desc"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 47,
+   "label": "T2 text full range",
+   "params": {
+    "uri": "urn:dpr/baf-2-outlet-valve-status"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 48,
+   "label": "R1 ref-uri 1 year",
+   "params": {
+    "uri": "urn:acquirium#e35376df-45df-5459-9a8a-38463bbf2c06",
+    "start": "2025-08-30T08:47:18+00:00",
+    "end": "2026-08-30T08:47:18+00:00"
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 49,
+   "label": "INFO all live streams",
+   "params": {
+    "kind": "info",
+    "uris": [
+     "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm",
+     "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-flow-rate",
+     "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+     "urn:dpr/conn-gac-2-proportional-valve-to-gac-2-outlet-junction-flow-rate",
+     "urn:dpr/conn-gac-3-proportional-valve-to-gac-3-outlet-junction-flow-rate",
+     "urn:dpr/conn-chlorine-contactor-to-potable-effluent-valve-cl2-mgL",
+     "urn:dpr/conn-chlorine-contactor-to-potable-effluent-valve-ph",
+     "urn:dpr/gac-3-proportional-valve-opening-ratio",
+     "urn:dpr/chlorine-pump-out-speed-command",
+     "urn:dpr/conn-baf-1-proportional-valve-to-baf-2-outlet-junction-flow-rate",
+     "urn:dpr/conn-baf-4-proportional-valve-to-baf-4-outlet-junction-flow-rate",
+     "urn:dpr/conn-uf-unit-to-reject_valve-pressure",
+     "urn:dpr/conn-gac-4-proportional-valve-to-gac-4-outlet-junction-flow-rate",
+     "urn:dpr/gac-1-proportional-valve-opening-ratio",
+     "urn:dpr/gac-2-proportional-valve-opening-ratio",
+     "urn:dpr/h2o2-pump-speed-command",
+     "urn:dpr/conn-ozone-generator-to-baf-1-inlet-junction-toc-ppm",
+     "urn:dpr/ozone-generator-electric-current",
+     "urn:dpr/conn-baf-2-proportional-valve-to-baf-2-outlet-junction-flow-rate",
+     "urn:dpr/conn-baf-3-proportional-valve-to-baf-3-outlet-junction-flow-rate",
+     "urn:dpr/uf-feed-tank-volume",
+     "urn:dpr/feed-pump-out-flow-rate",
+     "urn:dpr/feed-pump-electric-current",
+     "urn:dpr/uf-feed-tank-temperature",
+     "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-turbidity",
+     "urn:dpr/ozone-generator-ozone-ppb-gas",
+     "urn:dpr/ozone-generator-speed-command",
+     "urn:dpr/gac-4-proportional-valve-opening-ratio",
+     "urn:dpr/backwash-dosing-pump-speed-command",
+     "urn:dpr/feed-pump-speed-command",
+     "urn:dpr/coag-dosing-pump-speed-command",
+     "urn:dpr/pre-filter-in-pressure-psi",
+     "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-pressure",
+     "urn:dpr/ozone-generator-valve-in-turbidity",
+     "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-ph",
+     "urn:dpr/baf-3-proportional-valve-opening-ratio",
+     "urn:dpr/conn-chlorine-contactor-to-potable-effluent-valve-toc-ppm",
+     "urn:dpr/ozone-generator-valve-in-no3-mgL",
+     "urn:dpr/ozone-generator-valve-in-no2-mgL",
+     "urn:dpr/ozone-generator-valve-in-ph",
+     "urn:dpr/ozone-generator-valve-in-dissolved-o2",
+     "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-no3-mgL",
+     "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-ph",
+     "urn:dpr/baf-1-inlet-valve-status",
+     "urn:dpr/baf-2-outlet-valve-status",
+     "urn:dpr/baf-1-air-valve-status",
+     "urn:dpr/ac_valve-status",
+     "urn:dpr/h2o2-pump-status",
+     "urn:dpr/conn-gac-1-proportional-valve-to-gac-2-outlet-junction-toc-ppm",
+     "urn:dpr/baf-1-status",
+     "urn:dpr/baf-2-status",
+     "urn:dpr/ozone-generator-fault",
+     "urn:dpr/baf-4-inlet-valve-status",
+     "urn:dpr/b1-valve-status",
+     "urn:dpr/b3w1_valve-status",
+     "urn:dpr/b3w2-valve-status",
+     "urn:dpr/uf_backwash_pump-status",
+     "urn:dpr/baf-3-air-valve-status",
+     "urn:dpr/gac-3-inlet-valve-status",
+     "urn:dpr/gac-2-outlet-valve-status",
+     "urn:dpr/gac-2-air-valve-status",
+     "urn:dpr/gac-3-air-valve-status",
+     "urn:dpr/conn-b3w1_valve-to-uf_bypass_valve-toc-ppm",
+     "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-nh4-mgL",
+     "urn:dpr/baf-4-status",
+     "urn:dpr/gac-1-status",
+     "urn:dpr/gac-2-status",
+     "urn:dpr/influent-ozone-valve-status",
+     "urn:dpr/ozone-generator-status",
+     "urn:dpr/baf-4-outlet-valve-status",
+     "urn:dpr/s2_valve-status",
+     "urn:dpr/gac-1-inlet-valve-status",
+     "urn:dpr/gac-1-outlet-valve-status",
+     "urn:dpr/gac-4-outlet-valve-status",
+     "urn:dpr/gac-4-air-valve-status",
+     "urn:dpr/baf-gac-drain-pump-status",
+     "urn:dpr/baf-3-status",
+     "urn:dpr/gac-3-status",
+     "urn:dpr/gac-4-status",
+     "urn:dpr/baf-2-inlet-valve-status",
+     "urn:dpr/baf-3-inlet-valve-status",
+     "urn:dpr/baf-1-outlet-valve-status",
+     "urn:dpr/baf-3-outlet-valve-status",
+     "urn:dpr/baf-2-air-valve-status",
+     "urn:dpr/baf-4-air-valve-status",
+     "urn:dpr/gac-2-inlet-valve-status",
+     "urn:dpr/gac-4-inlet-valve-status",
+     "urn:dpr/gac-3-outlet-valve-status",
+     "urn:dpr/gac-1-air-valve-status",
+     "urn:dpr/uv-led-status",
+     "urn:dpr/abbw1-valve-status",
+     "urn:dpr/ufd_valve-status",
+     "urn:dpr/baf-gac-backwash-pump-status",
+     "urn:dpr/ozone-generator-valve-in-nh4-mgL",
+     "urn:dpr/baf-2-proportional-valve-opening-ratio",
+     "urn:dpr/baf-1-proportional-valve-opening-ratio",
+     "urn:dpr/baf-4-proportional-valve-opening-ratio",
+     "urn:dpr/pre-filter-out-pressure-psi",
+     "urn:dpr/backwash-tank-volume",
+     "urn:dpr/conn-chlorine-contactor-to-potable-effluent-valve-turbidity",
+     "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-no2-mgL",
+     "urn:dpr/feed-pump-out-pressure",
+     "urn:dpr/ozone-generator-valve-in-toc-ppm",
+     "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-dissolved-o2",
+     "urn:dpr/uf-unit-out-turbidity",
+     "urn:dpr/coag-dosing-pump-flow-rate",
+     "urn:dpr/ozone-generator-valve-in-tic-ppm",
+     "urn:dpr/ozone-generator-ozone-mgl",
+     "urn:dpr/backwash-dosing-pump-flow-rate",
+     "urn:dpr/h2o2-pump-flow-rate",
+     "urn:dpr/chlorine-pump-out-flow-rate",
+     "urn:dpr/conn-ozone-generator-to-baf-1-inlet-junction-ozone-ppm"
+    ]
+   },
+   "expect_empty": false
+  },
+  {
+   "id": 50,
+   "label": "INFO P1 single",
+   "params": {
+    "kind": "info",
+    "uris": [
+     "urn:dpr/conn-baf-4-outlet-junction-to-mb1-valve-toc-ppm"
+    ]
+   },
+   "expect_empty": false
+  }
+ ]
+}

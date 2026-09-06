@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""30-query GET /timeseries workload for the DPR dataset.
+"""50-query workload for the DPR dataset: 48 GET /timeseries shapes + 2 POST /timeseries_info.
 
     python queries.py gen  <base_url> <lookup.json> <out queries.json>
     python queries.py run  <base_url> <queries.json> <reps> <warmup> <out result.json> [pg]
@@ -45,6 +45,21 @@ def get(s, base, params):
     return r
 
 
+def fetch(s, base, params):
+    """GET /timeseries, or POST /timeseries_info when params["kind"] == "info"."""
+    if params.get("kind") == "info":
+        r = s.post(f"{base}/timeseries_info", json={"uris": params["uris"]}, timeout=3600)
+        r.raise_for_status()
+        return r
+    return get(s, base, params)
+
+
+def count_rows(params, r) -> int:
+    if params.get("kind") == "info":
+        return len(r.json())
+    return read_table(r.content).num_rows
+
+
 def cpu_seconds(pg: bool) -> float:
     """CPU seconds of the acquirium server session (env SERVER_SID) + postgres."""
     import os
@@ -81,6 +96,11 @@ def gen(base: str, lookup: str, out: str) -> None:
     if len(numeric) < 2 or not text:
         sys.exit(f"stream discovery failed: numeric={len(numeric)} text={len(text)}")
     P1, P2, T1 = numeric[0], numeric[1], text[0]
+    P3 = numeric[2] if len(numeric) > 2 else P2
+    # sparsest live numeric stream (fewest rows) — a different index regime
+    P4 = min(numeric, key=lambda u: live[u]["row_count"])
+    T2 = text[1] if len(text) > 1 else T1
+    all_live = [u for u, _ in ranked]
     R1 = ref_uri(UNMAPPED_NUMERIC)
     r1_rows = read_table(get(s, base, dict(uri=R1, limit=1)).content).num_rows
     if not r1_rows:
@@ -130,20 +150,42 @@ def gen(base: str, lookup: str, out: str) -> None:
         ("EMPTY P1 window after data", dict(uri=P1, start=(anchor + 30 * D).isoformat(),
                                             end=(anchor + 60 * D).isoformat())),
         ("EMPTY unregistered uri", dict(uri="urn:dpr/does-not-exist")),
+        # ---- 31-50: added 2026-09-04 for the 1000-file dataset (2 years of data)
+        ("P1 1 year", win(P1, 365 * D)),
+        ("P1 180 days", win(P1, 180 * D)),
+        ("P1 full range numeric", dict(uri=P1, value_mode="numeric")),
+        ("P1 90 days desc", win(P1, 90 * D, order="desc")),
+        ("P1 90 days limit 100000", win(P1, 90 * D, limit=100000)),
+        ("P1 1 year latest 1000 desc", win(P1, 365 * D, limit=1000, order="desc")),
+        ("P1 1 day, 1 year back", win(P1, D, back=365 * D)),
+        ("P1 1 hour, 1 year back", win(P1, H, back=365 * D)),
+        ("P1 7 days, 180 days back", win(P1, 7 * D, back=180 * D)),
+        ("P3 full range", dict(uri=P3)),
+        ("P3 30 days", win(P3, 30 * D)),
+        ("P3 1 hour", win(P3, H)),
+        ("P4 sparse full range", dict(uri=P4)),
+        ("P4 sparse 30 days", win(P4, 30 * D)),
+        ("T1 text 30 days", win(T1, 30 * D)),
+        ("T1 latest 1 desc", dict(uri=T1, limit=1, order="desc")),
+        ("T2 text full range", dict(uri=T2)),
+        ("R1 ref-uri 1 year", win(R1, 365 * D)),
+        ("INFO all live streams", dict(kind="info", uris=all_live)),
+        ("INFO P1 single", dict(kind="info", uris=[P1])),
     ]
-    assert len(Q) == 30
+    assert len(Q) == 50
     doc = {
         "generated": datetime.now(timezone.utc).isoformat(),
         "anchor": anchor.isoformat(), "first_row": first.isoformat(),
-        "streams": {"P1": P1, "P2": P2, "T1": T1, "R1": R1, "R1_name": UNMAPPED_NUMERIC},
+        "streams": {"P1": P1, "P2": P2, "P3": P3, "P4": P4, "T1": T1, "T2": T2, "R1": R1, "R1_name": UNMAPPED_NUMERIC,
+                    "n_live": len(all_live)},
         "stream_rows": {k: live.get(v, {}).get("row_count") for k, v in
-                        {"P1": P1, "P2": P2, "T1": T1}.items()},
+                        {"P1": P1, "P2": P2, "P3": P3, "P4": P4, "T1": T1, "T2": T2}.items()},
         "queries": [{"id": i + 1, "label": l, "params": p, "expect_empty": l.startswith("EMPTY")}
                     for i, (l, p) in enumerate(Q)],
     }
     with open(out, "w") as f:
         json.dump(doc, f, indent=1)
-    print(f"wrote {out}: P1={P1} P2={P2} T1={T1} anchor={anchor}")
+    print(f"wrote {out}: P1={P1} P2={P2} P3={P3} P4={P4} T1={T1} T2={T2} live={len(all_live)} anchor={anchor}")
 
 
 # ----------------------------------------------------------------- run
@@ -163,17 +205,16 @@ def run(base: str, qfile: str, reps: int, warmup: int, out: str, pg: bool) -> No
         entry = {"id": q["id"], "label": q["label"], "params": params}
         try:
             t0 = time.perf_counter()
-            r = get(s, base, params)
+            r = fetch(s, base, params)
             entry["cold_ms"] = round((time.perf_counter() - t0) * 1e3, 2)
-            tbl = read_table(r.content)
-            entry["rows"], entry["bytes"] = tbl.num_rows, len(r.content)
+            entry["rows"], entry["bytes"] = count_rows(params, r), len(r.content)
             for _ in range(warmup):
-                get(s, base, params)
+                fetch(s, base, params)
             cpu0 = cpu_seconds(pg)
             lat = []
             for _ in range(reps):
                 t0 = time.perf_counter()
-                get(s, base, params)
+                fetch(s, base, params)
                 lat.append((time.perf_counter() - t0) * 1e3)
             cpu1 = cpu_seconds(pg)
             entry.update({

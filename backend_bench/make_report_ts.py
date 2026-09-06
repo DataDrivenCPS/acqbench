@@ -152,11 +152,12 @@ def params(p): return ", ".join(f"{k}={v}" for k, v in p.items() if k != "uri")
 qdef = "<table><tr><th>#</th><th>label</th><th>stream</th><th>params</th></tr>" + "".join(
     f"<tr><td>{q['id']}</td><td>{E(q['label'])}</td><td><code>{E(q['params']['uri'])}</code></td><td>{E(params(q['params']))}</td></tr>" for q in Q["queries"]) + "</table>"
 FIND = Path(spec["findings"]).read_text() if spec.get("findings") and Path(spec["findings"]).exists() else ""
-CSS = open(Path(__file__).parent / "report.css").read() + "\n:root{--series-4:#8e5bd1;--series-5:#c9a300}\n"
-page = f"""<title>Timescale Store Variants</title>
+CSS = open(Path(__file__).parent / "report.css").read() + "\n:root{--series-4:#8e5bd1;--series-5:#c9a300;--series-6:#d13c8e}\n"
+page = f"""<meta charset="utf-8">
+<title>Timescale Store Variants</title>
 <style>{CSS}</style>
 <div class=wrap>
-<h1>acquirium Timescale backend: main vs the three fix variants</h1>
+<h1>acquirium Timescale backend: main vs the fix variants</h1>
 <p class=sub>DPR trailer SCADA, 200 CSVs, 136.8M rows · cloud-vm (4 vCPU / 16 GiB cgroup) · <code>timescale/timescaledb:latest-pg17</code>, fresh container per run ·
 each variant was run in its own campaign right after a run of <code>main</code> @ <code>c09d321</code> on the same day, and every "÷ main" number is against that same-day main run ·
 duckdb column = <code>main</code> duckdb backend from the 2026-09-04 campaign, for scale</p>
