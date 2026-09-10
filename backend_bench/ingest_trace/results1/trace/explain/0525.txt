@@ -1,0 +1,32 @@
+-- file DPR Pilot R1 SCADA v14.10 - 2025.11.11-1340.csv, rows 67950
+Custom Scan (ModifyHypertable)  (cost=7211.97..7381.47 rows=0 width=0) (actual time=397.647..397.653 rows=0 loops=1)
+  Buffers: shared hit=544480 dirtied=1233 written=692, local hit=904
+  I/O Timings: shared write=1.439
+  WAL: records=204105 fpi=511 bytes=16153105
+  ->  Insert on timeseries  (cost=7211.97..7381.47 rows=0 width=0) (actual time=397.641..397.645 rows=0 loops=1)
+        Conflict Resolution: UPDATE
+        Conflict Arbiter Indexes: idx_timeseries_ref_ts_unique
+        Tuples Inserted: 67950
+        Conflicting Tuples: 0
+        Buffers: shared hit=544480 dirtied=1233 written=692, local hit=904
+        I/O Timings: shared write=1.439
+        WAL: records=204105 fpi=511 bytes=16153105
+        ->  Sort  (cost=7211.97..7381.47 rows=67800 width=52) (actual time=23.090..25.401 rows=67950 loops=1)
+              Sort Key: r.ref_id, i.ts
+              Sort Method: quicksort  Memory: 5755kB
+              Buffers: shared hit=3, local hit=904
+              ->  Hash Join  (cost=8.00..1771.36 rows=67800 width=52) (actual time=0.046..11.066 rows=67950 loops=1)
+                    Hash Cond: (i.ref_uri = r.ref_uri)
+                    Buffers: shared hit=3, local hit=904
+                    ->  Seq Scan on _acquirium_incoming_timeseries i  (cost=0.00..1582.00 rows=67800 width=80) (actual time=0.006..2.997 rows=67950 loops=1)
+                          Buffers: local hit=904
+                    ->  Hash  (cost=5.22..5.22 rows=222 width=55) (actual time=0.036..0.037 rows=277 loops=1)
+                          Buckets: 1024  Batches: 1  Memory Usage: 32kB
+                          Buffers: shared hit=3
+                          ->  Seq Scan on ref_ids r  (cost=0.00..5.22 rows=222 width=55) (actual time=0.004..0.015 rows=277 loops=1)
+                                Buffers: shared hit=3
+Settings: work_mem = '16MB', effective_io_concurrency = '256', max_parallel_workers = '4', random_page_cost = '1.1', effective_cache_size = '6GB', jit = 'off'
+Planning:
+  Buffers: shared hit=4
+Planning Time: 0.169 ms
+Execution Time: 397.949 ms

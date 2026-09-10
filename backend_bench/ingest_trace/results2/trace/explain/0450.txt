@@ -1,0 +1,31 @@
+-- file DPR Pilot R1 SCADA v14.10 - 2025.09.02-0923-29.csv, rows 758496
+Custom Scan (ModifyHypertable)  (cost=101120.34..102885.84 rows=0 width=0) (actual time=1142.496..1142.501 rows=0 loops=1)
+  Buffers: shared hit=3043491 dirtied=7707 written=7708, local read=9416, temp read=3046 written=3049
+  I/O Timings: shared write=15.784, local read=8.768, temp read=2.901 write=5.806
+  WAL: records=1519831 bytes=116018876
+  ->  Insert on timeseries  (cost=101120.34..102885.84 rows=0 width=0) (actual time=1142.488..1142.492 rows=0 loops=1)
+        Buffers: shared hit=3043491 dirtied=7707 written=7708, local read=9416, temp read=3046 written=3049
+        I/O Timings: shared write=15.784, local read=8.768, temp read=2.901 write=5.806
+        WAL: records=1519831 bytes=116018876
+        ->  Sort  (cost=101120.34..102885.84 rows=706200 width=52) (actual time=284.293..333.488 rows=758496 loops=1)
+              Sort Key: r.ref_id, i.ts
+              Sort Method: external merge  Disk: 24368kB
+              Buffers: shared hit=3, local read=9416, temp read=3046 written=3049
+              I/O Timings: local read=8.768, temp read=2.901 write=5.806
+              ->  Hash Join  (cost=8.00..18375.16 rows=706200 width=52) (actual time=0.052..123.311 rows=758496 loops=1)
+                    Hash Cond: (i.ref_uri = r.ref_uri)
+                    Buffers: shared hit=3, local read=9416
+                    I/O Timings: local read=8.768
+                    ->  Seq Scan on _acquirium_incoming_timeseries i  (cost=0.00..16478.00 rows=706200 width=80) (actual time=0.008..34.367 rows=758496 loops=1)
+                          Buffers: local read=9416
+                          I/O Timings: local read=8.768
+                    ->  Hash  (cost=5.22..5.22 rows=222 width=55) (actual time=0.039..0.040 rows=277 loops=1)
+                          Buckets: 1024  Batches: 1  Memory Usage: 32kB
+                          Buffers: shared hit=3
+                          ->  Seq Scan on ref_ids r  (cost=0.00..5.22 rows=222 width=55) (actual time=0.007..0.018 rows=277 loops=1)
+                                Buffers: shared hit=3
+Settings: work_mem = '16MB', effective_io_concurrency = '256', max_parallel_workers = '4', random_page_cost = '1.1', effective_cache_size = '6GB', jit = 'off'
+Planning:
+  Buffers: shared hit=4
+Planning Time: 0.191 ms
+Execution Time: 1144.031 ms

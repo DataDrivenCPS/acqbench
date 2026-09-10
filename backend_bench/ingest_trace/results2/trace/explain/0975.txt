@@ -1,0 +1,28 @@
+-- file DPR Pilot R1 SCADA v15.06 - 2026.08.12-1342.csv, rows 771
+Custom Scan (ModifyHypertable)  (cost=65.98..67.85 rows=0 width=0) (actual time=3.632..3.634 rows=0 loops=1)
+  Buffers: shared hit=3112 dirtied=173 written=5, local hit=10
+  I/O Timings: shared write=0.035
+  WAL: records=1542 fpi=258 bytes=1490676
+  ->  Insert on timeseries  (cost=65.98..67.85 rows=0 width=0) (actual time=3.622..3.624 rows=0 loops=1)
+        Buffers: shared hit=3112 dirtied=173 written=5, local hit=10
+        I/O Timings: shared write=0.035
+        WAL: records=1542 fpi=258 bytes=1490676
+        ->  Sort  (cost=65.98..67.85 rows=750 width=52) (actual time=0.293..0.322 rows=771 loops=1)
+              Sort Key: r.ref_id, i.ts
+              Sort Method: quicksort  Memory: 55kB
+              Buffers: shared hit=4, local hit=10
+              ->  Hash Join  (cost=10.66..30.16 rows=750 width=52) (actual time=0.064..0.195 rows=771 loops=1)
+                    Hash Cond: (i.ref_uri = r.ref_uri)
+                    Buffers: shared hit=4, local hit=10
+                    ->  Seq Scan on _acquirium_incoming_timeseries i  (cost=0.00..17.50 rows=750 width=80) (actual time=0.008..0.043 rows=771 loops=1)
+                          Buffers: local hit=10
+                    ->  Hash  (cost=6.96..6.96 rows=296 width=55) (actual time=0.051..0.051 rows=292 loops=1)
+                          Buckets: 1024  Batches: 1  Memory Usage: 33kB
+                          Buffers: shared hit=4
+                          ->  Seq Scan on ref_ids r  (cost=0.00..6.96 rows=296 width=55) (actual time=0.013..0.028 rows=292 loops=1)
+                                Buffers: shared hit=4
+Settings: work_mem = '16MB', effective_io_concurrency = '256', max_parallel_workers = '4', random_page_cost = '1.1', effective_cache_size = '6GB', jit = 'off'
+Planning:
+  Buffers: shared hit=4
+Planning Time: 0.125 ms
+Execution Time: 3.697 ms

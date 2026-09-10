@@ -1,0 +1,491 @@
+<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg version="1.1" width="1200" height="362" onload="init(evt)" viewBox="0 0 1200 362" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:fg="http://github.com/jonhoo/inferno"><!--Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples.--><!--NOTES: --><defs><linearGradient id="background" y1="0" y2="1" x1="0" x2="0"><stop stop-color="#eeeeee" offset="5%"/><stop stop-color="#eeeeb0" offset="95%"/></linearGradient></defs><style type="text/css">
+text { font-family:monospace; font-size:12px }
+#title { text-anchor:middle; font-size:17px; }
+#matched { text-anchor:end; }
+#search { text-anchor:end; opacity:0.1; cursor:pointer; }
+#search:hover, #search.show { opacity:1; }
+#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+#unzoom { cursor:pointer; }
+#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+.hide { display:none; }
+.parent { opacity:0.5; }
+</style><script type="text/ecmascript"><![CDATA[
+        var nametype = 'Function:';
+        var fontsize = 12;
+        var fontwidth = 0.59;
+        var xpad = 10;
+        var inverted = true;
+        var searchcolor = 'rgb(230,0,230)';
+        var fluiddrawing = true;
+        var truncate_text_right = false;
+    ]]><![CDATA["use strict";
+var details, searchbtn, unzoombtn, matchedtxt, svg, searching, frames, known_font_width;
+function init(evt) {
+    details = document.getElementById("details").firstChild;
+    searchbtn = document.getElementById("search");
+    unzoombtn = document.getElementById("unzoom");
+    matchedtxt = document.getElementById("matched");
+    svg = document.getElementsByTagName("svg")[0];
+    frames = document.getElementById("frames");
+    known_font_width = get_monospace_width(frames);
+    total_samples = parseInt(frames.attributes.total_samples.value);
+    searching = 0;
+
+    // Use GET parameters to restore a flamegraph's state.
+    var restore_state = function() {
+        var params = get_params();
+        if (params.x && params.y)
+            zoom(find_group(document.querySelector('[*|x="' + params.x + '"][y="' + params.y + '"]')));
+        if (params.s)
+            search(params.s);
+    };
+
+    if (fluiddrawing) {
+        // Make width dynamic so the SVG fits its parent's width.
+        svg.removeAttribute("width");
+        // Edge requires us to have a viewBox that gets updated with size changes.
+        var isEdge = /Edge\/\d./i.test(navigator.userAgent);
+        if (!isEdge) {
+            svg.removeAttribute("viewBox");
+        }
+        var update_for_width_change = function() {
+            if (isEdge) {
+                svg.attributes.viewBox.value = "0 0 " + svg.width.baseVal.value + " " + svg.height.baseVal.value;
+            }
+
+            // Keep consistent padding on left and right of frames container.
+            frames.attributes.width.value = svg.width.baseVal.value - xpad * 2;
+
+            // Text truncation needs to be adjusted for the current width.
+            update_text_for_elements(frames.children);
+
+            // Keep search elements at a fixed distance from right edge.
+            var svgWidth = svg.width.baseVal.value;
+            searchbtn.attributes.x.value = svgWidth - xpad;
+            matchedtxt.attributes.x.value = svgWidth - xpad;
+        };
+        window.addEventListener('resize', function() {
+            update_for_width_change();
+        });
+        // This needs to be done asynchronously for Safari to work.
+        setTimeout(function() {
+            unzoom();
+            update_for_width_change();
+            restore_state();
+        }, 0);
+    } else {
+        restore_state();
+    }
+}
+// event listeners
+window.addEventListener("click", function(e) {
+    var target = find_group(e.target);
+    if (target) {
+        if (target.nodeName == "a") {
+            if (e.ctrlKey === false) return;
+            e.preventDefault();
+        }
+        if (target.classList.contains("parent")) unzoom();
+        zoom(target);
+
+        // set parameters for zoom state
+        var el = target.querySelector("rect");
+        if (el && el.attributes && el.attributes.y && el.attributes["fg:x"]) {
+            var params = get_params()
+            params.x = el.attributes["fg:x"].value;
+            params.y = el.attributes.y.value;
+            history.replaceState(null, null, parse_params(params));
+        }
+    }
+    else if (e.target.id == "unzoom") {
+        unzoom();
+
+        // remove zoom state
+        var params = get_params();
+        if (params.x) delete params.x;
+        if (params.y) delete params.y;
+        history.replaceState(null, null, parse_params(params));
+    }
+    else if (e.target.id == "search") search_prompt();
+}, false)
+// mouse-over for info
+// show
+window.addEventListener("mouseover", function(e) {
+    var target = find_group(e.target);
+    if (target) details.nodeValue = nametype + " " + g_to_text(target);
+}, false)
+// clear
+window.addEventListener("mouseout", function(e) {
+    var target = find_group(e.target);
+    if (target) details.nodeValue = ' ';
+}, false)
+// ctrl-F for search
+window.addEventListener("keydown",function (e) {
+    if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+        e.preventDefault();
+        search_prompt();
+    }
+}, false)
+// functions
+function get_params() {
+    var params = {};
+    var paramsarr = window.location.search.substr(1).split('&');
+    for (var i = 0; i < paramsarr.length; ++i) {
+        var tmp = paramsarr[i].split("=");
+        if (!tmp[0] || !tmp[1]) continue;
+        params[tmp[0]]  = decodeURIComponent(tmp[1]);
+    }
+    return params;
+}
+function parse_params(params) {
+    var uri = "?";
+    for (var key in params) {
+        uri += key + '=' + encodeURIComponent(params[key]) + '&';
+    }
+    if (uri.slice(-1) == "&")
+        uri = uri.substring(0, uri.length - 1);
+    if (uri == '?')
+        uri = window.location.href.split('?')[0];
+    return uri;
+}
+function find_child(node, selector) {
+    var children = node.querySelectorAll(selector);
+    if (children.length) return children[0];
+    return;
+}
+function find_group(node) {
+    var parent = node.parentElement;
+    if (!parent) return;
+    if (parent.id == "frames") return node;
+    return find_group(parent);
+}
+function orig_save(e, attr, val) {
+    if (e.attributes["fg:orig_" + attr] != undefined) return;
+    if (e.attributes[attr] == undefined) return;
+    if (val == undefined) val = e.attributes[attr].value;
+    e.setAttribute("fg:orig_" + attr, val);
+}
+function orig_load(e, attr) {
+    if (e.attributes["fg:orig_"+attr] == undefined) return;
+    e.attributes[attr].value = e.attributes["fg:orig_" + attr].value;
+    e.removeAttribute("fg:orig_" + attr);
+}
+function g_to_text(e) {
+    var text = find_child(e, "title").firstChild.nodeValue;
+    return (text)
+}
+function g_to_func(e) {
+    var func = g_to_text(e);
+    // if there's any manipulation we want to do to the function
+    // name before it's searched, do it here before returning.
+    return (func);
+}
+function get_monospace_width(frames) {
+    // Given the id="frames" element, return the width of text characters if
+    // this is a monospace font, otherwise return 0.
+    text = find_child(frames.children[0], "text");
+    originalContent = text.textContent;
+    text.textContent = "!";
+    bangWidth = text.getComputedTextLength();
+    text.textContent = "W";
+    wWidth = text.getComputedTextLength();
+    text.textContent = originalContent;
+    if (bangWidth === wWidth) {
+        return bangWidth;
+    } else {
+        return 0;
+    }
+}
+function update_text_for_elements(elements) {
+    // In order to render quickly in the browser, you want to do one pass of
+    // reading attributes, and one pass of mutating attributes. See
+    // https://web.dev/avoid-large-complex-layouts-and-layout-thrashing/ for details.
+
+    // Fall back to inefficient calculation, if we're variable-width font.
+    // TODO This should be optimized somehow too.
+    if (known_font_width === 0) {
+        for (var i = 0; i < elements.length; i++) {
+            update_text(elements[i]);
+        }
+        return;
+    }
+
+    var textElemNewAttributes = [];
+    for (var i = 0; i < elements.length; i++) {
+        var e = elements[i];
+        var r = find_child(e, "rect");
+        var t = find_child(e, "text");
+        var w = parseFloat(r.attributes.width.value) * frames.attributes.width.value / 100 - 3;
+        var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+        var newX = format_percent((parseFloat(r.attributes.x.value) + (100 * 3 / frames.attributes.width.value)));
+
+        // Smaller than this size won't fit anything
+        if (w < 2 * known_font_width) {
+            textElemNewAttributes.push([newX, ""]);
+            continue;
+        }
+
+        // Fit in full text width
+        if (txt.length * known_font_width < w) {
+            textElemNewAttributes.push([newX, txt]);
+            continue;
+        }
+
+        var substringLength = Math.floor(w / known_font_width) - 2;
+        if (truncate_text_right) {
+            // Truncate the right side of the text.
+            textElemNewAttributes.push([newX, txt.substring(0, substringLength) + ".."]);
+            continue;
+        } else {
+            // Truncate the left side of the text.
+            textElemNewAttributes.push([newX, ".." + txt.substring(txt.length - substringLength, txt.length)]);
+            continue;
+        }
+    }
+
+    console.assert(textElemNewAttributes.length === elements.length, "Resize failed, please file a bug at https://github.com/jonhoo/inferno/");
+
+    // Now that we know new textContent, set it all in one go so we don't refresh a bazillion times.
+    for (var i = 0; i < elements.length; i++) {
+        var e = elements[i];
+        var values = textElemNewAttributes[i];
+        var t = find_child(e, "text");
+        t.attributes.x.value = values[0];
+        t.textContent = values[1];
+    }
+}
+
+function update_text(e) {
+    var r = find_child(e, "rect");
+    var t = find_child(e, "text");
+    var w = parseFloat(r.attributes.width.value) * frames.attributes.width.value / 100 - 3;
+    var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+    t.attributes.x.value = format_percent((parseFloat(r.attributes.x.value) + (100 * 3 / frames.attributes.width.value)));
+
+    // Smaller than this size won't fit anything
+    if (w < 2 * fontsize * fontwidth) {
+        t.textContent = "";
+        return;
+    }
+    t.textContent = txt;
+    // Fit in full text width
+    if (t.getComputedTextLength() < w)
+        return;
+    if (truncate_text_right) {
+        // Truncate the right side of the text.
+        for (var x = txt.length - 2; x > 0; x--) {
+            if (t.getSubStringLength(0, x + 2) <= w) {
+                t.textContent = txt.substring(0, x) + "..";
+                return;
+            }
+        }
+    } else {
+        // Truncate the left side of the text.
+        for (var x = 2; x < txt.length; x++) {
+            if (t.getSubStringLength(x - 2, txt.length) <= w) {
+                t.textContent = ".." + txt.substring(x, txt.length);
+                return;
+            }
+        }
+    }
+    t.textContent = "";
+}
+// zoom
+function zoom_reset(e) {
+    if (e.tagName == "rect") {
+        e.attributes.x.value = format_percent(100 * parseInt(e.attributes["fg:x"].value) / total_samples);
+        e.attributes.width.value = format_percent(100 * parseInt(e.attributes["fg:w"].value) / total_samples);
+    }
+    if (e.childNodes == undefined) return;
+    for(var i = 0, c = e.childNodes; i < c.length; i++) {
+        zoom_reset(c[i]);
+    }
+}
+function zoom_child(e, x, zoomed_width_samples) {
+    if (e.tagName == "text") {
+        var parent_x = parseFloat(find_child(e.parentNode, "rect[x]").attributes.x.value);
+        e.attributes.x.value = format_percent(parent_x + (100 * 3 / frames.attributes.width.value));
+    } else if (e.tagName == "rect") {
+        e.attributes.x.value = format_percent(100 * (parseInt(e.attributes["fg:x"].value) - x) / zoomed_width_samples);
+        e.attributes.width.value = format_percent(100 * parseInt(e.attributes["fg:w"].value) / zoomed_width_samples);
+    }
+    if (e.childNodes == undefined) return;
+    for(var i = 0, c = e.childNodes; i < c.length; i++) {
+        zoom_child(c[i], x, zoomed_width_samples);
+    }
+}
+function zoom_parent(e) {
+    if (e.attributes) {
+        if (e.attributes.x != undefined) {
+            e.attributes.x.value = "0.0%";
+        }
+        if (e.attributes.width != undefined) {
+            e.attributes.width.value = "100.0%";
+        }
+    }
+    if (e.childNodes == undefined) return;
+    for(var i = 0, c = e.childNodes; i < c.length; i++) {
+        zoom_parent(c[i]);
+    }
+}
+function zoom(node) {
+    var attr = find_child(node, "rect").attributes;
+    var width = parseInt(attr["fg:w"].value);
+    var xmin = parseInt(attr["fg:x"].value);
+    var xmax = xmin + width;
+    var ymin = parseFloat(attr.y.value);
+    unzoombtn.classList.remove("hide");
+    var el = frames.children;
+    var to_update_text = [];
+    for (var i = 0; i < el.length; i++) {
+        var e = el[i];
+        var a = find_child(e, "rect").attributes;
+        var ex = parseInt(a["fg:x"].value);
+        var ew = parseInt(a["fg:w"].value);
+        // Is it an ancestor
+        if (!inverted) {
+            var upstack = parseFloat(a.y.value) > ymin;
+        } else {
+            var upstack = parseFloat(a.y.value) < ymin;
+        }
+        if (upstack) {
+            // Direct ancestor
+            if (ex <= xmin && (ex+ew) >= xmax) {
+                e.classList.add("parent");
+                zoom_parent(e);
+                to_update_text.push(e);
+            }
+            // not in current path
+            else
+                e.classList.add("hide");
+        }
+        // Children maybe
+        else {
+            // no common path
+            if (ex < xmin || ex >= xmax) {
+                e.classList.add("hide");
+            }
+            else {
+                zoom_child(e, xmin, width);
+                to_update_text.push(e);
+            }
+        }
+    }
+    update_text_for_elements(to_update_text);
+}
+function unzoom() {
+    unzoombtn.classList.add("hide");
+    var el = frames.children;
+    for(var i = 0; i < el.length; i++) {
+        el[i].classList.remove("parent");
+        el[i].classList.remove("hide");
+        zoom_reset(el[i]);
+    }
+    update_text_for_elements(el);
+}
+// search
+function reset_search() {
+    var el = document.querySelectorAll("#frames rect");
+    for (var i = 0; i < el.length; i++) {
+        orig_load(el[i], "fill")
+    }
+    var params = get_params();
+    delete params.s;
+    history.replaceState(null, null, parse_params(params));
+}
+function search_prompt() {
+    if (!searching) {
+        var term = prompt("Enter a search term (regexp " +
+            "allowed, eg: ^ext4_)", "");
+        if (term != null) {
+            search(term)
+        }
+    } else {
+        reset_search();
+        searching = 0;
+        searchbtn.classList.remove("show");
+        searchbtn.firstChild.nodeValue = "Search"
+        matchedtxt.classList.add("hide");
+        matchedtxt.firstChild.nodeValue = ""
+    }
+}
+function search(term) {
+    var re = new RegExp(term);
+    var el = frames.children;
+    var matches = new Object();
+    var maxwidth = 0;
+    for (var i = 0; i < el.length; i++) {
+        var e = el[i];
+        // Skip over frames which are either not visible, or below the zoomed-to frame
+        if (e.classList.contains("hide") || e.classList.contains("parent")) {
+            continue;
+        }
+        var func = g_to_func(e);
+        var rect = find_child(e, "rect");
+        if (func == null || rect == null)
+            continue;
+        // Save max width. Only works as we have a root frame
+        var w = parseInt(rect.attributes["fg:w"].value);
+        if (w > maxwidth)
+            maxwidth = w;
+        if (func.match(re)) {
+            // highlight
+            var x = parseInt(rect.attributes["fg:x"].value);
+            orig_save(rect, "fill");
+            rect.attributes.fill.value = searchcolor;
+            // remember matches
+            if (matches[x] == undefined) {
+                matches[x] = w;
+            } else {
+                if (w > matches[x]) {
+                    // overwrite with parent
+                    matches[x] = w;
+                }
+            }
+            searching = 1;
+        }
+    }
+    if (!searching)
+        return;
+    var params = get_params();
+    params.s = term;
+    history.replaceState(null, null, parse_params(params));
+
+    searchbtn.classList.add("show");
+    searchbtn.firstChild.nodeValue = "Reset Search";
+    // calculate percent matched, excluding vertical overlap
+    var count = 0;
+    var lastx = -1;
+    var lastw = 0;
+    var keys = Array();
+    for (k in matches) {
+        if (matches.hasOwnProperty(k))
+            keys.push(k);
+    }
+    // sort the matched frames by their x location
+    // ascending, then width descending
+    keys.sort(function(a, b){
+        return a - b;
+    });
+    // Step through frames saving only the biggest bottom-up frames
+    // thanks to the sort order. This relies on the tree property
+    // where children are always smaller than their parents.
+    for (var k in keys) {
+        var x = parseInt(keys[k]);
+        var w = matches[keys[k]];
+        if (x >= lastx + lastw) {
+            count += w;
+            lastx = x;
+            lastw = w;
+        }
+    }
+    // display matched percent
+    matchedtxt.classList.remove("hide");
+    var pct = 100 * count / maxwidth;
+    if (pct != 100) pct = pct.toFixed(1);
+    matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+}
+function format_percent(n) {
+    return n.toFixed(4) + "%";
+}
+]]></script><rect x="0" y="0" width="100%" height="362" fill="url(#background)"/><text id="title" fill="rgb(0,0,0)" x="50.0000%" y="24.00">/home/vmuser/acq_bench10/venv_ums-timescale-fix/bin/py-spy record --pid 181572 --duration 600 --rate 50 --native --idle --threads --format flamegraph -o /home/vmuser/acq_trace2/flame_wall.svg</text><text id="details" fill="rgb(0,0,0)" x="10" y="40.00"> </text><text id="unzoom" class="hide" fill="rgb(0,0,0)" x="10" y="24.00">Reset Zoom</text><text id="search" fill="rgb(0,0,0)" x="1190" y="24.00">Search</text><text id="matched" fill="rgb(0,0,0)" x="1190" y="351.00"> </text><svg id="frames" x="10" width="1180" total_samples="90184"><g><title>0x7ff8b2661088 (libc.so.6) (122 samples, 0.14%)</title><rect x="0.4114%" y="276" width="0.1353%" height="15" fill="rgb(227,0,7)" fg:x="371" fg:w="122"/><text x="0.6614%" y="286.50"></text></g><g><title>arrow::ipc::internal::IpcFormatWriter::WriteTable (pyarrow/libarrow.so.2500) (200 samples, 0.22%)</title><rect x="0.3271%" y="148" width="0.2218%" height="15" fill="rgb(217,0,24)" fg:x="295" fg:w="200"/><text x="0.5771%" y="158.50"></text></g><g><title>arrow::ipc::RecordBatchWriter::WriteTable (pyarrow/libarrow.so.2500) (200 samples, 0.22%)</title><rect x="0.3271%" y="164" width="0.2218%" height="15" fill="rgb(221,193,54)" fg:x="295" fg:w="200"/><text x="0.5771%" y="174.50"></text></g><g><title>arrow::ipc::internal::IpcFormatWriter::WriteRecordBatch (pyarrow/libarrow.so.2500) (200 samples, 0.22%)</title><rect x="0.3271%" y="180" width="0.2218%" height="15" fill="rgb(248,212,6)" fg:x="295" fg:w="200"/><text x="0.5771%" y="190.50"></text></g><g><title>arrow::ipc::internal::IpcFormatWriter::WriteRecordBatch (pyarrow/libarrow.so.2500) (200 samples, 0.22%)</title><rect x="0.3271%" y="196" width="0.2218%" height="15" fill="rgb(208,68,35)" fg:x="295" fg:w="200"/><text x="0.5771%" y="206.50"></text></g><g><title>arrow::ipc::internal::PayloadStreamWriter::WritePayload (pyarrow/libarrow.so.2500) (199 samples, 0.22%)</title><rect x="0.3282%" y="212" width="0.2207%" height="15" fill="rgb(232,128,0)" fg:x="296" fg:w="199"/><text x="0.5782%" y="222.50"></text></g><g><title>arrow::ipc::WriteIpcPayload (pyarrow/libarrow.so.2500) (199 samples, 0.22%)</title><rect x="0.3282%" y="228" width="0.2207%" height="15" fill="rgb(207,160,47)" fg:x="296" fg:w="199"/><text x="0.5782%" y="238.50"></text></g><g><title>arrow::py::PyOutputStream::Write (pyarrow/libarrow_python.so.2500) (199 samples, 0.22%)</title><rect x="0.3282%" y="244" width="0.2207%" height="15" fill="rgb(228,23,34)" fg:x="296" fg:w="199"/><text x="0.5782%" y="254.50"></text></g><g><title>realloc (libc.so.6) (124 samples, 0.14%)</title><rect x="0.4114%" y="260" width="0.1375%" height="15" fill="rgb(218,30,26)" fg:x="371" fg:w="124"/><text x="0.6614%" y="270.50"></text></g><g><title>main (ingest_trace.py:367) (201 samples, 0.22%)</title><rect x="0.3271%" y="116" width="0.2229%" height="15" fill="rgb(220,122,19)" fg:x="295" fg:w="201"/><text x="0.5771%" y="126.50"></text></g><g><title>write_table (pyarrow/lib.cpython-312-x86_64-linux-gnu.so) (201 samples, 0.22%)</title><rect x="0.3271%" y="132" width="0.2229%" height="15" fill="rgb(250,228,42)" fg:x="295" fg:w="201"/><text x="0.5771%" y="142.50"></text></g><g><title>0x7ff8a4c9f8a7 (psycopg_binary/_psycopg.cpython-312-x86_64-linux-gnu.so) (97 samples, 0.11%)</title><rect x="0.6620%" y="180" width="0.1076%" height="15" fill="rgb(240,193,28)" fg:x="597" fg:w="97"/><text x="0.9120%" y="190.50"></text></g><g><title>poll (libc.so.6) (97 samples, 0.11%)</title><rect x="0.6620%" y="196" width="0.1076%" height="15" fill="rgb(216,20,37)" fg:x="597" fg:w="97"/><text x="0.9120%" y="206.50"></text></g><g><title>stream_value_kind (acquirium/Storage/timescale_store.py:822) (129 samples, 0.14%)</title><rect x="0.6354%" y="132" width="0.1430%" height="15" fill="rgb(206,188,39)" fg:x="573" fg:w="129"/><text x="0.8854%" y="142.50"></text></g><g><title>execute (psycopg/cursor.py:113) (129 samples, 0.14%)</title><rect x="0.6354%" y="148" width="0.1430%" height="15" fill="rgb(217,207,13)" fg:x="573" fg:w="129"/><text x="0.8854%" y="158.50"></text></g><g><title>wait (psycopg/connection.py:484) (129 samples, 0.14%)</title><rect x="0.6354%" y="164" width="0.1430%" height="15" fill="rgb(231,73,38)" fg:x="573" fg:w="129"/><text x="0.8854%" y="174.50"></text></g><g><title>main (ingest_trace.py:392) (142 samples, 0.16%)</title><rect x="0.6243%" y="116" width="0.1575%" height="15" fill="rgb(225,20,46)" fg:x="563" fg:w="142"/><text x="0.8743%" y="126.50"></text></g><g><title>0x7ff8a4c9f8a7 (psycopg_binary/_psycopg.cpython-312-x86_64-linux-gnu.so) (234 samples, 0.26%)</title><rect x="0.8183%" y="196" width="0.2595%" height="15" fill="rgb(210,31,41)" fg:x="738" fg:w="234"/><text x="1.0683%" y="206.50"></text></g><g><title>poll (libc.so.6) (234 samples, 0.26%)</title><rect x="0.8183%" y="212" width="0.2595%" height="15" fill="rgb(221,200,47)" fg:x="738" fg:w="234"/><text x="1.0683%" y="222.50"></text></g><g><title>__exit__ (contextlib.py:144) (235 samples, 0.26%)</title><rect x="0.8183%" y="132" width="0.2606%" height="15" fill="rgb(226,26,5)" fg:x="738" fg:w="235"/><text x="1.0683%" y="142.50"></text></g><g><title>transaction (psycopg/connection.py:362) (235 samples, 0.26%)</title><rect x="0.8183%" y="148" width="0.2606%" height="15" fill="rgb(249,33,26)" fg:x="738" fg:w="235"/><text x="1.0683%" y="158.50"></text></g><g><title>__exit__ (psycopg/transaction.py:271) (235 samples, 0.26%)</title><rect x="0.8183%" y="164" width="0.2606%" height="15" fill="rgb(235,183,28)" fg:x="738" fg:w="235"/><text x="1.0683%" y="174.50"></text></g><g><title>wait (psycopg/connection.py:484) (235 samples, 0.26%)</title><rect x="0.8183%" y="180" width="0.2606%" height="15" fill="rgb(221,5,38)" fg:x="738" fg:w="235"/><text x="1.0683%" y="190.50"></text></g><g><title>main (ingest_trace.py:409) (240 samples, 0.27%)</title><rect x="0.8150%" y="116" width="0.2661%" height="15" fill="rgb(247,18,42)" fg:x="735" fg:w="240"/><text x="1.0650%" y="126.50"></text></g><g><title>main (ingest_trace.py:413) (347 samples, 0.38%)</title><rect x="1.1000%" y="116" width="0.3848%" height="15" fill="rgb(241,131,45)" fg:x="992" fg:w="347"/><text x="1.3500%" y="126.50"></text></g><g><title>write_csv (polars/dataframe/frame.py:3269) (300 samples, 0.33%)</title><rect x="1.1521%" y="132" width="0.3327%" height="15" fill="rgb(249,31,29)" fg:x="1039" fg:w="300"/><text x="1.4021%" y="142.50"></text></g><g><title>0x7ff8a4c9f8a7 (psycopg_binary/_psycopg.cpython-312-x86_64-linux-gnu.so) (6,460 samples, 7.16%)</title><rect x="1.5690%" y="228" width="7.1631%" height="15" fill="rgb(225,111,53)" fg:x="1415" fg:w="6460"/><text x="1.8190%" y="238.50">0x7ff8a4c9..</text></g><g><title>poll (libc.so.6) (6,460 samples, 7.16%)</title><rect x="1.5690%" y="244" width="7.1631%" height="15" fill="rgb(238,160,17)" fg:x="1415" fg:w="6460"/><text x="1.8190%" y="254.50">poll (libc..</text></g><g><title>0x7ff8a5db6696 (libpq-e9b5c9ac.so.5.18) (94 samples, 0.10%)</title><rect x="8.7366%" y="292" width="0.1042%" height="15" fill="rgb(214,148,48)" fg:x="7879" fg:w="94"/><text x="8.9866%" y="302.50"></text></g><g><title>0x7ff8a5dbb5a5 (libpq-e9b5c9ac.so.5.18) (94 samples, 0.10%)</title><rect x="8.7366%" y="308" width="0.1042%" height="15" fill="rgb(232,36,49)" fg:x="7879" fg:w="94"/><text x="8.9866%" y="318.50"></text></g><g><title>send (libc.so.6) (94 samples, 0.10%)</title><rect x="8.7366%" y="324" width="0.1042%" height="15" fill="rgb(209,103,24)" fg:x="7879" fg:w="94"/><text x="8.9866%" y="334.50"></text></g><g><title>0x7ff8a4c9f934 (psycopg_binary/_psycopg.cpython-312-x86_64-linux-gnu.so) (307 samples, 0.34%)</title><rect x="8.7321%" y="228" width="0.3404%" height="15" fill="rgb(229,88,8)" fg:x="7875" fg:w="307"/><text x="8.9821%" y="238.50"></text></g><g><title>copy_end (psycopg/generators.py:369) (305 samples, 0.34%)</title><rect x="8.7344%" y="244" width="0.3382%" height="15" fill="rgb(213,181,19)" fg:x="7877" fg:w="305"/><text x="8.9844%" y="254.50"></text></g><g><title>0x7ff8a724a52e (psycopg_binary/pq.cpython-312-x86_64-linux-gnu.so) (303 samples, 0.34%)</title><rect x="8.7366%" y="260" width="0.3360%" height="15" fill="rgb(254,191,54)" fg:x="7879" fg:w="303"/><text x="8.9866%" y="270.50"></text></g><g><title>0x7ff8a7249ce2 (psycopg_binary/pq.cpython-312-x86_64-linux-gnu.so) (303 samples, 0.34%)</title><rect x="8.7366%" y="276" width="0.3360%" height="15" fill="rgb(241,83,37)" fg:x="7879" fg:w="303"/><text x="8.9866%" y="286.50"></text></g><g><title>0x7ff8a5db67e2 (libpq-e9b5c9ac.so.5.18) (208 samples, 0.23%)</title><rect x="8.8419%" y="292" width="0.2306%" height="15" fill="rgb(233,36,39)" fg:x="7974" fg:w="208"/><text x="9.0919%" y="302.50"></text></g><g><title>copy (psycopg/cursor.py:327) (6,789 samples, 7.53%)</title><rect x="1.5457%" y="148" width="7.5279%" height="15" fill="rgb(226,3,54)" fg:x="1394" fg:w="6789"/><text x="1.7957%" y="158.50">copy (psyc..</text></g><g><title>__exit__ (psycopg/_copy.py:78) (6,789 samples, 7.53%)</title><rect x="1.5457%" y="164" width="7.5279%" height="15" fill="rgb(245,192,40)" fg:x="1394" fg:w="6789"/><text x="1.7957%" y="174.50">__exit__ (..</text></g><g><title>finish (psycopg/_copy.py:142) (6,789 samples, 7.53%)</title><rect x="1.5457%" y="180" width="7.5279%" height="15" fill="rgb(238,167,29)" fg:x="1394" fg:w="6789"/><text x="1.7957%" y="190.50">finish (ps..</text></g><g><title>finish (psycopg/_copy.py:214) (6,789 samples, 7.53%)</title><rect x="1.5457%" y="196" width="7.5279%" height="15" fill="rgb(232,182,51)" fg:x="1394" fg:w="6789"/><text x="1.7957%" y="206.50">finish (ps..</text></g><g><title>wait (psycopg/connection.py:484) (6,789 samples, 7.53%)</title><rect x="1.5457%" y="212" width="7.5279%" height="15" fill="rgb(231,60,39)" fg:x="1394" fg:w="6789"/><text x="1.7957%" y="222.50">wait (psyc..</text></g><g><title>main (ingest_trace.py:416) (6,808 samples, 7.55%)</title><rect x="1.5258%" y="116" width="7.5490%" height="15" fill="rgb(208,69,12)" fg:x="1376" fg:w="6808"/><text x="1.7758%" y="126.50">main (inge..</text></g><g><title>__exit__ (contextlib.py:144) (6,790 samples, 7.53%)</title><rect x="1.5457%" y="132" width="7.5291%" height="15" fill="rgb(235,93,37)" fg:x="1394" fg:w="6790"/><text x="1.7957%" y="142.50">__exit__ (..</text></g><g><title>0x7ff8b27557e1 (libc.so.6) (94 samples, 0.10%)</title><rect x="9.1114%" y="180" width="0.1042%" height="15" fill="rgb(213,116,39)" fg:x="8217" fg:w="94"/><text x="9.3614%" y="190.50"></text></g><g><title>0x7ff8b27557e8 (libc.so.6) (121 samples, 0.13%)</title><rect x="9.2156%" y="180" width="0.1342%" height="15" fill="rgb(222,207,29)" fg:x="8311" fg:w="121"/><text x="9.4656%" y="190.50"></text></g><g><title>write (psycopg/_copy.py:123) (224 samples, 0.25%)</title><rect x="9.1058%" y="132" width="0.2484%" height="15" fill="rgb(206,96,30)" fg:x="8212" fg:w="224"/><text x="9.3558%" y="142.50"></text></g><g><title>write (psycopg/_copy_base.py:221) (224 samples, 0.25%)</title><rect x="9.1058%" y="148" width="0.2484%" height="15" fill="rgb(218,138,4)" fg:x="8212" fg:w="224"/><text x="9.3558%" y="158.50"></text></g><g><title>_ensure_bytes (psycopg/_copy_base.py:243) (224 samples, 0.25%)</title><rect x="9.1058%" y="164" width="0.2484%" height="15" fill="rgb(250,191,14)" fg:x="8212" fg:w="224"/><text x="9.3558%" y="174.50"></text></g><g><title>main (ingest_trace.py:417) (377 samples, 0.42%)</title><rect x="9.0748%" y="116" width="0.4180%" height="15" fill="rgb(239,60,40)" fg:x="8184" fg:w="377"/><text x="9.3248%" y="126.50"></text></g><g><title>write (psycopg/_copy.py:124) (125 samples, 0.14%)</title><rect x="9.3542%" y="132" width="0.1386%" height="15" fill="rgb(206,27,48)" fg:x="8436" fg:w="125"/><text x="9.6042%" y="142.50"></text></g><g><title>main (ingest_trace.py:420) (1,055 samples, 1.17%)</title><rect x="9.4928%" y="116" width="1.1698%" height="15" fill="rgb(225,35,8)" fg:x="8561" fg:w="1055"/><text x="9.7428%" y="126.50"></text></g><g><title>execute (psycopg/cursor.py:113) (1,055 samples, 1.17%)</title><rect x="9.4928%" y="132" width="1.1698%" height="15" fill="rgb(250,213,24)" fg:x="8561" fg:w="1055"/><text x="9.7428%" y="142.50"></text></g><g><title>wait (psycopg/connection.py:484) (1,055 samples, 1.17%)</title><rect x="9.4928%" y="148" width="1.1698%" height="15" fill="rgb(247,123,22)" fg:x="8561" fg:w="1055"/><text x="9.7428%" y="158.50"></text></g><g><title>0x7ff8a4c9f8a7 (psycopg_binary/_psycopg.cpython-312-x86_64-linux-gnu.so) (1,048 samples, 1.16%)</title><rect x="9.5006%" y="164" width="1.1621%" height="15" fill="rgb(231,138,38)" fg:x="8568" fg:w="1048"/><text x="9.7506%" y="174.50"></text></g><g><title>poll (libc.so.6) (1,048 samples, 1.16%)</title><rect x="9.5006%" y="180" width="1.1621%" height="15" fill="rgb(231,145,46)" fg:x="8568" fg:w="1048"/><text x="9.7506%" y="190.50"></text></g><g><title>main (ingest_trace.py:423) (823 samples, 0.91%)</title><rect x="10.6638%" y="116" width="0.9126%" height="15" fill="rgb(251,118,11)" fg:x="9617" fg:w="823"/><text x="10.9138%" y="126.50"></text></g><g><title>execute (psycopg/cursor.py:113) (823 samples, 0.91%)</title><rect x="10.6638%" y="132" width="0.9126%" height="15" fill="rgb(217,147,25)" fg:x="9617" fg:w="823"/><text x="10.9138%" y="142.50"></text></g><g><title>wait (psycopg/connection.py:484) (823 samples, 0.91%)</title><rect x="10.6638%" y="148" width="0.9126%" height="15" fill="rgb(247,81,37)" fg:x="9617" fg:w="823"/><text x="10.9138%" y="158.50"></text></g><g><title>0x7ff8a4c9f8a7 (psycopg_binary/_psycopg.cpython-312-x86_64-linux-gnu.so) (823 samples, 0.91%)</title><rect x="10.6638%" y="164" width="0.9126%" height="15" fill="rgb(209,12,38)" fg:x="9617" fg:w="823"/><text x="10.9138%" y="174.50"></text></g><g><title>poll (libc.so.6) (823 samples, 0.91%)</title><rect x="10.6638%" y="180" width="0.9126%" height="15" fill="rgb(227,1,9)" fg:x="9617" fg:w="823"/><text x="10.9138%" y="190.50"></text></g><g><title>0x7ff8a4c9f8a7 (psycopg_binary/_psycopg.cpython-312-x86_64-linux-gnu.so) (15,728 samples, 17.44%)</title><rect x="11.5763%" y="164" width="17.4399%" height="15" fill="rgb(248,47,43)" fg:x="10440" fg:w="15728"/><text x="11.8263%" y="174.50">0x7ff8a4c9f8a7 (psycopg_bin..</text></g><g><title>poll (libc.so.6) (15,728 samples, 17.44%)</title><rect x="11.5763%" y="180" width="17.4399%" height="15" fill="rgb(221,10,30)" fg:x="10440" fg:w="15728"/><text x="11.8263%" y="190.50">poll (libc.so.6)</text></g><g><title>main (ingest_trace.py:430) (15,730 samples, 17.44%)</title><rect x="11.5763%" y="116" width="17.4421%" height="15" fill="rgb(210,229,1)" fg:x="10440" fg:w="15730"/><text x="11.8263%" y="126.50">main (ingest_trace.py:430)</text></g><g><title>execute (psycopg/cursor.py:113) (15,730 samples, 17.44%)</title><rect x="11.5763%" y="132" width="17.4421%" height="15" fill="rgb(222,148,37)" fg:x="10440" fg:w="15730"/><text x="11.8263%" y="142.50">execute (psycopg/cursor.py:..</text></g><g><title>wait (psycopg/connection.py:484) (15,730 samples, 17.44%)</title><rect x="11.5763%" y="148" width="17.4421%" height="15" fill="rgb(234,67,33)" fg:x="10440" fg:w="15730"/><text x="11.8263%" y="158.50">wait (psycopg/connection.py..</text></g><g><title>0x7ff8b25de1ca (libc.so.6) (26,182 samples, 29.03%)</title><rect x="0.0011%" y="84" width="29.0318%" height="15" fill="rgb(247,98,35)" fg:x="1" fg:w="26182"/><text x="0.2511%" y="94.50">0x7ff8b25de1ca (libc.so.6)</text></g><g><title>&lt;module&gt; (ingest_trace.py:478) (26,182 samples, 29.03%)</title><rect x="0.0011%" y="100" width="29.0318%" height="15" fill="rgb(247,138,52)" fg:x="1" fg:w="26182"/><text x="0.2511%" y="110.50">&lt;module&gt; (ingest_trace.py:478)</text></g><g><title>_RNvMs3_NtCs4LCoU3z53HD_10rayon_core5latchNtB5_9LockLatch14wait_and_reset (_polars_runtime_32/_polars_runtime.abi3.so) (95 samples, 0.11%)</title><rect x="29.0440%" y="212" width="0.1053%" height="15" fill="rgb(213,79,30)" fg:x="26193" fg:w="95"/><text x="29.2940%" y="222.50"></text></g><g><title>syscall (libc.so.6) (95 samples, 0.11%)</title><rect x="29.0440%" y="228" width="0.1053%" height="15" fill="rgb(246,177,23)" fg:x="26193" fg:w="95"/><text x="29.2940%" y="238.50"></text></g><g><title>main (ingest_trace.py:320) (125 samples, 0.14%)</title><rect x="29.0329%" y="100" width="0.1386%" height="15" fill="rgb(230,62,27)" fg:x="26183" fg:w="125"/><text x="29.2829%" y="110.50"></text></g><g><title>wrapper (polars/_utils/deprecation.py:132) (125 samples, 0.14%)</title><rect x="29.0329%" y="116" width="0.1386%" height="15" fill="rgb(216,154,8)" fg:x="26183" fg:w="125"/><text x="29.2829%" y="126.50"></text></g><g><title>wrapper (polars/_utils/deprecation.py:132) (125 samples, 0.14%)</title><rect x="29.0329%" y="132" width="0.1386%" height="15" fill="rgb(244,35,45)" fg:x="26183" fg:w="125"/><text x="29.2829%" y="142.50"></text></g><g><title>wrapper (polars/_utils/deprecation.py:132) (125 samples, 0.14%)</title><rect x="29.0329%" y="148" width="0.1386%" height="15" fill="rgb(251,115,12)" fg:x="26183" fg:w="125"/><text x="29.2829%" y="158.50"></text></g><g><title>wrapper (polars/_utils/deprecation.py:132) (125 samples, 0.14%)</title><rect x="29.0329%" y="164" width="0.1386%" height="15" fill="rgb(240,54,50)" fg:x="26183" fg:w="125"/><text x="29.2829%" y="174.50"></text></g><g><title>read_csv (polars/io/csv/functions.py:621) (125 samples, 0.14%)</title><rect x="29.0329%" y="180" width="0.1386%" height="15" fill="rgb(233,84,52)" fg:x="26183" fg:w="125"/><text x="29.2829%" y="190.50"></text></g><g><title>_read_csv_impl (polars/io/csv/functions.py:743) (125 samples, 0.14%)</title><rect x="29.0329%" y="196" width="0.1386%" height="15" fill="rgb(207,117,47)" fg:x="26183" fg:w="125"/><text x="29.2829%" y="206.50"></text></g><g><title>to_observations (acquirium/Drivers/tabular.py:144) (120 samples, 0.13%)</title><rect x="29.1848%" y="116" width="0.1331%" height="15" fill="rgb(249,43,39)" fg:x="26320" fg:w="120"/><text x="29.4348%" y="126.50"></text></g><g><title>select (polars/dataframe/frame.py:10585) (120 samples, 0.13%)</title><rect x="29.1848%" y="132" width="0.1331%" height="15" fill="rgb(209,38,44)" fg:x="26320" fg:w="120"/><text x="29.4348%" y="142.50"></text></g><g><title>_collect_eager (polars/lazyframe/frame.py:2240) (120 samples, 0.13%)</title><rect x="29.1848%" y="148" width="0.1331%" height="15" fill="rgb(236,212,23)" fg:x="26320" fg:w="120"/><text x="29.4348%" y="158.50"></text></g><g><title>collect (polars/lazyframe/engine.py:435) (120 samples, 0.13%)</title><rect x="29.1848%" y="164" width="0.1331%" height="15" fill="rgb(242,79,21)" fg:x="26320" fg:w="120"/><text x="29.4348%" y="174.50"></text></g><g><title>to_observations (acquirium/Drivers/tabular.py:148) (197 samples, 0.22%)</title><rect x="29.3212%" y="116" width="0.2184%" height="15" fill="rgb(211,96,35)" fg:x="26443" fg:w="197"/><text x="29.5712%" y="126.50"></text></g><g><title>unpivot (polars/dataframe/frame.py:9941) (174 samples, 0.19%)</title><rect x="29.3467%" y="132" width="0.1929%" height="15" fill="rgb(253,215,40)" fg:x="26466" fg:w="174"/><text x="29.5967%" y="142.50"></text></g><g><title>_collect_eager (polars/lazyframe/frame.py:2240) (174 samples, 0.19%)</title><rect x="29.3467%" y="148" width="0.1929%" height="15" fill="rgb(211,81,21)" fg:x="26466" fg:w="174"/><text x="29.5967%" y="158.50"></text></g><g><title>collect (polars/lazyframe/engine.py:435) (174 samples, 0.19%)</title><rect x="29.3467%" y="164" width="0.1929%" height="15" fill="rgb(208,190,38)" fg:x="26466" fg:w="174"/><text x="29.5967%" y="174.50"></text></g><g><title>main (ingest_trace.py:325) (362 samples, 0.40%)</title><rect x="29.1715%" y="100" width="0.4014%" height="15" fill="rgb(235,213,38)" fg:x="26308" fg:w="362"/><text x="29.4215%" y="110.50"></text></g><g><title>_RNvXNtNtCsd8ivy27hhZR_13polars_python10conversion13chunked_arrayRINtB4_4WrapRINtNtCsh4PTPxMyeKl_11polars_core13chunked_array12ChunkedArrayNtNtB1i_9datatypes10StringTypeEENtNtCslOouxyCtSiE_4pyo310conversion12IntoPyObject13into_pyobject (_polars_runtime_32/_polars_runtime.abi3.so) (157 samples, 0.17%)</title><rect x="29.8201%" y="148" width="0.1741%" height="15" fill="rgb(237,122,38)" fg:x="26893" fg:w="157"/><text x="30.0701%" y="158.50"></text></g><g><title>main (ingest_trace.py:340) (177 samples, 0.20%)</title><rect x="29.8168%" y="100" width="0.1963%" height="15" fill="rgb(244,218,35)" fg:x="26890" fg:w="177"/><text x="30.0668%" y="110.50"></text></g><g><title>iter_rows (polars/dataframe/frame.py:12251) (176 samples, 0.20%)</title><rect x="29.8179%" y="116" width="0.1952%" height="15" fill="rgb(240,68,47)" fg:x="26891" fg:w="176"/><text x="30.0679%" y="126.50"></text></g><g><title>rows (polars/dataframe/frame.py:12007) (176 samples, 0.20%)</title><rect x="29.8179%" y="132" width="0.1952%" height="15" fill="rgb(210,16,53)" fg:x="26891" fg:w="176"/><text x="30.0679%" y="142.50"></text></g><g><title>partition_by (polars/dataframe/frame.py:10246) (155 samples, 0.17%)</title><rect x="30.1816%" y="116" width="0.1719%" height="15" fill="rgb(235,124,12)" fg:x="27219" fg:w="155"/><text x="30.4316%" y="126.50"></text></g><g><title>_RNvMs3_NtCs4LCoU3z53HD_10rayon_core5latchNtB5_9LockLatch14wait_and_reset (_polars_runtime_32/_polars_runtime.abi3.so) (155 samples, 0.17%)</title><rect x="30.1816%" y="132" width="0.1719%" height="15" fill="rgb(224,169,11)" fg:x="27219" fg:w="155"/><text x="30.4316%" y="142.50"></text></g><g><title>syscall (libc.so.6) (155 samples, 0.17%)</title><rect x="30.1816%" y="148" width="0.1719%" height="15" fill="rgb(250,166,2)" fg:x="27219" fg:w="155"/><text x="30.4316%" y="158.50"></text></g><g><title>main (ingest_trace.py:377) (156 samples, 0.17%)</title><rect x="30.1816%" y="100" width="0.1730%" height="15" fill="rgb(242,216,29)" fg:x="27219" fg:w="156"/><text x="30.4316%" y="110.50"></text></g><g><title>main (ingest_trace.py:379) (91 samples, 0.10%)</title><rect x="30.3546%" y="100" width="0.1009%" height="15" fill="rgb(230,116,27)" fg:x="27375" fg:w="91"/><text x="30.6046%" y="110.50"></text></g><g><title>wrapper (polars/_utils/deprecation.py:132) (91 samples, 0.10%)</title><rect x="30.3546%" y="116" width="0.1009%" height="15" fill="rgb(228,99,48)" fg:x="27375" fg:w="91"/><text x="30.6046%" y="126.50"></text></g><g><title>to_arrow (polars/dataframe/frame.py:1805) (91 samples, 0.10%)</title><rect x="30.3546%" y="132" width="0.1009%" height="15" fill="rgb(253,11,6)" fg:x="27375" fg:w="91"/><text x="30.6046%" y="142.50"></text></g><g><title>_RINvNtNtCs40F5eC5IIzc_14polars_compute4cast7utf8_to17binary_to_binviewxEB6_ (_polars_runtime_32/_polars_runtime.abi3.so) (94 samples, 0.10%)</title><rect x="30.4555%" y="148" width="0.1042%" height="15" fill="rgb(247,143,39)" fg:x="27466" fg:w="94"/><text x="30.7055%" y="158.50"></text></g><g><title>main (ingest_trace.py:384) (95 samples, 0.11%)</title><rect x="30.4555%" y="100" width="0.1053%" height="15" fill="rgb(236,97,10)" fg:x="27466" fg:w="95"/><text x="30.7055%" y="110.50"></text></g><g><title>from_arrow (polars/convert/general.py:562) (95 samples, 0.11%)</title><rect x="30.4555%" y="116" width="0.1053%" height="15" fill="rgb(233,208,19)" fg:x="27466" fg:w="95"/><text x="30.7055%" y="126.50"></text></g><g><title>arrow_to_pydf (polars/_utils/construction/dataframe.py:1197) (95 samples, 0.11%)</title><rect x="30.4555%" y="132" width="0.1053%" height="15" fill="rgb(216,164,2)" fg:x="27466" fg:w="95"/><text x="30.7055%" y="142.50"></text></g><g><title>main (ingest_trace.py:389) (93 samples, 0.10%)</title><rect x="30.6363%" y="100" width="0.1031%" height="15" fill="rgb(220,129,5)" fg:x="27629" fg:w="93"/><text x="30.8863%" y="110.50"></text></g><g><title>wrapper (polars/series/utils.py:104) (93 samples, 0.10%)</title><rect x="30.6363%" y="116" width="0.1031%" height="15" fill="rgb(242,17,10)" fg:x="27629" fg:w="93"/><text x="30.8863%" y="126.50"></text></g><g><title>select_seq (polars/dataframe/frame.py:10616) (93 samples, 0.10%)</title><rect x="30.6363%" y="132" width="0.1031%" height="15" fill="rgb(242,107,0)" fg:x="27629" fg:w="93"/><text x="30.8863%" y="142.50"></text></g><g><title>_collect_eager (polars/lazyframe/frame.py:2240) (93 samples, 0.10%)</title><rect x="30.6363%" y="148" width="0.1031%" height="15" fill="rgb(251,28,31)" fg:x="27629" fg:w="93"/><text x="30.8863%" y="158.50"></text></g><g><title>collect (polars/lazyframe/engine.py:435) (93 samples, 0.10%)</title><rect x="30.6363%" y="164" width="0.1031%" height="15" fill="rgb(233,223,10)" fg:x="27629" fg:w="93"/><text x="30.8863%" y="174.50"></text></g><g><title>_RNvMs3_NtCs4LCoU3z53HD_10rayon_core5latchNtB5_9LockLatch14wait_and_reset (_polars_runtime_32/_polars_runtime.abi3.so) (147 samples, 0.16%)</title><rect x="30.7460%" y="164" width="0.1630%" height="15" fill="rgb(215,21,27)" fg:x="27728" fg:w="147"/><text x="30.9960%" y="174.50"></text></g><g><title>syscall (libc.so.6) (147 samples, 0.16%)</title><rect x="30.7460%" y="180" width="0.1630%" height="15" fill="rgb(232,23,21)" fg:x="27728" fg:w="147"/><text x="30.9960%" y="190.50"></text></g><g><title>main (ingest_trace.py:397) (155 samples, 0.17%)</title><rect x="30.7394%" y="100" width="0.1719%" height="15" fill="rgb(244,5,23)" fg:x="27722" fg:w="155"/><text x="30.9894%" y="110.50"></text></g><g><title>with_columns (polars/dataframe/frame.py:10751) (151 samples, 0.17%)</title><rect x="30.7438%" y="116" width="0.1674%" height="15" fill="rgb(226,81,46)" fg:x="27726" fg:w="151"/><text x="30.9938%" y="126.50"></text></g><g><title>_collect_eager (polars/lazyframe/frame.py:2240) (151 samples, 0.17%)</title><rect x="30.7438%" y="132" width="0.1674%" height="15" fill="rgb(247,70,30)" fg:x="27726" fg:w="151"/><text x="30.9938%" y="142.50"></text></g><g><title>collect (polars/lazyframe/engine.py:435) (151 samples, 0.17%)</title><rect x="30.7438%" y="148" width="0.1674%" height="15" fill="rgb(212,68,19)" fg:x="27726" fg:w="151"/><text x="30.9938%" y="158.50"></text></g><g><title>_RNvMs3_NtCs4LCoU3z53HD_10rayon_core5latchNtB5_9LockLatch14wait_and_reset (_polars_runtime_32/_polars_runtime.abi3.so) (441 samples, 0.49%)</title><rect x="30.9778%" y="212" width="0.4890%" height="15" fill="rgb(240,187,13)" fg:x="27937" fg:w="441"/><text x="31.2278%" y="222.50"></text></g><g><title>syscall (libc.so.6) (441 samples, 0.49%)</title><rect x="30.9778%" y="228" width="0.4890%" height="15" fill="rgb(223,113,26)" fg:x="27937" fg:w="441"/><text x="31.2278%" y="238.50"></text></g><g><title>_prepare_value_columns_vectorized (acquirium/Storage/values.py:212) (447 samples, 0.50%)</title><rect x="30.9745%" y="148" width="0.4957%" height="15" fill="rgb(206,192,2)" fg:x="27934" fg:w="447"/><text x="31.2245%" y="158.50"></text></g><g><title>with_columns (polars/dataframe/frame.py:10751) (447 samples, 0.50%)</title><rect x="30.9745%" y="164" width="0.4957%" height="15" fill="rgb(241,108,4)" fg:x="27934" fg:w="447"/><text x="31.2245%" y="174.50"></text></g><g><title>_collect_eager (polars/lazyframe/frame.py:2240) (447 samples, 0.50%)</title><rect x="30.9745%" y="180" width="0.4957%" height="15" fill="rgb(247,173,49)" fg:x="27934" fg:w="447"/><text x="31.2245%" y="190.50"></text></g><g><title>collect (polars/lazyframe/engine.py:435) (447 samples, 0.50%)</title><rect x="30.9745%" y="196" width="0.4957%" height="15" fill="rgb(224,114,35)" fg:x="27934" fg:w="447"/><text x="31.2245%" y="206.50"></text></g><g><title>_prepare_frame (acquirium/Storage/timescale_store.py:311) (517 samples, 0.57%)</title><rect x="30.9190%" y="116" width="0.5733%" height="15" fill="rgb(245,159,27)" fg:x="27884" fg:w="517"/><text x="31.1690%" y="126.50"></text></g><g><title>prepare_value_columns (acquirium/Storage/values.py:153) (517 samples, 0.57%)</title><rect x="30.9190%" y="132" width="0.5733%" height="15" fill="rgb(245,172,44)" fg:x="27884" fg:w="517"/><text x="31.1690%" y="142.50"></text></g><g><title>_RINvNtNtNtNtCsdN1ZzDs28Vk_4core5slice4sort8unstable9quicksort9quicksortTmINtNtCsdG6TjKnxNwU_12polars_utils7idx_vec7UnitVecmEENCINvMB8_SB17_20sort_unstable_by_keymNCNCNCNvNtNtNtCsh4PTPxMyeKl_11polars_core5frame8group_by7hashing18finish_group_order000E0EB2O_ (_polars_runtime_32/_polars_runtime.abi3.so) (148 samples, 0.16%)</title><rect x="31.5888%" y="180" width="0.1641%" height="15" fill="rgb(236,23,11)" fg:x="28488" fg:w="148"/><text x="31.8388%" y="190.50"></text></g><g><title>_RNvMs3_NtCs4LCoU3z53HD_10rayon_core5latchNtB5_9LockLatch14wait_and_reset (_polars_runtime_32/_polars_runtime.abi3.so) (310 samples, 0.34%)</title><rect x="31.8127%" y="180" width="0.3437%" height="15" fill="rgb(205,117,38)" fg:x="28690" fg:w="310"/><text x="32.0627%" y="190.50"></text></g><g><title>syscall (libc.so.6) (310 samples, 0.34%)</title><rect x="31.8127%" y="196" width="0.3437%" height="15" fill="rgb(237,72,25)" fg:x="28690" fg:w="310"/><text x="32.0627%" y="206.50"></text></g><g><title>main (ingest_trace.py:404) (1,129 samples, 1.25%)</title><rect x="30.9190%" y="100" width="1.2519%" height="15" fill="rgb(244,70,9)" fg:x="27884" fg:w="1129"/><text x="31.1690%" y="110.50"></text></g><g><title>_prepare_frame (acquirium/Storage/timescale_store.py:319) (610 samples, 0.68%)</title><rect x="31.4945%" y="116" width="0.6764%" height="15" fill="rgb(217,125,39)" fg:x="28403" fg:w="610"/><text x="31.7445%" y="126.50"></text></g><g><title>unique (polars/dataframe/frame.py:11488) (610 samples, 0.68%)</title><rect x="31.4945%" y="132" width="0.6764%" height="15" fill="rgb(235,36,10)" fg:x="28403" fg:w="610"/><text x="31.7445%" y="142.50"></text></g><g><title>_collect_eager (polars/lazyframe/frame.py:2240) (610 samples, 0.68%)</title><rect x="31.4945%" y="148" width="0.6764%" height="15" fill="rgb(251,123,47)" fg:x="28403" fg:w="610"/><text x="31.7445%" y="158.50"></text></g><g><title>collect (polars/lazyframe/engine.py:435) (610 samples, 0.68%)</title><rect x="31.4945%" y="164" width="0.6764%" height="15" fill="rgb(221,13,13)" fg:x="28403" fg:w="610"/><text x="31.7445%" y="174.50"></text></g><g><title>thread (181572): MainThread (29,965 samples, 33.23%)</title><rect x="0.0000%" y="68" width="33.2265%" height="15" fill="rgb(238,131,9)" fg:x="0" fg:w="29965"/><text x="0.2500%" y="78.50">thread (181572): MainThread</text></g><g><title>&lt;module&gt; (ingest_trace.py:478) (3,782 samples, 4.19%)</title><rect x="29.0329%" y="84" width="4.1936%" height="15" fill="rgb(211,50,8)" fg:x="26183" fg:w="3782"/><text x="29.2829%" y="94.50">&lt;modu..</text></g><g><title>main (ingest_trace.py:413) (950 samples, 1.05%)</title><rect x="32.1731%" y="100" width="1.0534%" height="15" fill="rgb(245,182,24)" fg:x="29015" fg:w="950"/><text x="32.4231%" y="110.50"></text></g><g><title>write_csv (polars/dataframe/frame.py:3242) (948 samples, 1.05%)</title><rect x="32.1753%" y="116" width="1.0512%" height="15" fill="rgb(242,14,37)" fg:x="29017" fg:w="948"/><text x="32.4253%" y="126.50"></text></g><g><title>sink_csv (polars/lazyframe/frame.py:3976) (948 samples, 1.05%)</title><rect x="32.1753%" y="132" width="1.0512%" height="15" fill="rgb(246,228,12)" fg:x="29017" fg:w="948"/><text x="32.4253%" y="142.50"></text></g><g><title>sink_csv (polars/lazyframe/engine.py:755) (948 samples, 1.05%)</title><rect x="32.1753%" y="148" width="1.0512%" height="15" fill="rgb(213,55,15)" fg:x="29017" fg:w="948"/><text x="32.4253%" y="158.50"></text></g><g><title>_finish_sink (polars/lazyframe/engine.py:514) (948 samples, 1.05%)</title><rect x="32.1753%" y="164" width="1.0512%" height="15" fill="rgb(209,9,3)" fg:x="29017" fg:w="948"/><text x="32.4253%" y="174.50"></text></g><g><title>collect (polars/lazyframe/engine.py:435) (948 samples, 1.05%)</title><rect x="32.1753%" y="180" width="1.0512%" height="15" fill="rgb(230,59,30)" fg:x="29017" fg:w="948"/><text x="32.4253%" y="190.50"></text></g><g><title>activity_sampler (ingest_trace.py:202) (167 samples, 0.19%)</title><rect x="33.2376%" y="164" width="0.1852%" height="15" fill="rgb(209,121,21)" fg:x="29975" fg:w="167"/><text x="33.4876%" y="174.50"></text></g><g><title>execute (psycopg/cursor.py:113) (166 samples, 0.18%)</title><rect x="33.2387%" y="180" width="0.1841%" height="15" fill="rgb(220,109,13)" fg:x="29976" fg:w="166"/><text x="33.4887%" y="190.50"></text></g><g><title>wait (psycopg/connection.py:484) (166 samples, 0.18%)</title><rect x="33.2387%" y="196" width="0.1841%" height="15" fill="rgb(232,18,1)" fg:x="29976" fg:w="166"/><text x="33.4887%" y="206.50"></text></g><g><title>clock_nanosleep (libc.so.6) (29,687 samples, 32.92%)</title><rect x="33.4383%" y="180" width="32.9183%" height="15" fill="rgb(215,41,42)" fg:x="30156" fg:w="29687"/><text x="33.6883%" y="190.50">clock_nanosleep (libc.so.6)</text></g><g><title>thread (181613): Thread-1 (activity_sampler) (29,965 samples, 33.23%)</title><rect x="33.2265%" y="68" width="33.2265%" height="15" fill="rgb(224,123,36)" fg:x="29965" fg:w="29965"/><text x="33.4765%" y="78.50">thread (181613): Thread-1 (activity_sampler)</text></g><g><title>0x7ff8b26ddc6c (libc.so.6) (29,965 samples, 33.23%)</title><rect x="33.2265%" y="84" width="33.2265%" height="15" fill="rgb(240,125,3)" fg:x="29965" fg:w="29965"/><text x="33.4765%" y="94.50">0x7ff8b26ddc6c (libc.so.6)</text></g><g><title>0x7ff8b2650aa4 (libc.so.6) (29,965 samples, 33.23%)</title><rect x="33.2265%" y="100" width="33.2265%" height="15" fill="rgb(205,98,50)" fg:x="29965" fg:w="29965"/><text x="33.4765%" y="110.50">0x7ff8b2650aa4 (libc.so.6)</text></g><g><title>_bootstrap (threading.py:1030) (29,965 samples, 33.23%)</title><rect x="33.2265%" y="116" width="33.2265%" height="15" fill="rgb(205,185,37)" fg:x="29965" fg:w="29965"/><text x="33.4765%" y="126.50">_bootstrap (threading.py:1030)</text></g><g><title>_bootstrap_inner (threading.py:1073) (29,965 samples, 33.23%)</title><rect x="33.2265%" y="132" width="33.2265%" height="15" fill="rgb(238,207,15)" fg:x="29965" fg:w="29965"/><text x="33.4765%" y="142.50">_bootstrap_inner (threading.py:1073)</text></g><g><title>run (threading.py:1010) (29,965 samples, 33.23%)</title><rect x="33.2265%" y="148" width="33.2265%" height="15" fill="rgb(213,199,42)" fg:x="29965" fg:w="29965"/><text x="33.4765%" y="158.50">run (threading.py:1010)</text></g><g><title>activity_sampler (ingest_trace.py:207) (29,774 samples, 33.01%)</title><rect x="33.4383%" y="164" width="33.0147%" height="15" fill="rgb(235,201,11)" fg:x="30156" fg:w="29774"/><text x="33.6883%" y="174.50">activity_sampler (ingest_trace.py:207)</text></g><g><title>poll (libc.so.6) (318 samples, 0.35%)</title><rect x="66.4674%" y="244" width="0.3526%" height="15" fill="rgb(207,46,11)" fg:x="59943" fg:w="318"/><text x="66.7174%" y="254.50"></text></g><g><title>_communicate (subprocess.py:2115) (323 samples, 0.36%)</title><rect x="66.4663%" y="212" width="0.3582%" height="15" fill="rgb(241,35,35)" fg:x="59942" fg:w="323"/><text x="66.7163%" y="222.50"></text></g><g><title>select (selectors.py:415) (322 samples, 0.36%)</title><rect x="66.4674%" y="228" width="0.3570%" height="15" fill="rgb(243,32,47)" fg:x="59943" fg:w="322"/><text x="66.7174%" y="238.50"></text></g><g><title>sys_sampler (ingest_trace.py:217) (337 samples, 0.37%)</title><rect x="66.4530%" y="164" width="0.3737%" height="15" fill="rgb(247,202,23)" fg:x="59930" fg:w="337"/><text x="66.7030%" y="174.50"></text></g><g><title>run (subprocess.py:550) (326 samples, 0.36%)</title><rect x="66.4652%" y="180" width="0.3615%" height="15" fill="rgb(219,102,11)" fg:x="59941" fg:w="326"/><text x="66.7152%" y="190.50"></text></g><g><title>communicate (subprocess.py:1209) (326 samples, 0.36%)</title><rect x="66.4652%" y="196" width="0.3615%" height="15" fill="rgb(243,110,44)" fg:x="59941" fg:w="326"/><text x="66.7152%" y="206.50"></text></g><g><title>clock_nanosleep (libc.so.6) (29,621 samples, 32.85%)</title><rect x="66.8289%" y="180" width="32.8451%" height="15" fill="rgb(222,74,54)" fg:x="60269" fg:w="29621"/><text x="67.0789%" y="190.50">clock_nanosleep (libc.so.6)</text></g><g><title>thread (181614): Thread-2 (sys_sampler) (29,965 samples, 33.23%)</title><rect x="66.4530%" y="68" width="33.2265%" height="15" fill="rgb(216,99,12)" fg:x="59930" fg:w="29965"/><text x="66.7030%" y="78.50">thread (181614): Thread-2 (sys_sampler)</text></g><g><title>0x7ff8b26ddc6c (libc.so.6) (29,965 samples, 33.23%)</title><rect x="66.4530%" y="84" width="33.2265%" height="15" fill="rgb(226,22,26)" fg:x="59930" fg:w="29965"/><text x="66.7030%" y="94.50">0x7ff8b26ddc6c (libc.so.6)</text></g><g><title>0x7ff8b2650aa4 (libc.so.6) (29,965 samples, 33.23%)</title><rect x="66.4530%" y="100" width="33.2265%" height="15" fill="rgb(217,163,10)" fg:x="59930" fg:w="29965"/><text x="66.7030%" y="110.50">0x7ff8b2650aa4 (libc.so.6)</text></g><g><title>_bootstrap (threading.py:1030) (29,965 samples, 33.23%)</title><rect x="66.4530%" y="116" width="33.2265%" height="15" fill="rgb(213,25,53)" fg:x="59930" fg:w="29965"/><text x="66.7030%" y="126.50">_bootstrap (threading.py:1030)</text></g><g><title>_bootstrap_inner (threading.py:1073) (29,965 samples, 33.23%)</title><rect x="66.4530%" y="132" width="33.2265%" height="15" fill="rgb(252,105,26)" fg:x="59930" fg:w="29965"/><text x="66.7030%" y="142.50">_bootstrap_inner (threading.py:1073)</text></g><g><title>run (threading.py:1010) (29,965 samples, 33.23%)</title><rect x="66.4530%" y="148" width="33.2265%" height="15" fill="rgb(220,39,43)" fg:x="59930" fg:w="29965"/><text x="66.7030%" y="158.50">run (threading.py:1010)</text></g><g><title>sys_sampler (ingest_trace.py:229) (29,626 samples, 32.85%)</title><rect x="66.8289%" y="164" width="32.8506%" height="15" fill="rgb(229,68,48)" fg:x="60269" fg:w="29626"/><text x="67.0789%" y="174.50">sys_sampler (ingest_trace.py:229)</text></g><g><title>thread (181649) (118 samples, 0.13%)</title><rect x="99.6795%" y="68" width="0.1308%" height="15" fill="rgb(252,8,32)" fg:x="89895" fg:w="118"/><text x="99.9295%" y="78.50"></text></g><g><title>_RNvYINtNtCslOouxyCtSiE_4pyo38instance5BoundNtNtNtB7_5types5tuple7PyTupleENtNtB7_4call10PyCallArgs22call_method_positionalCsd8ivy27hhZR_13polars_python (_polars_runtime_32/_polars_runtime.abi3.so) (105 samples, 0.12%)</title><rect x="99.6940%" y="84" width="0.1164%" height="15" fill="rgb(223,20,43)" fg:x="89908" fg:w="105"/><text x="99.9440%" y="94.50"></text></g><g><title>all (90,184 samples, 100%)</title><rect x="0.0000%" y="52" width="100.0000%" height="15" fill="rgb(229,81,49)" fg:x="0" fg:w="90184"/><text x="0.2500%" y="62.50"></text></g></svg></svg>

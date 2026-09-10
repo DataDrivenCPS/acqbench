@@ -1,0 +1,305 @@
+{
+ "pg_stat_io": [],
+ "pg_stat_checkpointer": [
+  {
+   "num_timed": 0,
+   "num_requested": 0,
+   "restartpoints_timed": 0,
+   "restartpoints_req": 0,
+   "restartpoints_done": 0,
+   "write_time": 0.0,
+   "sync_time": 0.0,
+   "buffers_written": 0,
+   "stats_reset": "2026-09-09 21:43:19.760278+00:00"
+  }
+ ],
+ "pg_stat_bgwriter": [
+  {
+   "buffers_clean": 0,
+   "maxwritten_clean": 0,
+   "buffers_alloc": 0,
+   "stats_reset": "2026-09-09 21:43:19.760269+00:00"
+  }
+ ],
+ "pg_stat_wal": [
+  {
+   "wal_records": 0,
+   "wal_fpi": 0,
+   "wal_bytes": "0",
+   "wal_buffers_full": 0,
+   "wal_write": 0,
+   "wal_sync": 0,
+   "wal_write_time": 0.0,
+   "wal_sync_time": 0.0,
+   "stats_reset": "2026-09-09 21:43:19.760286+00:00"
+  }
+ ],
+ "pg_stat_user_tables": [
+  {
+   "relname": "compression_algorithm",
+   "n_tup_ins": 8,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 8,
+   "seq_scan": 1,
+   "idx_scan": 0
+  },
+  {
+   "relname": "metadata",
+   "n_tup_ins": 3,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 3,
+   "seq_scan": 1,
+   "idx_scan": 5
+  },
+  {
+   "relname": "bgw_job",
+   "n_tup_ins": 2,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 2,
+   "seq_scan": 2,
+   "idx_scan": 8
+  },
+  {
+   "relname": "bgw_job_stat",
+   "n_tup_ins": 2,
+   "n_tup_upd": 2,
+   "n_tup_hot_upd": 2,
+   "n_live_tup": 2,
+   "seq_scan": 1,
+   "idx_scan": 7
+  },
+  {
+   "relname": "bgw_job_stat_history",
+   "n_tup_ins": 1,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 1,
+   "seq_scan": 3,
+   "idx_scan": 1
+  },
+  {
+   "relname": "continuous_aggs_materialization_invalidation_log",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 1,
+   "idx_scan": 0
+  },
+  {
+   "relname": "timeseries",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 0,
+   "idx_scan": 0
+  },
+  {
+   "relname": "chunk_column_stats",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 2,
+   "idx_scan": 0
+  },
+  {
+   "relname": "hypertable",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 3,
+   "idx_scan": 4
+  },
+  {
+   "relname": "dimension",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 2,
+   "idx_scan": 0
+  },
+  {
+   "relname": "compression_settings",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 2,
+   "idx_scan": 1
+  },
+  {
+   "relname": "streams",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 0,
+   "idx_scan": 0
+  },
+  {
+   "relname": "continuous_aggs_jobs_refresh_ranges",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 1,
+   "idx_scan": 0
+  },
+  {
+   "relname": "continuous_aggs_bucket_function",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 1,
+   "idx_scan": 0
+  },
+  {
+   "relname": "cache_inval_bgw_job",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 0,
+   "idx_scan": null
+  },
+  {
+   "relname": "continuous_agg",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 4,
+   "idx_scan": 0
+  },
+  {
+   "relname": "tablespace",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 2,
+   "idx_scan": 0
+  },
+  {
+   "relname": "chunk_rewrite",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 1,
+   "idx_scan": 0
+  },
+  {
+   "relname": "continuous_aggs_tenant_tracking",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 1,
+   "idx_scan": 0
+  },
+  {
+   "relname": "dimension_slice",
+   "n_tup_ins": 0,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 0,
+   "seq_scan": 3,
+   "idx_scan": 0
+  }
+ ],
+ "settings": [
+  {
+   "name": "autovacuum",
+   "setting": "on"
+  },
+  {
+   "name": "checkpoint_completion_target",
+   "setting": "0.9"
+  },
+  {
+   "name": "checkpoint_timeout",
+   "setting": "300"
+  },
+  {
+   "name": "effective_io_concurrency",
+   "setting": "256"
+  },
+  {
+   "name": "fsync",
+   "setting": "on"
+  },
+  {
+   "name": "full_page_writes",
+   "setting": "on"
+  },
+  {
+   "name": "jit",
+   "setting": "off"
+  },
+  {
+   "name": "maintenance_work_mem",
+   "setting": "1048576"
+  },
+  {
+   "name": "max_parallel_workers",
+   "setting": "4"
+  },
+  {
+   "name": "max_parallel_workers_per_gather",
+   "setting": "2"
+  },
+  {
+   "name": "max_wal_size",
+   "setting": "1024"
+  },
+  {
+   "name": "random_page_cost",
+   "setting": "1.1"
+  },
+  {
+   "name": "shared_buffers",
+   "setting": "262144"
+  },
+  {
+   "name": "shared_preload_libraries",
+   "setting": "timescaledb,pg_stat_statements"
+  },
+  {
+   "name": "synchronous_commit",
+   "setting": "on"
+  },
+  {
+   "name": "temp_buffers",
+   "setting": "1024"
+  },
+  {
+   "name": "track_io_timing",
+   "setting": "on"
+  },
+  {
+   "name": "wal_buffers",
+   "setting": "2048"
+  },
+  {
+   "name": "wal_compression",
+   "setting": "off"
+  },
+  {
+   "name": "wal_level",
+   "setting": "replica"
+  },
+  {
+   "name": "work_mem",
+   "setting": "16384"
+  }
+ ]
+}

@@ -1,0 +1,31 @@
+-- file DPR Pilot R1 SCADA v13.05 - 2025.02.19-1107-3.csv, rows 786480
+Custom Scan (ModifyHypertable)  (cost=105455.24..107292.74 rows=0 width=0) (actual time=3044.458..3044.466 rows=0 loops=1)
+  Buffers: shared hit=1677616 read=24 dirtied=8115 written=8086, local read=9800, temp read=3145 written=3148
+  I/O Timings: shared read=0.117 write=46.735, local read=19.497, temp read=6.858 write=15.362
+  WAL: records=1576160 fpi=27 bytes=120364552
+  ->  Insert on timeseries  (cost=105455.24..107292.74 rows=0 width=0) (actual time=3044.439..3044.444 rows=0 loops=1)
+        Buffers: shared hit=1677616 read=24 dirtied=8115 written=8086, local read=9800, temp read=3145 written=3148
+        I/O Timings: shared read=0.117 write=46.735, local read=19.497, temp read=6.858 write=15.362
+        WAL: records=1576160 fpi=27 bytes=120364552
+        ->  Sort  (cost=105455.24..107292.74 rows=735000 width=52) (actual time=894.107..1046.231 rows=786480 loops=1)
+              Sort Key: r.ref_id, i.ts
+              Sort Method: external merge  Disk: 25160kB
+              Buffers: shared hit=3, local read=9800, temp read=3145 written=3148
+              I/O Timings: local read=19.497, temp read=6.858 write=15.362
+              ->  Hash Join  (cost=8.00..19124.20 rows=735000 width=52) (actual time=0.154..382.380 rows=786480 loops=1)
+                    Hash Cond: (i.ref_uri = r.ref_uri)
+                    Buffers: shared hit=3, local read=9800
+                    I/O Timings: local read=19.497
+                    ->  Seq Scan on _acquirium_incoming_timeseries i  (cost=0.00..17150.00 rows=735000 width=80) (actual time=0.029..102.965 rows=786480 loops=1)
+                          Buffers: local read=9800
+                          I/O Timings: local read=19.497
+                    ->  Hash  (cost=5.22..5.22 rows=222 width=55) (actual time=0.113..0.115 rows=245 loops=1)
+                          Buckets: 1024  Batches: 1  Memory Usage: 29kB
+                          Buffers: shared hit=3
+                          ->  Seq Scan on ref_ids r  (cost=0.00..5.22 rows=222 width=55) (actual time=0.020..0.048 rows=245 loops=1)
+                                Buffers: shared hit=3
+Settings: work_mem = '16MB', effective_io_concurrency = '256', max_parallel_workers = '4', random_page_cost = '1.1', effective_cache_size = '6GB', jit = 'off'
+Planning:
+  Buffers: shared hit=4
+Planning Time: 0.482 ms
+Execution Time: 3048.382 ms

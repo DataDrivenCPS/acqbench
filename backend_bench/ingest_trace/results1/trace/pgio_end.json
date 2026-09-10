@@ -1,0 +1,425 @@
+{
+ "pg_stat_io": [
+  {
+   "backend_type": "client backend",
+   "object": "relation",
+   "context": "normal",
+   "reads": 2858,
+   "read_time": 14.859,
+   "writes": 9,
+   "write_time": 0.08,
+   "writebacks": 0,
+   "extends": 4672539,
+   "extend_time": 9930.724,
+   "hits": 3584962698,
+   "evictions": 4414421,
+   "reuses": null,
+   "fsyncs": 0,
+   "fsync_time": 0.0
+  },
+  {
+   "backend_type": "client backend",
+   "object": "temp relation",
+   "context": "normal",
+   "reads": 11229224,
+   "read_time": 10138.354,
+   "writes": 5597239,
+   "write_time": 14570.179,
+   "writebacks": null,
+   "extends": 5627655,
+   "extend_time": 4928.573,
+   "hits": 5544488,
+   "evictions": 16212152,
+   "reuses": null,
+   "fsyncs": null,
+   "fsync_time": null
+  },
+  {
+   "backend_type": "autovacuum worker",
+   "object": "relation",
+   "context": "normal",
+   "reads": 638,
+   "read_time": 5.018,
+   "writes": 0,
+   "write_time": 0.0,
+   "writebacks": 0,
+   "extends": 212,
+   "extend_time": 2.124,
+   "hits": 3739698,
+   "evictions": 720,
+   "reuses": null,
+   "fsyncs": 0,
+   "fsync_time": 0.0
+  },
+  {
+   "backend_type": "autovacuum worker",
+   "object": "relation",
+   "context": "vacuum",
+   "reads": 106696,
+   "read_time": 121.22500000000001,
+   "writes": 4888,
+   "write_time": 13.476,
+   "writebacks": 0,
+   "extends": 0,
+   "extend_time": 0.0,
+   "hits": 10902683,
+   "evictions": 4537,
+   "reuses": 101979,
+   "fsyncs": null,
+   "fsync_time": null
+  },
+  {
+   "backend_type": "background worker",
+   "object": "relation",
+   "context": "normal",
+   "reads": 9,
+   "read_time": 0.05,
+   "writes": 0,
+   "write_time": 0.0,
+   "writebacks": 0,
+   "extends": 0,
+   "extend_time": 0.0,
+   "hits": 1792,
+   "evictions": 0,
+   "reuses": null,
+   "fsyncs": 0,
+   "fsync_time": 0.0
+  },
+  {
+   "backend_type": "background writer",
+   "object": "relation",
+   "context": "normal",
+   "reads": null,
+   "read_time": null,
+   "writes": 256,
+   "write_time": 2.031,
+   "writebacks": 256,
+   "extends": null,
+   "extend_time": null,
+   "hits": null,
+   "evictions": null,
+   "reuses": null,
+   "fsyncs": 0,
+   "fsync_time": 0.0
+  },
+  {
+   "backend_type": "checkpointer",
+   "object": "relation",
+   "context": "normal",
+   "reads": null,
+   "read_time": null,
+   "writes": 5171082,
+   "write_time": 13426.236,
+   "writebacks": 5171057,
+   "extends": null,
+   "extend_time": null,
+   "hits": null,
+   "evictions": null,
+   "reuses": null,
+   "fsyncs": 7103,
+   "fsync_time": 6272.633
+  }
+ ],
+ "pg_stat_checkpointer": [
+  {
+   "num_timed": 0,
+   "num_requested": 168,
+   "restartpoints_timed": 0,
+   "restartpoints_req": 0,
+   "restartpoints_done": 0,
+   "write_time": 2680193.0,
+   "sync_time": 6470.0,
+   "buffers_written": 5171082,
+   "stats_reset": "2026-09-09 21:43:19.760278+00:00"
+  }
+ ],
+ "pg_stat_bgwriter": [
+  {
+   "buffers_clean": 256,
+   "maxwritten_clean": 0,
+   "buffers_alloc": 4680828,
+   "stats_reset": "2026-09-09 21:43:19.760269+00:00"
+  }
+ ],
+ "pg_stat_wal": [
+  {
+   "wal_records": 1360949176,
+   "wal_fpi": 146348,
+   "wal_bytes": "92073862173",
+   "wal_buffers_full": 1460,
+   "wal_write": 16107,
+   "wal_sync": 14641,
+   "wal_write_time": 0.0,
+   "wal_sync_time": 0.0,
+   "stats_reset": "2026-09-09 21:43:19.760286+00:00"
+  }
+ ],
+ "pg_stat_user_tables": [
+  {
+   "relname": "_hyper_1_15_chunk",
+   "n_tup_ins": 41009016,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 40990937,
+   "seq_scan": 1,
+   "idx_scan": 41009016
+  },
+  {
+   "relname": "_hyper_1_20_chunk",
+   "n_tup_ins": 8144965,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 8146357,
+   "seq_scan": 1,
+   "idx_scan": 8144965
+  },
+  {
+   "relname": "_hyper_1_61_chunk",
+   "n_tup_ins": 7955646,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 7954887,
+   "seq_scan": 1,
+   "idx_scan": 7955646
+  },
+  {
+   "relname": "_hyper_1_42_chunk",
+   "n_tup_ins": 7896669,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 7895894,
+   "seq_scan": 1,
+   "idx_scan": 7896669
+  },
+  {
+   "relname": "_hyper_1_12_chunk",
+   "n_tup_ins": 7745202,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 7744025,
+   "seq_scan": 1,
+   "idx_scan": 7745202
+  },
+  {
+   "relname": "_hyper_1_33_chunk",
+   "n_tup_ins": 7579657,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 7580936,
+   "seq_scan": 1,
+   "idx_scan": 7579657
+  },
+  {
+   "relname": "_hyper_1_59_chunk",
+   "n_tup_ins": 7434512,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 7434915,
+   "seq_scan": 1,
+   "idx_scan": 7434512
+  },
+  {
+   "relname": "_hyper_1_75_chunk",
+   "n_tup_ins": 7400501,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 7400370,
+   "seq_scan": 1,
+   "idx_scan": 7400501
+  },
+  {
+   "relname": "_hyper_1_67_chunk",
+   "n_tup_ins": 7352885,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 7352470,
+   "seq_scan": 1,
+   "idx_scan": 7352885
+  },
+  {
+   "relname": "_hyper_1_44_chunk",
+   "n_tup_ins": 7300162,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 7301018,
+   "seq_scan": 1,
+   "idx_scan": 7300162
+  },
+  {
+   "relname": "_hyper_1_74_chunk",
+   "n_tup_ins": 7275747,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 7274070,
+   "seq_scan": 1,
+   "idx_scan": 7275747
+  },
+  {
+   "relname": "_hyper_1_26_chunk",
+   "n_tup_ins": 7133329,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 7133960,
+   "seq_scan": 1,
+   "idx_scan": 7133329
+  },
+  {
+   "relname": "_hyper_1_52_chunk",
+   "n_tup_ins": 7119118,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 7118335,
+   "seq_scan": 1,
+   "idx_scan": 7119118
+  },
+  {
+   "relname": "_hyper_1_14_chunk",
+   "n_tup_ins": 7002186,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 7002307,
+   "seq_scan": 1,
+   "idx_scan": 7002186
+  },
+  {
+   "relname": "_hyper_1_70_chunk",
+   "n_tup_ins": 6944293,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 6945172,
+   "seq_scan": 1,
+   "idx_scan": 6944293
+  },
+  {
+   "relname": "_hyper_1_53_chunk",
+   "n_tup_ins": 6942398,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 6942193,
+   "seq_scan": 1,
+   "idx_scan": 6942398
+  },
+  {
+   "relname": "_hyper_1_63_chunk",
+   "n_tup_ins": 6917969,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 6918419,
+   "seq_scan": 1,
+   "idx_scan": 6917969
+  },
+  {
+   "relname": "_hyper_1_48_chunk",
+   "n_tup_ins": 6830489,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 6832040,
+   "seq_scan": 1,
+   "idx_scan": 6830489
+  },
+  {
+   "relname": "_hyper_1_68_chunk",
+   "n_tup_ins": 6729960,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 6730210,
+   "seq_scan": 1,
+   "idx_scan": 6729960
+  },
+  {
+   "relname": "_hyper_1_66_chunk",
+   "n_tup_ins": 6691964,
+   "n_tup_upd": 0,
+   "n_tup_hot_upd": 0,
+   "n_live_tup": 6500446,
+   "seq_scan": 1,
+   "idx_scan": 6691964
+  }
+ ],
+ "settings": [
+  {
+   "name": "autovacuum",
+   "setting": "on"
+  },
+  {
+   "name": "checkpoint_completion_target",
+   "setting": "0.9"
+  },
+  {
+   "name": "checkpoint_timeout",
+   "setting": "300"
+  },
+  {
+   "name": "effective_io_concurrency",
+   "setting": "256"
+  },
+  {
+   "name": "fsync",
+   "setting": "on"
+  },
+  {
+   "name": "full_page_writes",
+   "setting": "on"
+  },
+  {
+   "name": "jit",
+   "setting": "off"
+  },
+  {
+   "name": "maintenance_work_mem",
+   "setting": "1048576"
+  },
+  {
+   "name": "max_parallel_workers",
+   "setting": "4"
+  },
+  {
+   "name": "max_parallel_workers_per_gather",
+   "setting": "2"
+  },
+  {
+   "name": "max_wal_size",
+   "setting": "1024"
+  },
+  {
+   "name": "random_page_cost",
+   "setting": "1.1"
+  },
+  {
+   "name": "shared_buffers",
+   "setting": "262144"
+  },
+  {
+   "name": "shared_preload_libraries",
+   "setting": "timescaledb,pg_stat_statements"
+  },
+  {
+   "name": "synchronous_commit",
+   "setting": "on"
+  },
+  {
+   "name": "temp_buffers",
+   "setting": "1024"
+  },
+  {
+   "name": "track_io_timing",
+   "setting": "on"
+  },
+  {
+   "name": "wal_buffers",
+   "setting": "2048"
+  },
+  {
+   "name": "wal_compression",
+   "setting": "off"
+  },
+  {
+   "name": "wal_level",
+   "setting": "replica"
+  },
+  {
+   "name": "work_mem",
+   "setting": "16384"
+  }
+ ]
+}

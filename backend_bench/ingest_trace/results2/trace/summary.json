@@ -1,0 +1,76 @@
+{
+ "started": "2026-09-10T17:43:35.932523+00:00",
+ "finished": "2026-09-10T18:20:11.131655+00:00",
+ "files_done": 1000,
+ "files_total": 1000,
+ "rows_pushed": 682580597,
+ "rows_in_db": 682580597,
+ "ref_ids": 292,
+ "streams": 292,
+ "ingest_wall_s": 2170.586159550003,
+ "rows_per_s": 314468.32644575136,
+ "sizes": {
+  "table_bytes": 35943620608,
+  "index_bytes": 21823709184,
+  "total_bytes": 57768165376,
+  "chunks": 101
+ },
+ "postgres": [
+  "PostgreSQL 17.11 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit",
+  "2.29.2"
+ ],
+ "fidelity": {
+  "checks": {
+   "store.drop": true,
+   "store.create_temp": true,
+   "store.copy": true,
+   "store.ref_ids": true,
+   "store.merge": true,
+   "store.write_csv": true,
+   "store.dedupe": true,
+   "manager.value_kind_per_stream": true,
+   "manager.replace_maps": true,
+   "app.from_arrow_partition": true,
+   "client.ipc_stream": true,
+   "driver.register_group_by": true
+  },
+  "all_ok": true,
+  "acquirium_path": "/home/vmuser/acq_bench10/repo_ums-timescale-fix/src/acquirium",
+  "clone_head": "d6b6e1a5f20b43fda9deaee9630ba498c011c3a6"
+ },
+ "driver_cfg": {
+  "format": "wide",
+  "date_col": "Date",
+  "clock_col": "Time",
+  "date_format": "%m/%d/%Y %I:%M:%S %p",
+  "header_contains": [
+   "Date",
+   "Time"
+  ],
+  "null_values": [
+   "NaN"
+  ],
+  "encoding": "utf8-lossy",
+  "timezone": "UTC"
+ },
+ "explain_every": 25,
+ "versions": {
+  "polars": "1.44.1",
+  "pyarrow": "25.0.1",
+  "psycopg": "3.3.5",
+  "python": "3.12.3"
+ },
+ "stopped_by": "complete",
+ "variant": "plain-insert",
+ "merge_sql": "\n                INSERT INTO timeseries (ref_id, ts, numeric_value, text_value)\n                SELECT r.ref_id, i.ts, i.numeric_value, i.text_value\n                FROM _acquirium_incoming_timeseries AS i\n                JOIN ref_ids AS r USING (ref_uri)\n                ORDER BY r.ref_id, i.ts\n",
+ "variant_ddl": [
+  "DROP INDEX idx_timeseries_ref_ts_unique",
+  "CREATE INDEX idx_timeseries_ref_ts ON timeseries (ref_id, ts)"
+ ],
+ "indexes": [
+  [
+   "idx_timeseries_ref_ts",
+   "CREATE INDEX idx_timeseries_ref_ts ON public.timeseries USING btree (ref_id, ts)"
+  ]
+ ]
+}
