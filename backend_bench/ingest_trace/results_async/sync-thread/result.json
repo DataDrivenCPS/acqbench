@@ -1,0 +1,38 @@
+{
+ "mode": "sync",
+ "tag": "sync-thread",
+ "probe_uri": "urn:dpr/feed-pump-out-flow-rate",
+ "files": 100,
+ "rows_pushed": 61499352,
+ "rows_in_db": 61499352,
+ "boot_s": 216.8080644607544,
+ "driver_wall_s": 437.3859884738922,
+ "merge_tail_s": 0.06213784217834473,
+ "total_s": 437.44812631607056,
+ "rows_per_s_driver": 140606.58919271926,
+ "rows_per_s_total": 140586.61656162795,
+ "probe_health": {
+  "n": 174,
+  "p50_ms": 1.5866756439208984,
+  "p90_ms": 2.221345901489258,
+  "p99_ms": 68.18675994873047,
+  "max_ms": 136.47699356079102,
+  "over_1s": 0,
+  "over_5s": 0,
+  "errors": 0
+ },
+ "probe_timeseries_1d": {
+  "n": 175,
+  "p50_ms": 4.0111541748046875,
+  "p90_ms": 4466.477155685425,
+  "p99_ms": 4809.504270553589,
+  "max_ms": 4858.574151992798,
+  "over_1s": 80,
+  "over_5s": 0,
+  "errors": 0
+ },
+ "merged_batches": 0,
+ "merge_ms_sum": 0,
+ "size": "3240263680|1973256192|5213634560",
+ "started": "2026-09-11T03:28:38.430649+00:00"
+}
