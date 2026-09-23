@@ -1,0 +1,560 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acquirium Startup Breakdown</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-0:#f5f5f3; --surface-1:#fcfcfb; --surface-2:#efefec;
+  --border:#dedcd6; --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#7b7a75;
+  --grid:#e6e5e0; --axis:#c3c2b7;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948;
+  --n1:#9d9c96; --n2:#c9c8c1;
+  --h0:#cde2fb; --h1:#9ec5f4; --h2:#6da7ec; --h3:#3987e5; --h4:#256abf; --h5:#184f95;
+  --accent:#2a78d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0:#121211; --surface-1:#1a1a19; --surface-2:#232322;
+    --border:#3a3a37; --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#94938b;
+    --grid:#2c2c2a; --axis:#383835;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+    --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+    --n1:#6f6e69; --n2:#4a4946;
+    --h0:#1d2a3a; --h1:#18365c; --h2:#184f95; --h3:#256abf; --h4:#3987e5; --h5:#6da7ec;
+    --accent:#3987e5;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0:#121211; --surface-1:#1a1a19; --surface-2:#232322;
+  --border:#3a3a37; --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#94938b;
+  --grid:#2c2c2a; --axis:#383835;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+  --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  --n1:#6f6e69; --n2:#4a4946;
+  --h0:#1d2a3a; --h1:#18365c; --h2:#184f95; --h3:#256abf; --h4:#3987e5; --h5:#6da7ec;
+  --accent:#3987e5;
+}
+* { box-sizing:border-box; }
+body { background:var(--surface-0); color:var(--text-primary); margin:0;
+  font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+.wrap { max-width:1240px; margin:0 auto; padding:32px 16px 80px; }
+h1 { font-size:27px; margin:0 0 4px; letter-spacing:-.02em; }
+h2 { font-size:19px; margin:40px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+.sub { color:var(--text-secondary); font-size:13px; }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; }
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin:18px 0 6px; }
+.tile { background:var(--surface-1); border:1px solid var(--border); border-radius:10px; padding:11px 14px; }
+.tile .k { font-size:12px; color:var(--text-secondary); }
+.tile .t { font-size:11px; color:var(--text-muted); }
+.tile .v { font-size:24px; font-weight:640; margin-top:3px; letter-spacing:-.02em; }
+.tile .n { font-size:12px; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+.fig { margin:14px 0; background:var(--surface-1); border:1px solid var(--border); border-radius:10px; padding:12px 14px 10px; position:relative; }
+.fig h3 { font-size:14px; margin:0 0 2px; }
+.fig .unit { color:var(--text-muted); font-size:12px; }
+.scroll { overflow-x:auto; }
+.legend { display:flex; flex-wrap:wrap; gap:4px 14px; margin:8px 0 4px; font-size:12px; color:var(--text-secondary); }
+.legend span { display:inline-flex; align-items:center; gap:6px; }
+.sw { width:10px; height:10px; border-radius:3px; display:inline-block; }
+.controls { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:6px 0 8px; }
+.seg { display:inline-flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; flex-wrap:wrap; }
+.seg button { border:0; background:var(--surface-1); color:var(--text-secondary); padding:5px 10px; font:inherit; font-size:12px; cursor:pointer; }
+.seg button + button { border-left:1px solid var(--border); }
+.seg button.on { background:var(--surface-2); color:var(--text-primary); font-weight:600; }
+button.plain, input[type=search] { border:1px solid var(--border); background:var(--surface-1); color:var(--text-primary); border-radius:8px; padding:5px 10px; font:inherit; font-size:12px; }
+input[type=search] { min-width:220px; }
+table { border-collapse:collapse; width:100%; font-size:12.5px; }
+th, td { padding:5px 8px; border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
+th { font-size:11.5px; color:var(--text-muted); font-weight:600; background:var(--surface-2); position:sticky; top:0; cursor:pointer; user-select:none; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.path { white-space:normal; min-width:340px; max-width:560px; }
+td.path .pre { color:var(--text-muted); font-size:11px; }
+.tbox { max-height:620px; overflow:auto; border:1px solid var(--border); border-radius:8px; }
+.muted { color:var(--text-muted); }
+svg text { fill:var(--text-muted); font-size:11px; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+svg .lab { fill:var(--text-primary); font-size:12px; }
+svg .val { fill:var(--text-secondary); font-size:11.5px; font-variant-numeric:tabular-nums; }
+svg .grid { stroke:var(--grid); stroke-width:1; }
+svg .axis { stroke:var(--axis); stroke-width:1; }
+svg .mark-line { stroke:var(--text-secondary); stroke-width:1; }
+#tip { position:fixed; pointer-events:none; z-index:10; background:var(--surface-1); color:var(--text-primary);
+  border:1px solid var(--border); border-radius:8px; padding:7px 9px; font-size:12px; max-width:460px;
+  box-shadow:0 4px 18px rgba(0,0,0,.14); display:none; }
+#tip b { font-weight:600; } #tip .m { color:var(--text-muted); }
+details summary { cursor:pointer; color:var(--text-secondary); font-size:13px; }
+.logs { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; max-height:460px; overflow:auto; white-space:pre; background:var(--surface-2); padding:8px; border-radius:8px; }
+.two { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media (max-width:820px) { .two { grid-template-columns:1fr; } }
+.foot { font-size:12px; color:var(--text-muted); margin-top:40px; }
+</style>
+<body>
+<div class="wrap">
+<h1>Acquirium startup breakdown</h1>
+<div class="sub" id="envline"></div>
+<div class="controls" style="margin-top:12px">
+  <span class="muted">Dataset</span><div class="seg" id="setsel"></div>
+  <span class="muted" style="margin-left:10px">Refs</span><div class="seg" id="refsel"><button data-v="both" class="on">All</button><button data-v="main">main</button><button data-v="lri">local-runtime-init</button><button data-v="emb">ums-embedding-improvement</button><button data-v="emb2">…-2</button></div>
+</div>
+<div class="sub" id="setnote"></div>
+<div class="tiles" id="tiles"></div>
+
+<h2>main vs branches</h2>
+<div class="fig">
+  <h3>Per scenario</h3><span class="unit">medians of traced reps in the selected dataset</span>
+  <div class="scroll"><table id="cmp"></table></div>
+</div>
+
+<h2>Launch → /health</h2>
+<div class="fig">
+  <h3>Main-thread time by step group</h3><span class="unit" id="grpunit">seconds, mean of traced reps</span>
+  <div class="controls"><div class="seg" id="grpmode"><button data-v="abs" class="on">Seconds</button><button data-v="pct">Share</button></div></div>
+  <div class="legend" id="grplegend"></div>
+  <div class="scroll" id="grpchart"></div>
+</div>
+<div class="two">
+  <div class="fig">
+    <h3>/health per rep</h3><span class="unit">seconds, log scale</span>
+    <div class="legend" id="dotlegend"></div>
+    <div class="scroll" id="dots"></div>
+  </div>
+  <div class="fig">
+    <h3>After /health: configured driver start</h3><span class="unit">seconds, mean of traced reps</span>
+    <div class="legend" id="postlegend"></div>
+    <div class="scroll" id="postchart"></div>
+  </div>
+</div>
+
+<div class="fig">
+  <h3>Milestones</h3><span class="unit">median over traced reps unless noted</span>
+  <div class="scroll"><table id="miles"></table></div>
+</div>
+
+<h2>Every step</h2>
+<div class="fig">
+  <h3>Launch → /health, per call path</h3><span class="unit">ms, mean of traced reps · cell shade = share of that run's /health time</span>
+  <div class="controls">
+    <div class="seg" id="stepmode"><button data-v="0" class="on">Self time</button><button data-v="1">Inclusive</button></div>
+    <input type="search" id="stepfilter" placeholder="filter path…">
+    <div class="seg" id="stepmin"><button data-v="0">all</button><button data-v="1" class="on">≥ 1 ms</button><button data-v="10">≥ 10 ms</button><button data-v="100">≥ 100 ms</button></div>
+    <span class="muted" id="stepcount"></span>
+  </div>
+  <div class="tbox"><table id="steps"></table></div>
+</div>
+<div class="fig">
+  <h3>After /health: driver start, per call path</h3><span class="unit">ms, mean of traced reps</span>
+  <div class="tbox" style="max-height:340px"><table id="poststeps"></table></div>
+</div>
+
+<h2>Timeline of one run</h2>
+<div class="controls"><span class="muted">Run</span><div class="seg" id="scsel"></div></div>
+<div class="fig">
+  <h3 id="flametitle">Span timeline</h3><span class="unit">click a span to zoom · colour = step group (grey = after /health or request threads)</span>
+  <div class="controls"><button class="plain" id="zoomreset">Reset zoom</button><span class="muted" id="zoominfo"></span></div>
+  <div class="scroll" id="flame"></div>
+</div>
+<div class="two">
+  <div class="fig"><h3>CPU</h3><span class="unit">cores in use, container cgroup, 1 s rolling window</span><div id="cpu"></div></div>
+  <div class="fig"><h3>Memory</h3><span class="unit">MiB</span>
+    <div class="legend"><span><span class="sw" style="background:var(--s1)"></span>server RSS</span><span><span class="sw" style="background:var(--s2)"></span>Ray processes RSS</span><span><span class="sw" style="background:var(--s3)"></span>container cgroup</span></div>
+    <div id="mem"></div></div>
+</div>
+<div class="fig">
+  <h3>Hottest functions in this run's scenario</h3><span class="unit">whole process lifetime incl. probes · median of traced reps · includes calls past the per-span cap</span>
+  <div class="tbox" style="max-height:420px"><table id="hot"></table></div>
+</div>
+<details class="fig"><summary>Server log (INFO + timed DEBUG exits) for this run</summary><div class="logs" id="logs"></div></details>
+
+<h2>First requests after the driver starts</h2>
+<div class="fig">
+  <h3>Probe latency</h3><span class="unit">ms, median of traced reps · run sequentially top to bottom · hover a cell for every rep</span>
+  <div class="scroll"><table id="probes"></table></div>
+</div>
+
+<h2>Footprint</h2>
+<div class="fig"><h3>data_dir after the run</h3><span class="unit">MB</span><div class="legend" id="disklegend"></div><div class="scroll" id="disk"></div></div>
+<div class="two">
+  <div class="fig"><h3>Peak server RSS</h3><span class="unit">MiB, median of traced reps</span><div class="legend" id="rsslegend"></div><div class="scroll" id="peakrss"></div></div>
+  <div class="fig"><h3>Peak container memory</h3><span class="unit">MiB, cgroup memory.current, median of traced reps</span><div class="legend" id="cglegend"></div><div class="scroll" id="peakcg"></div></div>
+</div>
+<div class="fig" id="impfig">
+  <h3>Import cost by top-level package</h3><span class="unit" id="impunit"></span>
+  <div class="legend" id="implegend"></div>
+  <div class="scroll" id="imports"></div>
+</div>
+
+<div class="foot" id="foot"></div>
+</div>
+<div id="tip"></div>
+<script>
+const D = /*DATA*/null;
+const GCOL = ["--s1","--s2","--s3","--s4","--s5","--s6","--s7","--s8"].map(v => `var(${v})`);
+const REFS = D.refs;
+const REFCOL = {main: GCOL[0], lri: GCOL[1], emb: GCOL[2], emb2: GCOL[3]};
+const NS = "http://www.w3.org/2000/svg";
+const fmt = (x, d=1) => x == null || isNaN(x) ? "–" : x.toLocaleString(undefined, {minimumFractionDigits:d, maximumFractionDigits:d});
+const fs = x => x == null ? "–" : (Math.abs(x) >= 100 ? fmt(x,0) : Math.abs(x) >= 10 ? fmt(x,1) : fmt(x,2)) + " s";
+const fms = x => x == null ? "–" : (Math.abs(x) >= 1000 ? fmt(x,0) : Math.abs(x) >= 10 ? fmt(x,1) : fmt(x,2));
+const med = a => { a = (a || []).filter(x => x != null).sort((p,q)=>p-q); if (!a.length) return null; const m = a.length>>1; return a.length%2 ? a[m] : (a[m-1]+a[m])/2; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const el = (tag, attrs={}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const refName = r => (REFS.find(x => x.key === r) || {name: r}).name;
+const short = s => `${s.tag} ${s.ref}`;
+const tip = document.getElementById("tip");
+function showTip(ev, html) { tip.innerHTML = html; tip.style.display = "block"; const w = tip.offsetWidth, h = tip.offsetHeight; let x = ev.clientX + 14, y = ev.clientY + 14; if (x + w > innerWidth - 8) x = ev.clientX - w - 14; if (y + h > innerHeight - 8) y = ev.clientY - h - 14; tip.style.left = Math.max(4,x) + "px"; tip.style.top = Math.max(4,y) + "px"; }
+function hideTip() { tip.style.display = "none"; }
+function hover(node, html) { node.addEventListener("mousemove", e => showTip(e, typeof html === "function" ? html() : html)); node.addEventListener("mouseleave", hideTip); }
+function niceTicks(max, n=5) { if (max <= 0) return [0, 1]; const raw = max / n, p = Math.pow(10, Math.floor(Math.log10(raw))); const step = [1,2,2.5,5,10].map(m=>m*p).find(s => s >= raw); const out = []; let v = 0; for (; v < max - 1e-9; v += step) out.push(+v.toFixed(10)); out.push(+v.toFixed(10)); return out; }
+function legend(id, names, cols) { document.getElementById(id).innerHTML = names.map((n,i)=>`<span><span class="sw" style="background:${cols[i]}"></span>${esc(n)}</span>`).join(""); }
+function segmented(id, onchange) { const box = document.getElementById(id); box.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; box.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); onchange(b.dataset.v); }); }
+function rounded(parent, x, y, w, h, fill, rightRound) {
+  const r = Math.min(4, w/2, h/2);
+  if (!rightRound || w < 2) return el("rect", {x, y, width: Math.max(0, w), height: h, fill}, parent);
+  const d = `M${x},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h-r}Q${x+w},${y+h} ${x+w-r},${y+h}H${x}Z`;
+  return el("path", {d, fill}, parent);
+}
+
+/* ---------- dataset / ref state ---------- */
+let curSet = 0, refFilter = "both", ALL = D.sets[0].scenarios, S = ALL, cur = 0, zoom = null;
+const SETNOTE = {
+  "Paired": "main (startbench-1) and local-runtime-init (startbench-5) started the same job at the same moment and waited for each other before the next; jobs round-robin over scenarios: 3 traced rounds, then 1 untraced round.",
+  "Parallel ×4": "Per ref, 4 capped containers ran concurrently (main on startbench-1..4, local-runtime-init on startbench-5..8, ums-embedding-improvement on startbench-9..12, ums-embedding-improvement-2 on startbench-13..16, at different times): #1 on the 1st, #5b on the 2nd, #2 + #3 on the 3rd, #4a + #4b on the 4th; 5 traced + 2 untraced reps each.",
+};
+document.getElementById("setsel").innerHTML = D.sets.map((x, i) => `<button data-v="${i}" class="${i ? "" : "on"}">${esc(x.label)}</button>`).join("");
+function applyFilter() {
+  ALL = D.sets[curSet].scenarios;
+  S = ALL.filter(s => refFilter === "both" || s.ref === refFilter);
+  cur = Math.min(cur, S.length - 1); zoom = null;
+  document.getElementById("setnote").textContent = SETNOTE[D.sets[curSet].label] || "";
+  document.getElementById("scsel").innerHTML = S.map((s,i)=>`<button data-v="${i}" class="${i===cur?"on":""}" title="${esc(s.label)} · ${esc(s.ref_name)}">${esc(short(s))}</button>`).join("");
+}
+segmented("setsel", v => { curSet = +v; applyFilter(); drawAll(); });
+segmented("refsel", v => { refFilter = v; applyFilter(); drawAll(); });
+
+/* ---------- header ---------- */
+const envs = Object.values(D.env || {}), E0 = envs[0] || {};
+document.getElementById("envline").innerHTML = [
+  REFS.map(r => `${esc(r.name)} <code>${esc(r.sha)}</code>`).join(" · "),
+  E0.version && `v${esc(E0.version)}`, [...new Set(envs.map(e => e.date).filter(Boolean))].sort().join(" / "), E0.caps && esc(E0.caps), E0.cpu && esc(E0.cpu),
+  `DuckDB backend · 1 configured driver (SystemMetricsDriver)`
+].filter(Boolean).join(" · ");
+
+function byKey(list) { const m = new Map(); list.forEach(s => { if (!m.has(s.key)) m.set(s.key, {key: s.key, tag: s.tag, label: s.label, refs: {}}); m.get(s.key).refs[s.ref] = s; }); return [...m.values()]; }
+
+function drawTiles() {
+  document.getElementById("tiles").innerHTML = byKey(S).map(g => {
+    const lines = REFS.filter(r => g.refs[r.key]).map(r => { const s = g.refs[r.key]; return `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span class="n"><span class="sw" style="background:${REFCOL[r.key]}"></span> ${esc(r.key)}</span><span class="v" style="font-size:20px">${fs(med(s.health))}</span></div><div class="n" style="text-align:right">${fs(Math.min(...s.health))}–${fs(Math.max(...s.health))} · n=${s.n}</div>`; }).join("");
+    return `<div class="tile"><div class="t">${esc(g.tag)}</div><div class="k">${esc(g.label)}</div><div class="n" style="margin-top:2px">median to /health</div>${lines}</div>`;
+  }).join("");
+}
+
+function drawCmp() {
+  const groups = byKey(ALL);
+  const mets = [
+    ["/health", s => med(s.health), fs],
+    ["driver running", s => med(s.drivers), fs],
+    ["/health untraced", s => med(s.health_plain), fs],
+    ["CPU-s to /health", s => med(s.cpu_to_health), v => fmt(v, 1)],
+    ["first fuzzy unit query", s => s.probes["resolve fuzzy unit #1"]?.ms, v => v == null ? "–" : fms(v) + " ms"],
+    ["first fuzzy class query", s => s.probes["resolve fuzzy class #1"]?.ms, v => v == null ? "–" : fms(v) + " ms"],
+    ["peak server RSS", s => med(s.peak_srv_rss) / 1048576, v => v == null ? "–" : fmt(v, 0) + " MiB"],
+    ["data_dir", s => s.sizes.total / 1e6, v => v == null ? "–" : fmt(v, 0) + " MB"],
+  ];
+  const others = REFS.filter(r => r.key !== "main");
+  let html = `<tr><th>Scenario</th><th>Metric</th><th class="num">main</th>${others.map(r => `<th class="num">${esc(r.name)}</th><th class="num">× main</th>`).join("")}</tr>`;
+  groups.forEach(g => {
+    mets.forEach(([name, f, ff], i) => {
+      const a = g.refs.main ? f(g.refs.main) : null;
+      const cells = others.map(r => {
+        const b = g.refs[r.key] ? f(g.refs[r.key]) : null;
+        const ratio = a && b != null ? b / a : null;
+        return `<td class="num">${ff(b)}</td><td class="num">${ratio == null ? "–" : fmt(ratio, 2) + "×"}</td>`;
+      }).join("");
+      html += `<tr>${i === 0 ? `<td rowspan="${mets.length}" style="vertical-align:top;white-space:normal;min-width:180px"><b>${esc(g.tag)}</b> ${esc(g.label)}</td>` : ""}<td>${esc(name)}</td><td class="num">${ff(a)}</td>${cells}</tr>`;
+    });
+  });
+  document.getElementById("cmp").innerHTML = html;
+}
+
+/* ---------- stacked horizontal bars ---------- */
+function stacked(id, rows, names, cols, mode, opts={}) {
+  const box = document.getElementById(id); box.innerHTML = "";
+  const labW = opts.labW || 390, W = Math.max(640, box.clientWidth || 900), plotW = W - labW - 72, rowH = opts.rowH || 30, barH = 18, top = 8;
+  const H = top + rows.length * rowH + 26;
+  const svg = el("svg", {width: W, height: H, viewBox: `0 0 ${W} ${H}`}, box);
+  const totals = rows.map(r => r.vals.reduce((a,b)=>a+b,0));
+  const vf = opts.vf || (v => fmt(v, v < 1 ? 3 : 2) + " s"), tf = opts.tf || fs;
+  const max = mode === "pct" ? 100 : Math.max(...totals) * 1.02;
+  const ticks = mode === "pct" ? [0,25,50,75,100] : niceTicks(max);
+  const xmax = mode === "pct" ? 100 : ticks[ticks.length-1];
+  const X = v => labW + v / xmax * plotW;
+  ticks.forEach(t => { el("line", {x1: X(t), x2: X(t), y1: top-4, y2: H-22, class:"grid"}, svg); const tx = el("text", {x: X(t), y: H-8, "text-anchor":"middle"}, svg); tx.textContent = mode === "pct" ? t + "%" : t; });
+  rows.forEach((r, i) => {
+    const y = top + i*rowH + (rowH-barH)/2, tot = totals[i];
+    if (r.sep && i) el("line", {x1: 0, x2: W, y1: top + i*rowH, y2: top + i*rowH, class: "grid"}, svg);
+    const lt = el("text", {x: labW - 10, y: y + barH/2 + 4, "text-anchor":"end", class:"lab"}, svg); lt.textContent = r.label;
+    if (r.ref) el("rect", {x: labW - 6, y: y + 3, width: 3, height: barH - 6, rx: 1, fill: REFCOL[r.ref]}, svg);
+    let acc = 0;
+    const segs = r.vals.map((v,j)=>[v,j]).filter(([v])=>v>0);
+    segs.forEach(([v, j], k) => {
+      const vv = mode === "pct" ? v / tot * 100 : v;
+      const x0 = X(acc), w = X(acc + vv) - x0; acc += vv;
+      const last = k === segs.length - 1;
+      const g = rounded(svg, x0, y, Math.max(0, w - (last ? 0 : 2)), barH, cols[j], last);
+      hover(g, `<b>${esc(r.label)}</b><br>${esc(names[j])}<br>${vf(v)} · ${fmt(v/tot*100,1)}%`);
+    });
+    const vt = el("text", {x: X(acc) + 6, y: y + barH/2 + 4, class:"val"}, svg);
+    vt.textContent = tf(tot);
+  });
+}
+let grpMode = "abs";
+const rowsOf = (valsFn, full) => S.map((s, i) => ({label: full ? `${s.tag} ${s.label} · ${s.ref}` : short(s), vals: valsFn(s), ref: s.ref, sep: i && S[i-1].key !== s.key}));
+function drawGroups() { stacked("grpchart", rowsOf(s => s.groups, true), D.groups, GCOL, grpMode); document.getElementById("grpunit").textContent = grpMode === "pct" ? "share of main-thread time to /health, mean of traced reps (bar end = total)" : "seconds, mean of traced reps"; }
+legend("grplegend", D.groups, GCOL);
+segmented("grpmode", v => { grpMode = v; drawGroups(); });
+legend("postlegend", D.post_groups, GCOL);
+const drawPost = () => stacked("postchart", rowsOf(s => s.post), D.post_groups, GCOL, "abs", {labW: 90, rowH: 24});
+
+/* ---------- per-rep dots (log x), one row per scenario, colour = ref ---------- */
+function drawDots() {
+  const box = document.getElementById("dots"); box.innerHTML = "";
+  const refsShown = REFS.filter(r => S.some(s => s.ref === r.key));
+  document.getElementById("dotlegend").innerHTML = refsShown.map(r => `<span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="${REFCOL[r.key]}"/></svg>${esc(r.name)}</span>`).join("") +
+    `<span><svg width="12" height="12"><circle cx="6" cy="6" r="4" fill="none" stroke="var(--text-secondary)" stroke-width="1.5"/></svg>untraced control (ring)</span>`;
+  const groups = byKey(S);
+  const labW = 80, W = Math.max(420, box.clientWidth || 520), plotW = W - labW - 20, sub = 13, rowH = refsShown.length * sub * 2 + 10, top = 8, H = top + groups.length*rowH + 26;
+  const svg = el("svg", {width: W, height: H}, box);
+  const all = S.flatMap(s => [...s.health, ...s.health_plain]);
+  const lo = Math.pow(10, Math.floor(Math.log10(Math.min(...all)))), hi = Math.pow(10, Math.ceil(Math.log10(Math.max(...all))));
+  const X = v => labW + (Math.log10(v) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo)) * plotW;
+  const ticks = []; for (let d = lo; d <= hi; d *= 10) [1,2,5].forEach(m => { const v = d*m; if (v >= lo && v <= hi) ticks.push(v); });
+  ticks.forEach(t => { el("line", {x1:X(t), x2:X(t), y1:top-4, y2:H-22, class:"grid"}, svg); const tx = el("text", {x:X(t), y:H-8, "text-anchor":"middle"}, svg); tx.textContent = t; });
+  groups.forEach((g, i) => {
+    const y0 = top + i*rowH;
+    if (i) el("line", {x1: 0, x2: W, y1: y0 - 2, y2: y0 - 2, class: "grid"}, svg);
+    const lt = el("text", {x: labW-10, y: y0 + rowH/2, "text-anchor":"end", class:"lab"}, svg); lt.textContent = g.tag;
+    refsShown.forEach((r, k) => {
+      const s = g.refs[r.key]; if (!s) return;
+      const y = y0 + 6 + k * sub * 2;
+      s.health.forEach((h, j) => { const c = el("circle", {cx:X(h), cy:y, r:5, fill:REFCOL[r.key], stroke:"var(--surface-1)", "stroke-width":2}, svg); hover(c, `<b>${esc(g.label)}</b> · ${esc(r.name)}<br>traced rep ${j+1}: ${fmt(h,2)} s`); });
+      s.health_plain.forEach((h, j) => { const c = el("circle", {cx:X(h), cy:y + sub, r:4.5, fill:"var(--surface-1)", stroke:REFCOL[r.key], "stroke-width":2}, svg); hover(c, `<b>${esc(g.label)}</b> · ${esc(r.name)}<br>untraced rep ${j+1}: ${fmt(h,2)} s`); });
+    });
+  });
+}
+
+/* ---------- milestones ---------- */
+function drawMiles() {
+  const MB = x => x == null ? "–" : fmt(x / 1048576, 0);
+  const cols = [
+    ["Scenario", s => `<b>${esc(s.tag)}</b> ${esc(s.label)}`],
+    ["Ref", s => `<span class="sw" style="background:${REFCOL[s.ref]}"></span> ${esc(s.ref_name)}`],
+    ["/health", s => fs(med(s.health)), 1], ["min", s => fs(Math.min(...s.health)), 1], ["max", s => fs(Math.max(...s.health)), 1],
+    ["/health untraced", s => s.health_plain.length ? fs(med(s.health_plain)) : "–", 1],
+    ["tracer overhead", s => s.health_plain.length ? fmt((med(s.health)/med(s.health_plain)-1)*100, 1) + "%" : "–", 1],
+    ["driver running", s => fs(med(s.drivers)), 1],
+    ["driver untraced", s => s.drivers_plain.length ? fs(med(s.drivers_plain)) : "–", 1],
+    ["CPU-s to /health", s => fmt(med(s.cpu_to_health), 1), 1],
+    ["shutdown", s => fs(med(s.stop)), 1],
+    ["peak RSS server", s => MB(med(s.peak_srv_rss)) + " MiB", 1],
+    ["peak RSS +Ray", s => MB(med(s.peak_rss)) + " MiB", 1],
+    ["peak cgroup", s => MB(med(s.peak_cg)) + " MiB", 1],
+    ["template copy", s => s.prep > 0.001 ? fs(s.prep) : "–", 1],
+    ["exit code", s => s.exit.join(", "), 1],
+    ["containers", s => s.hosts.map(h => h.replace("startbench-", "sb")).join(", "), 1],
+  ];
+  document.getElementById("miles").innerHTML = `<tr>${cols.map(c=>`<th class="${c[2]?"num":""}">${c[0]}</th>`).join("")}</tr>` +
+    S.map(s => `<tr>${cols.map(c=>`<td class="${c[2]?"num":""}">${c[1](s)}</td>`).join("")}</tr>`).join("");
+}
+
+/* ---------- step tables ---------- */
+const HEAT = ["--h0","--h1","--h2","--h3","--h4","--h5"].map(v => `var(${v})`);
+const isDark = () => document.documentElement.dataset.theme === "dark" || (document.documentElement.dataset.theme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+function heat(frac) {
+  if (!(frac > 0.001)) return "";
+  const i = Math.max(0, Math.min(5, Math.floor(Math.log10(frac * 1000) / 3 * 6)));
+  const ink = isDark() ? (i >= 4 ? "#0b0b0b" : "#ffffff") : (i >= 3 ? "#ffffff" : "#0b0b0b");
+  return `background:${HEAT[i]};color:${ink}`;
+}
+const colHead = s => `<th class="num" title="${esc(s.label)} · ${esc(s.ref_name)}"><span class="sw" style="background:${REFCOL[s.ref]};width:8px;height:8px"></span> ${esc(short(s))}`;
+function stepTable(tableId, key, opts) {
+  const tbl = document.getElementById(tableId);
+  const paths = new Set(); S.forEach(s => Object.keys(s[key]).forEach(p => paths.add(p)));
+  let rows = [...paths].map(p => ({p, v: S.map(s => s[key][p] ? s[key][p][opts.mode] : null)}));
+  const f = (opts.filter || "").toLowerCase();
+  if (f) rows = rows.filter(r => r.p.toLowerCase().includes(f));
+  rows = rows.filter(r => r.v.some(x => x != null && x >= opts.min));
+  const sc = opts.sort; if (sc.col >= S.length) sc.col = 0;
+  rows.sort((a, b) => sc.col === -1 ? a.p.localeCompare(b.p) * sc.dir : ((b.v[sc.col] ?? -1) - (a.v[sc.col] ?? -1)) * sc.dir);
+  const tot = S.map(s => opts.denom(s));
+  tbl.innerHTML = `<thead><tr><th data-c="-1">Call path ${sc.col===-1?(sc.dir>0?"▲":"▼"):""}</th>${S.map((s,i)=>`${colHead(s)} ${sc.col===i?(sc.dir>0?"▼":"▲"):""}</th>`).join("")}</tr></thead><tbody>` +
+    rows.map(r => {
+      const parts = r.p.split(" › "), leaf = parts.pop();
+      const pre = parts.length ? `<div class="pre">${esc(parts.join(" › "))}</div>` : "";
+      return `<tr><td class="path">${pre}${esc(leaf)}</td>${r.v.map((x,i)=>`<td class="num" style="${x!=null?heat(x/tot[i]):""}">${x==null?"":fms(x)}</td>`).join("")}</tr>`;
+    }).join("") + "</tbody>";
+  const ths = tbl.querySelectorAll("thead th");
+  ths.forEach((th, i) => { th.dataset.c = i - 1; th.onclick = () => { const c = i - 1; if (sc.col === c) sc.dir *= -1; else { sc.col = c; sc.dir = 1; } opts.redraw(); }; });
+  if (opts.countId) document.getElementById(opts.countId).textContent = `${rows.length} paths`;
+}
+const stepOpts = {mode: 0, min: 1, filter: "", sort: {col: 0, dir: 1}, countId: "stepcount", denom: s => med(s.health) * 1000};
+stepOpts.redraw = () => stepTable("steps", "steps", stepOpts);
+segmented("stepmode", v => { stepOpts.mode = +v; stepOpts.redraw(); });
+segmented("stepmin", v => { stepOpts.min = +v; stepOpts.redraw(); });
+document.getElementById("stepfilter").addEventListener("input", e => { stepOpts.filter = e.target.value; stepOpts.redraw(); });
+const postOpts = {mode: 1, min: 0.05, filter: "", sort: {col: 0, dir: 1}, denom: s => (med(s.drivers) - med(s.health)) * 1000};
+postOpts.redraw = () => stepTable("poststeps", "post_steps", postOpts);
+
+/* ---------- flame ---------- */
+segmented("scsel", v => { cur = +v; zoom = null; drawRun(); });
+document.getElementById("zoomreset").onclick = () => { zoom = null; drawFlame(); };
+function flameColor(g) { return g < 8 ? GCOL[g] : g < 12 ? "var(--n1)" : "var(--n2)"; }
+function drawFlame() {
+  const s = S[cur], F = s.flame, box = document.getElementById("flame"); box.innerHTML = "";
+  document.getElementById("flametitle").textContent = `Span timeline · ${s.tag} ${s.label} · ${s.ref_name} · ${s.rep} (median /health rep)`;
+  const t0 = zoom ? zoom[0] : 0, t1 = zoom ? zoom[1] : F.end_ms;
+  document.getElementById("zoominfo").textContent = zoom ? `${fmt(t0/1000,3)} s – ${fmt(t1/1000,3)} s` : "";
+  const labW = 120, W = Math.max(900, box.clientWidth || 1100), plotW = W - labW - 10, rowH = 15, top = 22;
+  const X = t => labW + (t - t0) / (t1 - t0) * plotW;
+  let y = top; const lanes = [];
+  F.lanes.forEach(L => {
+    const vis = L.rows.filter(r => r[0] + r[1] >= t0 && r[0] <= t1 && (X(r[0]+r[1]) - X(r[0]) >= 0.4));
+    if (!vis.length) return;
+    const depth = Math.max(...vis.map(r => r[2])) + 1;
+    lanes.push({L, vis, y, depth}); y += depth * rowH + 10;
+  });
+  const H = y + 44;
+  const svg = el("svg", {width: W, height: H}, box);
+  const span = t1 - t0, ticks = niceTicks(span, 10);
+  ticks.forEach(tk => { const t = t0 + tk; if (t > t1) return; el("line", {x1:X(t), x2:X(t), y1:top-4, y2:H-40, class:"grid"}, svg); const tx = el("text", {x:X(t)+3, y:12}, svg); tx.textContent = span > 5000 ? fmt(t/1000, span > 50000 ? 0 : 1) + " s" : fmt(t, 0) + " ms"; });
+  const marks = [[F.interp_ms, "interpreter up"], [s.rep_health*1000, "/health"], [s.rep_drivers*1000, "driver running"]];
+  marks.forEach(([t, name], k) => { if (t == null || t < t0 || t > t1) return; el("line", {x1:X(t), x2:X(t), y1:top-6, y2:H-4-(2-k)*13 - 10, class:"mark-line"}, svg); const tx = el("text", {x:X(t)+3, y:H-4-(2-k)*13, class:"val"}, svg); tx.textContent = name; });
+  lanes.forEach(({L, vis, y, depth}) => {
+    const lt = el("text", {x: 4, y: y + 11, class:"lab"}, svg); lt.textContent = L.thread.length > 17 ? L.thread.slice(0,16) + "…" : L.thread;
+    el("line", {x1: labW, x2: W, y1: y + depth*rowH + 4, y2: y + depth*rowH + 4, class:"axis"}, svg);
+    vis.forEach(r => {
+      const a = Math.max(r[0], t0), b = Math.min(r[0]+r[1], t1);
+      const x = X(a), w = Math.max(1, X(b) - x - 1);
+      const g = el("rect", {x, y: y + r[2]*rowH, width: w, height: rowH - 2, rx: 2, fill: flameColor(r[4]), style: "cursor:zoom-in"}, svg);
+      if (w > 40) { const tx = el("text", {x: x + 3, y: y + r[2]*rowH + 10, style:`fill:${r[4] < 8 && [0,1,5,6,7].includes(r[4]) ? "#fff" : "#0b0b0b"};font-size:10px;pointer-events:none`}, svg); const n = Math.floor((w-6)/5.6); tx.textContent = r[3].length > n ? r[3].slice(0, Math.max(0,n-1)) + "…" : r[3]; }
+      hover(g, `<b>${esc(r[3])}</b><br>${fms(r[1])} ms<br><span class="m">start ${fmt(r[0]/1000,3)} s · ${esc(L.thread)} · ${r[4] < 8 ? esc(D.groups[r[4]]) : r[4] < 12 ? "after /health (driver start)" : "other thread"}</span>`);
+      g.addEventListener("click", () => { const pad = r[1] * 0.02; zoom = [Math.max(0, r[0] - pad), r[0] + r[1] + pad]; hideTip(); drawFlame(); });
+    });
+  });
+}
+function lineChart(id, series, cols, opts) {
+  const box = document.getElementById(id); box.innerHTML = "";
+  const W = Math.max(360, box.clientWidth || 520), H = 200, L = 46, R = 10, T = 14, B = 24;
+  const svg = el("svg", {width: W, height: H}, box);
+  const xs = series[0].map(p => p[0]); const xmax = Math.max(...xs);
+  const ymax = Math.max(0.1, ...series.flat().map(p => p[1] ?? 0)) * 1.05;
+  const yt = niceTicks(ymax, 4), ytop = yt[yt.length-1];
+  const X = x => L + x / xmax * (W - L - R), Y = y => T + (1 - y / ytop) * (H - T - B);
+  yt.forEach(t => { el("line", {x1:L, x2:W-R, y1:Y(t), y2:Y(t), class:"grid"}, svg); const tx = el("text", {x:L-6, y:Y(t)+4, "text-anchor":"end"}, svg); tx.textContent = t >= 1000 ? fmt(t,0) : t; });
+  niceTicks(xmax, 6).forEach(t => { if (t > xmax) return; const tx = el("text", {x:X(t), y:H-6, "text-anchor":"middle"}, svg); tx.textContent = t + " s"; });
+  const s = S[cur];
+  [[s.rep_health, "/health", "end", -3], [s.rep_drivers, "driver", "start", 3]].forEach(([t, n, anc, dx]) => { if (t == null) return; el("line", {x1:X(t), x2:X(t), y1:T, y2:H-B, class:"mark-line"}, svg); const tx = el("text", {x:X(t)+dx, y:T+8, class:"val", "text-anchor":anc}, svg); tx.textContent = n; });
+  series.forEach((pts, i) => {
+    const d = pts.filter(p => p[1] != null).map((p, k) => `${k?"L":"M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
+    el("path", {d, fill:"none", stroke: cols[i], "stroke-width": 2, "stroke-linejoin":"round", "stroke-linecap":"round"}, svg);
+  });
+  const cross = el("line", {y1:T, y2:H-B, stroke:"var(--axis)", "stroke-width":1, visibility:"hidden"}, svg);
+  const hit = el("rect", {x:L, y:T, width:W-L-R, height:H-T-B, fill:"transparent"}, svg);
+  hit.addEventListener("mousemove", e => {
+    const bb = svg.getBoundingClientRect(), x = (e.clientX - bb.left - L) / (W - L - R) * xmax;
+    let k = 0, best = 1e9; xs.forEach((v, j) => { const dd = Math.abs(v - x); if (dd < best) { best = dd; k = j; } });
+    cross.setAttribute("x1", X(xs[k])); cross.setAttribute("x2", X(xs[k])); cross.setAttribute("visibility", "visible");
+    showTip(e, `<b>${fmt(xs[k],1)} s</b><br>` + series.map((p, i) => `<span class="sw" style="background:${cols[i]}"></span> ${opts.names[i]}: ${p[k][1] == null ? "–" : fmt(p[k][1], opts.dec)}`).join("<br>"));
+  });
+  hit.addEventListener("mouseleave", () => { cross.setAttribute("visibility", "hidden"); hideTip(); });
+}
+function drawRes() {
+  const r = S[cur].res;
+  lineChart("cpu", [r.map(p => [p[0], p[1]])], [GCOL[0]], {names: ["cores"], dec: 2});
+  lineChart("mem", [r.map(p => [p[0], p[2]]), r.map(p => [p[0], p[3]]), r.map(p => [p[0], p[4]])], [GCOL[0], GCOL[1], GCOL[2]], {names: ["server RSS", "Ray RSS", "cgroup"], dec: 0});
+}
+function drawHot() {
+  const a = S[cur].agg;
+  const rows = Object.entries(a).sort((p, q) => q[1].self_ms - p[1].self_ms).slice(0, 60);
+  document.getElementById("hot").innerHTML = `<thead><tr><th>Function</th><th class="num">calls</th><th class="num">self ms</th><th class="num">total ms</th><th class="num">self ms / call</th></tr></thead><tbody>` +
+    rows.map(([k, v]) => `<tr><td>${esc(k)}</td><td class="num">${fmt(v.calls,0)}</td><td class="num">${fms(v.self_ms)}</td><td class="num">${fms(v.total_ms)}</td><td class="num">${fms(v.self_ms/v.calls)}</td></tr>`).join("") + "</tbody>";
+}
+function drawLogs() {
+  document.getElementById("logs").textContent = S[cur].logs.map(l => `${fmt(l[0]/1000,3).padStart(9)} s  ${l[1].padEnd(7)} ${l[2].padEnd(22)} ${l[3]}`).join("\n");
+}
+function drawRun() { if (!S.length) return; drawFlame(); drawRes(); drawHot(); drawLogs(); }
+
+/* ---------- probes ---------- */
+function drawProbes() {
+  const labels = Object.keys(S[0].probes);
+  const summ = sm => { if (!sm) return ""; if ("n" in sm) return `${sm.n} hits${sm.stages && sm.stages.length ? " · " + sm.stages.join("+") : ""}`; if ("semantic" in sm) return `semantic=${sm.semantic}`; if ("rows" in sm) return `${sm.rows} rows`; return ""; };
+  const maxv = Math.max(...S.flatMap(s => labels.map(l => s.probes[l]?.ms || 0)));
+  document.getElementById("probes").innerHTML = `<tr><th>Probe</th>${S.map(s => colHead(s) + "</th>").join("")}</tr>` +
+    labels.map(l => `<tr><td>${esc(l)}</td>${S.map(s => { const p = s.probes[l]; if (!p) return "<td></td>"; return `<td class="num" style="${heat(p.ms/maxv)}" title="reps: ${p.all.map(x=>fmt(x,1)).join(", ")} ms">${fms(p.ms)}<div style="font-size:10.5px;opacity:.75">${esc(summ(p.summary))}</div></td>`; }).join("")}</tr>`).join("");
+}
+
+/* ---------- footprint + imports ---------- */
+const DISK = [[".oxigraph/source","Oxigraph source store"],[".oxigraph/query","Oxigraph query store"],["embedding_cache/models","embedding model files"],["embedding_cache/graph","graph vector cache"],["embedding_cache/qudt","QUDT vector cache"],["timeseries.duckdb","DuckDB file"]];
+function drawDisk() {
+  legend("disklegend", [...DISK.map(d => d[1]), "other"], GCOL);
+  const mb = v => fmt(v, v < 10 ? 2 : 0) + " MB";
+  stacked("disk", rowsOf(s => { const v = DISK.map(d => (s.sizes[d[0]] || 0) / 1e6); return [...v, Math.max(0, s.sizes.total/1e6 - v.reduce((a,b)=>a+b,0))]; }), [...DISK.map(d => d[1]), "other"], GCOL, "abs", {labW: 90, rowH: 24, vf: mb, tf: mb});
+}
+function bars(id, rows, names, cols, unit, labW) {
+  const box = document.getElementById(id); box.innerHTML = "";
+  const k = names.length, W = Math.max(380, box.clientWidth || 520), plotW = W - labW - 80, bh = 11, gap = 2, rowH = k*(bh+gap) + 10, top = 6;
+  const H = top + rows.length*rowH + 22;
+  const svg = el("svg", {width: W, height: H}, box);
+  const max = Math.max(...rows.flatMap(r => r.vals.filter(v => v != null))) * 1.02, ticks = niceTicks(max, 4), xmax = ticks[ticks.length-1];
+  const X = v => labW + v / xmax * plotW;
+  ticks.forEach(t => { el("line", {x1:X(t), x2:X(t), y1:top-2, y2:H-20, class:"grid"}, svg); const tx = el("text", {x:X(t), y:H-6, "text-anchor":"middle"}, svg); tx.textContent = t >= 1000 ? fmt(t,0) : t; });
+  rows.forEach((r, i) => {
+    const y0 = top + i*rowH;
+    const lt = el("text", {x: labW-8, y: y0 + (k*(bh+gap))/2 + 3, "text-anchor":"end", class:"lab"}, svg); lt.textContent = r.label;
+    r.vals.forEach((v, j) => {
+      if (v == null) return;
+      const y = y0 + j*(bh+gap);
+      const b = rounded(svg, labW, y, X(v) - labW, bh, cols[j], true);
+      hover(b, `<b>${esc(r.label)}</b> · ${esc(names[j])}<br>${fmt(v, 1)} ${unit}`);
+      const vt = el("text", {x: X(v) + 5, y: y + bh - 2, class:"val", style:"font-size:10.5px"}, svg); vt.textContent = fmt(v, v >= 100 ? 0 : 1);
+    });
+  });
+}
+function refBars(id, legendId, f, unit) {
+  const refsShown = REFS.filter(r => S.some(s => s.ref === r.key));
+  legend(legendId, refsShown.map(r => r.name), refsShown.map(r => REFCOL[r.key]));
+  bars(id, byKey(S).map(g => ({label: g.tag, vals: refsShown.map(r => g.refs[r.key] ? f(g.refs[r.key]) : null)})), refsShown.map(r => r.name), refsShown.map(r => REFCOL[r.key]), unit, 80);
+}
+function drawPeak() {
+  refBars("peakrss", "rsslegend", s => med(s.peak_srv_rss) / 1048576, "MiB");
+  refBars("peakcg", "cglegend", s => med(s.peak_cg) / 1048576, "MiB");
+}
+function drawImports() {
+  const I = D.imports || {}, refs = REFS.filter(r => I[r.key] && (refFilter === "both" || refFilter === r.key));
+  if (!refs.length) { document.getElementById("impfig").style.display = "none"; return; }
+  document.getElementById("impfig").style.display = "";
+  document.getElementById("impunit").textContent = `ms self time, python -X importtime of acquirium.cli + uvicorn + acquirium.Server.app, median of runs · a shared dependency is charged to whichever package imports it first · ` + refs.map(r => `${r.key}: ${fmt(I[r.key].total_ms, 0)} ms total, n=${I[r.key].n}`).join(" · ");
+  const pk = {}; refs.forEach(r => Object.entries(I[r.key].by_pkg).forEach(([k, v]) => pk[k] = Math.max(pk[k] || 0, v)));
+  const top = Object.entries(pk).sort((a, b) => b[1] - a[1]).slice(0, 20).map(x => x[0]);
+  legend("implegend", refs.map(r => r.name), refs.map(r => REFCOL[r.key]));
+  bars("imports", top.map(k => ({label: k, vals: refs.map(r => I[r.key].by_pkg[k] ?? null)})), refs.map(r => r.name), refs.map(r => REFCOL[r.key]), "ms", 150);
+}
+
+function drawAll() {
+  if (!S.length) return;
+  drawTiles(); drawCmp(); drawGroups(); drawPost(); drawDots(); drawMiles(); stepOpts.redraw(); postOpts.redraw(); drawRun(); drawProbes(); drawDisk(); drawPeak(); drawImports();
+}
+applyFilter();
+drawAll();
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { drawGroups(); drawPost(); drawDots(); drawFlame(); drawRes(); drawDisk(); drawPeak(); drawImports(); }, 150); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { stepOpts.redraw(); postOpts.redraw(); drawProbes(); });
+
+document.getElementById("foot").innerHTML = [
+  "Each run: fresh data_dir (empty, or a cp -a of a template left by one earlier cold start of the same ref and mode, including the driver's graph and rows), server launched, /health polled every 50 ms, then /drivers/list polled until the configured driver runs, then the probes, then SIGTERM.",
+  "Every run is inside a podman container capped at 4 vCPU / 16 GiB; the 32-core host is shared with other users.",
+  "Traced runs wrap every function in acquirium's Server/Storage/TextMatch/Materialization/Drivers modules plus rdflib parse/serialize/query, ontoenv env methods, fastembed/onnxruntime, duckdb.connect, ray.init/get/actor creation and uvicorn startup. Step times are main-thread wall time; self time = span minus its child spans. Untraced control runs use plain `acquirium server -v`.",
+  "Package versions are identical in both venvs: " + Object.entries(E0.pkgs || {}).map(([k, v]) => `${esc(k)} ${esc(v)}`).join(", ") + ` · Python ${esc(E0.python || "")}.`,
+].join("<br>");
+</script>
+</body>
