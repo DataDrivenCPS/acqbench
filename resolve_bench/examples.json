@@ -1,0 +1,1808 @@
+{
+ "seed": 20260917,
+ "n": 200,
+ "built_from": "acquirium embedding_cache meta (graph + qudt) of main d894861 / local-runtime-init a9d4f65 \u2014 identical in both",
+ "note": "expected_uri is the concept whose indexed surface the text was derived from; texts whose normalized form is another concept's surface were rejected at generation time",
+ "examples": [
+  {
+   "id": "class-007",
+   "text": "venilating role",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#Role-Ventilating",
+   "expected_kind": "class",
+   "expected_label": "Ventilating role",
+   "source_surface": "ventilating role"
+  },
+  {
+   "id": "substance-004",
+   "text": "particulate-pm2.5",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#Particulate-PM2.5",
+   "expected_kind": "substance",
+   "expected_label": "PM 2.5",
+   "source_surface": "particulate pm2.5"
+  },
+  {
+   "id": "predicate-003",
+   "text": "EXecUteS",
+   "perturbation": "case_noise",
+   "expected_uri": "http://data.ashrae.org/standard223#executes",
+   "expected_kind": "predicate",
+   "expected_label": "executes",
+   "source_surface": "executes"
+  },
+  {
+   "id": "unit-009",
+   "text": "bans",
+   "perturbation": "plural",
+   "expected_uri": "http://qudt.org/vocab/unit/BAN",
+   "expected_kind": "unit",
+   "expected_label": "Ban",
+   "source_surface": "ban"
+  },
+  {
+   "id": "class-055",
+   "text": "number of electrical phases three phases",
+   "perturbation": "plural",
+   "expected_uri": "http://data.ashrae.org/standard223#NumberOfElectricalPhases-ThreePhase",
+   "expected_kind": "class",
+   "expected_label": "Three phase",
+   "source_surface": "number of electrical phases three phase"
+  },
+  {
+   "id": "class-054",
+   "text": "televisions",
+   "perturbation": "plural",
+   "expected_uri": "http://data.ashrae.org/standard223#Television",
+   "expected_kind": "class",
+   "expected_label": "Television",
+   "source_surface": "television"
+  },
+  {
+   "id": "class-060",
+   "text": "number of electrical pahses single phase",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://data.ashrae.org/standard223#NumberOfElectricalPhases-SinglePhase",
+   "expected_kind": "class",
+   "expected_label": "Single phase",
+   "source_surface": "number of electrical phases single phase"
+  },
+  {
+   "id": "unit-002",
+   "text": "millicoulomb per kilogram",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://qudt.org/vocab/unit/MilliC-PER-KiloGM",
+   "expected_kind": "unit",
+   "expected_label": "Millicoulomb per Kilogram",
+   "source_surface": "millicoulomb per kilogram"
+  },
+  {
+   "id": "predicate-020",
+   "text": "property array index",
+   "perturbation": "exact_lower",
+   "expected_uri": "http://data.ashrae.org/bacnet/2020#property-array-index",
+   "expected_kind": "predicate",
+   "expected_label": "Property array index",
+   "source_surface": "property array index"
+  },
+  {
+   "id": "class-018",
+   "text": "refrigrant r-134a",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#Refrigerant-R-134A",
+   "expected_kind": "class",
+   "expected_label": "Refrigerant R-134A",
+   "source_surface": "refrigerant r-134a"
+  },
+  {
+   "id": "class-005",
+   "text": "exchanger for air heat",
+   "perturbation": "reorder_of",
+   "expected_uri": "http://data.ashrae.org/standard223#AirHeatExchanger",
+   "expected_kind": "class",
+   "expected_label": "Air heat exchanger",
+   "source_surface": "air heat exchanger"
+  },
+  {
+   "id": "class-056",
+   "text": "constituent electriciy",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#Constituent-Electricity",
+   "expected_kind": "class",
+   "expected_label": "Electricity",
+   "source_surface": "constituent electricity"
+  },
+  {
+   "id": "class-020",
+   "text": "numerical number of phases",
+   "perturbation": "drop_word",
+   "expected_uri": "http://data.ashrae.org/standard223#Numerical-NumberOfElectricalPhases",
+   "expected_kind": "class",
+   "expected_label": "Number of electrical phases",
+   "source_surface": "numerical number of electrical phases"
+  },
+  {
+   "id": "unit-025",
+   "text": "gram hour per sxetic meter",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://qudt.org/vocab/unit/GM-HR-PER-M6",
+   "expected_kind": "unit",
+   "expected_label": "Gram Hour per Sextic Meter",
+   "source_surface": "gram hour per sextic meter"
+  },
+  {
+   "id": "quantity_kind-013",
+   "text": "CapacITAnCe",
+   "perturbation": "case_noise",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/Capacitance",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Capacitance",
+   "source_surface": "capacitance"
+  },
+  {
+   "id": "substance-015",
+   "text": "cOAgUlanT PolYAluMInum cHloRIde",
+   "perturbation": "case_noise",
+   "expected_uri": "urn:nawi-water-ontology#Coagulant-PolyaluminumChloride",
+   "expected_kind": "substance",
+   "expected_label": "Polyaluminum Chloride",
+   "source_surface": "coagulant polyaluminum chloride"
+  },
+  {
+   "id": "quantity_kind-008",
+   "text": "our volume density of charge",
+   "perturbation": "filler",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/VolumeDensityOfCharge",
+   "expected_kind": "quantity_kind",
+   "expected_label": "volume density of charge",
+   "source_surface": "volume density of charge"
+  },
+  {
+   "id": "substance-030",
+   "text": "our refrigerant r-134a",
+   "perturbation": "filler",
+   "expected_uri": "http://data.ashrae.org/standard223#Refrigerant-R-134A",
+   "expected_kind": "substance",
+   "expected_label": "Refrigerant R-134A",
+   "source_surface": "refrigerant r-134a"
+  },
+  {
+   "id": "predicate-013",
+   "text": "resolution for has measurement",
+   "perturbation": "reorder_of",
+   "expected_uri": "http://data.ashrae.org/standard223#hasMeasurementResolution",
+   "expected_kind": "predicate",
+   "expected_label": "has measurement resolution",
+   "source_surface": "has measurement resolution"
+  },
+  {
+   "id": "process-005",
+   "text": "process-chlorination",
+   "perturbation": "hyphen_space",
+   "expected_uri": "urn:nawi-water-ontology#Process-Chlorination",
+   "expected_kind": "process",
+   "expected_label": "Chlorination",
+   "source_surface": "process chlorination"
+  },
+  {
+   "id": "unit-044",
+   "text": "gill-(uk)-per-day",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://qudt.org/vocab/unit/GI_UK-PER-DAY",
+   "expected_kind": "unit",
+   "expected_label": "Gill (UK) per Day",
+   "source_surface": "gill (uk) per day"
+  },
+  {
+   "id": "unit-011",
+   "text": "measured in square yard",
+   "perturbation": "filler",
+   "expected_uri": "http://qudt.org/vocab/unit/YD2",
+   "expected_kind": "unit",
+   "expected_label": "Square Yard",
+   "source_surface": "square yard"
+  },
+  {
+   "id": "unit-040",
+   "text": "ton (uk shipping)",
+   "perturbation": "exact_lower",
+   "expected_uri": "http://qudt.org/vocab/unit/TON_SHIPPING_UK",
+   "expected_kind": "unit",
+   "expected_label": "Ton (uk Shipping)",
+   "source_surface": "ton (uk shipping)"
+  },
+  {
+   "id": "substance-025",
+   "text": "negatvie 12 vdc and positive 12 vdc electricity",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://data.ashrae.org/standard223#24V-12V-Neg-12V-Pos",
+   "expected_kind": "substance",
+   "expected_label": "Negative 12 VDC and positive 12 VDC electricity",
+   "source_surface": "negative 12 vdc and positive 12 vdc electricity"
+  },
+  {
+   "id": "quantity_kind-005",
+   "text": "catalyic activity",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/CatalyticActivity",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Catalytic Activity",
+   "source_surface": "catalytic activity"
+  },
+  {
+   "id": "quantity_kind-011",
+   "text": "PResSUrE rATiO",
+   "perturbation": "case_noise",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/PressureRatio",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Pressure Ratio",
+   "source_surface": "pressure ratio"
+  },
+  {
+   "id": "unit-018",
+   "text": "intenrational mile per minute",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://qudt.org/vocab/unit/MI-PER-MIN",
+   "expected_kind": "unit",
+   "expected_label": "International Mile per Minute",
+   "source_surface": "international mile per minute"
+  },
+  {
+   "id": "predicate-009",
+   "text": "priority writing",
+   "perturbation": "drop_word",
+   "expected_uri": "http://data.ashrae.org/bacnet/2020#priority-for-writing",
+   "expected_kind": "predicate",
+   "expected_label": "Priority for writing",
+   "source_surface": "priority for writing"
+  },
+  {
+   "id": "unit-019",
+   "text": "micromole per gramme hour",
+   "perturbation": "spelling",
+   "expected_uri": "http://qudt.org/vocab/unit/MicroMOL-PER-GM-HR",
+   "expected_kind": "unit",
+   "expected_label": "Micromole per Gram Hour",
+   "source_surface": "micromole per gram hour"
+  },
+  {
+   "id": "quantity_kind-017",
+   "text": "logaithmic ratio to base e",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/LogERatio",
+   "expected_kind": "quantity_kind",
+   "expected_label": "logarithmic ratio to base e",
+   "source_surface": "logarithmic ratio to base e"
+  },
+  {
+   "id": "class-002",
+   "text": "the aspect threshold",
+   "perturbation": "filler",
+   "expected_uri": "http://data.ashrae.org/standard223#Aspect-Threshold",
+   "expected_kind": "class",
+   "expected_label": "Threshold",
+   "source_surface": "aspect threshold"
+  },
+  {
+   "id": "quantity_kind-009",
+   "text": "mean linear ranges",
+   "perturbation": "plural",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/MeanLinearRange",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Mean Linear Range",
+   "source_surface": "mean linear range"
+  },
+  {
+   "id": "unit-015",
+   "text": "galileo for milli",
+   "perturbation": "reorder_of",
+   "expected_uri": "http://qudt.org/vocab/unit/MilliGALILEO",
+   "expected_kind": "unit",
+   "expected_label": "Milligalileo",
+   "source_surface": "milli galileo"
+  },
+  {
+   "id": "class-009",
+   "text": "coaulation basin",
+   "perturbation": "typo_drop",
+   "expected_uri": "urn:nawi-water-ontology#CoagulationBasin",
+   "expected_kind": "class",
+   "expected_label": "Coagulation Basin",
+   "source_surface": "coagulation basin"
+  },
+  {
+   "id": "predicate-010",
+   "text": "imprts",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://www.w3.org/2002/07/owl#imports",
+   "expected_kind": "predicate",
+   "expected_label": "imports",
+   "source_surface": "imports"
+  },
+  {
+   "id": "unit-001",
+   "text": "mole per square second meter steradian",
+   "perturbation": "drop_word",
+   "expected_uri": "http://qudt.org/vocab/unit/MOL-PER-M2-SEC-M-SR",
+   "expected_kind": "unit",
+   "expected_label": "Mole per Square Meter Second Meter Steradian",
+   "source_surface": "mole per square meter second meter steradian"
+  },
+  {
+   "id": "unit-027",
+   "text": "percent-per-hour",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://qudt.org/vocab/unit/PERCENT-PER-HR",
+   "expected_kind": "unit",
+   "expected_label": "Percent per Hour",
+   "source_surface": "percent per hour"
+  },
+  {
+   "id": "unit-005",
+   "text": "kilo-volt-ampere-reactive-hour",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://qudt.org/vocab/unit/KiloVAR-HR",
+   "expected_kind": "unit",
+   "expected_label": "Kilo Volt Ampere Reactive Hour",
+   "source_surface": "kilo volt ampere reactive hour"
+  },
+  {
+   "id": "unit-017",
+   "text": "hour for lumen",
+   "perturbation": "reorder_of",
+   "expected_uri": "http://qudt.org/vocab/unit/LM-HR",
+   "expected_kind": "unit",
+   "expected_label": "Lumen Hour",
+   "source_surface": "lumen hour"
+  },
+  {
+   "id": "substance-016",
+   "text": "ConSTituEnt-ORGaNICS",
+   "perturbation": "case_noise",
+   "expected_uri": "urn:nawi-water-ontology#Constituent-Organics",
+   "expected_kind": "substance",
+   "expected_label": "Constituent-Organics",
+   "source_surface": "constituent-organics"
+  },
+  {
+   "id": "process-018",
+   "text": "osmosis of process feed reversal reverse",
+   "perturbation": "reorder_of",
+   "expected_uri": "urn:nawi-water-ontology#Process-FeedReversalReverseOsmosis",
+   "expected_kind": "process",
+   "expected_label": "Feed Reversal Reverse Osmosis (FRRO)",
+   "source_surface": "process feed reversal reverse osmosis"
+  },
+  {
+   "id": "class-015",
+   "text": "apsect catalog number",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://data.ashrae.org/standard223#Aspect-CatalogNumber",
+   "expected_kind": "class",
+   "expected_label": "Catalog number",
+   "source_surface": "aspect catalog number"
+  },
+  {
+   "id": "class-022",
+   "text": "voltage-120v",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#Voltage-120V",
+   "expected_kind": "class",
+   "expected_label": "120 V",
+   "source_surface": "voltage 120v"
+  },
+  {
+   "id": "class-026",
+   "text": "rfid of ism band",
+   "perturbation": "reorder_of",
+   "expected_uri": "http://data.ashrae.org/standard223#ISMBand-RFID",
+   "expected_kind": "class",
+   "expected_label": "RFID",
+   "source_surface": "ism band rfid"
+  },
+  {
+   "id": "unit-034",
+   "text": "our byte",
+   "perturbation": "filler",
+   "expected_uri": "http://qudt.org/vocab/unit/BYTE",
+   "expected_kind": "unit",
+   "expected_label": "Byte",
+   "source_surface": "byte"
+  },
+  {
+   "id": "quantity_kind-018",
+   "text": "statc friction",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/StaticFriction",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Static Friction",
+   "source_surface": "static friction"
+  },
+  {
+   "id": "substance-024",
+   "text": "nox-no",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#NOX-NO",
+   "expected_kind": "substance",
+   "expected_label": "NO",
+   "source_surface": "nox no"
+  },
+  {
+   "id": "unit-035",
+   "text": "squarE us SUrVEy mile",
+   "perturbation": "case_noise",
+   "expected_uri": "http://qudt.org/vocab/unit/MI_US2",
+   "expected_kind": "unit",
+   "expected_label": "Square Us Survey Mile",
+   "source_surface": "square us survey mile"
+  },
+  {
+   "id": "process-012",
+   "text": "pROceSs EvAPORaTiON",
+   "perturbation": "case_noise",
+   "expected_uri": "urn:nawi-water-ontology#Process-Evaporation",
+   "expected_kind": "process",
+   "expected_label": "Evaporation",
+   "source_surface": "process evaporation"
+  },
+  {
+   "id": "predicate-008",
+   "text": "has-freezing-point",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#hasFreezingPoint",
+   "expected_kind": "predicate",
+   "expected_label": "has freezing point",
+   "source_surface": "has freezing point"
+  },
+  {
+   "id": "unit-022",
+   "text": "pound mass hour per us gallon yard",
+   "perturbation": "drop_word",
+   "expected_uri": "http://qudt.org/vocab/unit/LB-HR-PER-GAL_US-YD3",
+   "expected_kind": "unit",
+   "expected_label": "Pound Mass Hour per Us Gallon Cubic Yard",
+   "source_surface": "pound mass hour per us gallon cubic yard"
+  },
+  {
+   "id": "quantity_kind-002",
+   "text": "enERgY PeR TEmpeRaturE",
+   "perturbation": "case_noise",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/EnergyPerTemperature",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Energy per temperature",
+   "source_surface": "energy per temperature"
+  },
+  {
+   "id": "quantity_kind-014",
+   "text": "coefficient of molar attenuation",
+   "perturbation": "reorder_of",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/MolarAttenuationCoefficient",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Molar Attenuation Coefficient",
+   "source_surface": "molar attenuation coefficient"
+  },
+  {
+   "id": "unit-042",
+   "text": "the psi liter per second",
+   "perturbation": "filler",
+   "expected_uri": "http://qudt.org/vocab/unit/PSI-L-PER-SEC",
+   "expected_kind": "unit",
+   "expected_label": "Psi Liter per Second",
+   "source_surface": "psi liter per second"
+  },
+  {
+   "id": "unit-010",
+   "text": "measured in pound force inch per inch",
+   "perturbation": "filler",
+   "expected_uri": "http://qudt.org/vocab/unit/LB_F-IN-PER-IN",
+   "expected_kind": "unit",
+   "expected_label": "Pound Force Inch per Inch",
+   "source_surface": "pound force inch per inch"
+  },
+  {
+   "id": "substance-026",
+   "text": "positive-380-vdc-electricity",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#380V-380V-Pos",
+   "expected_kind": "substance",
+   "expected_label": "Positive 380 VDC electricity",
+   "source_surface": "positive 380 vdc electricity"
+  },
+  {
+   "id": "unit-016",
+   "text": "measured in milliohm per kelvin",
+   "perturbation": "filler",
+   "expected_uri": "http://qudt.org/vocab/unit/MilliOHM-PER-K",
+   "expected_kind": "unit",
+   "expected_label": "Milliohm per Kelvin",
+   "source_surface": "milliohm per kelvin"
+  },
+  {
+   "id": "unit-041",
+   "text": "milligram/hour bar",
+   "perturbation": "per_slash",
+   "expected_uri": "http://qudt.org/vocab/unit/MilliGM-PER-HR-BAR",
+   "expected_kind": "unit",
+   "expected_label": "Milligram per Hour Bar",
+   "source_surface": "milligram per hour bar"
+  },
+  {
+   "id": "predicate-019",
+   "text": "the target class",
+   "perturbation": "filler",
+   "expected_uri": "http://www.w3.org/ns/shacl#targetClass",
+   "expected_kind": "predicate",
+   "expected_label": "target class",
+   "source_surface": "target class"
+  },
+  {
+   "id": "quantity_kind-003",
+   "text": "0173-1#Z4-bAj321#002",
+   "perturbation": "case_noise",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/AreicDataVolume",
+   "expected_kind": "quantity_kind",
+   "expected_label": "areic data volume",
+   "source_surface": "0173-1#Z4-BAJ321#002"
+  },
+  {
+   "id": "class-048",
+   "text": "occupant motion",
+   "perturbation": "drop_word",
+   "expected_uri": "http://data.ashrae.org/standard223#OccupantMotionSensor",
+   "expected_kind": "class",
+   "expected_label": "Occupant motion sensor",
+   "source_surface": "occupant motion sensor"
+  },
+  {
+   "id": "predicate-016",
+   "text": "a version info",
+   "perturbation": "filler",
+   "expected_uri": "http://www.w3.org/2002/07/owl#versionInfo",
+   "expected_kind": "predicate",
+   "expected_label": "version info",
+   "source_surface": "version info"
+  },
+  {
+   "id": "unit-046",
+   "text": "kilogram/mega british thermal unit (international definition)",
+   "perturbation": "per_slash",
+   "expected_uri": "http://qudt.org/vocab/unit/KiloGM-PER-MegaBTU_IT",
+   "expected_kind": "unit",
+   "expected_label": "Kilogram per Mega British Thermal Unit (international Definition)",
+   "source_surface": "kilogram per mega british thermal unit (international definition)"
+  },
+  {
+   "id": "substance-002",
+   "text": "a water-brackish",
+   "perturbation": "filler",
+   "expected_uri": "urn:nawi-water-ontology#Water-Brackish",
+   "expected_kind": "substance",
+   "expected_label": "Water-Brackish",
+   "source_surface": "water-brackish"
+  },
+  {
+   "id": "unit-021",
+   "text": "liter per second sqaure meter",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://qudt.org/vocab/unit/L-PER-SEC-M2",
+   "expected_kind": "unit",
+   "expected_label": "Liter per Second Square Meter",
+   "source_surface": "liter per second square meter"
+  },
+  {
+   "id": "quantity_kind-007",
+   "text": "temperature-variance",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/TemperatureVariance",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Temperature Variance",
+   "source_surface": "temperature variance"
+  },
+  {
+   "id": "class-001",
+   "text": "heating roles",
+   "perturbation": "plural",
+   "expected_uri": "http://data.ashrae.org/standard223#Role-Heating",
+   "expected_kind": "class",
+   "expected_label": "Heating role",
+   "source_surface": "heating role"
+  },
+  {
+   "id": "predicate-004",
+   "text": "qualified-min-count",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://www.w3.org/ns/shacl#qualifiedMinCount",
+   "expected_kind": "predicate",
+   "expected_label": "qualified min count",
+   "source_surface": "qualified min count"
+  },
+  {
+   "id": "quantity_kind-006",
+   "text": "0173-1#Z4-bAJ331#002",
+   "perturbation": "case_noise",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/LineicDataVolume",
+   "expected_kind": "quantity_kind",
+   "expected_label": "lineic data volume",
+   "source_surface": "0173-1#Z4-BAJ331#002"
+  },
+  {
+   "id": "process-003",
+   "text": "process-elutriation",
+   "perturbation": "hyphen_space",
+   "expected_uri": "urn:nawi-water-ontology#Process-Elutriation",
+   "expected_kind": "process",
+   "expected_label": "Elutriation",
+   "source_surface": "process elutriation"
+  },
+  {
+   "id": "predicate-018",
+   "text": "equivalent-class",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://www.w3.org/2002/07/owl#equivalentClass",
+   "expected_kind": "predicate",
+   "expected_label": "equivalent class",
+   "source_surface": "equivalent class"
+  },
+  {
+   "id": "substance-005",
+   "text": "water-glycol solutions",
+   "perturbation": "plural",
+   "expected_uri": "http://data.ashrae.org/standard223#Water-GlycolSolution",
+   "expected_kind": "substance",
+   "expected_label": "Water-Glycol solution",
+   "source_surface": "water-glycol solution"
+  },
+  {
+   "id": "quantity_kind-020",
+   "text": "rEACTivE POwER",
+   "perturbation": "case_noise",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/ReactivePower",
+   "expected_kind": "quantity_kind",
+   "expected_label": "reactive power",
+   "source_surface": "reactive power"
+  },
+  {
+   "id": "class-006",
+   "text": "fiber-ethernet-cpak",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#FiberEthernet-CPAK",
+   "expected_kind": "class",
+   "expected_label": "Fiber Ethernet CPAK",
+   "source_surface": "fiber ethernet cpak"
+  },
+  {
+   "id": "unit-038",
+   "text": "kilogram per meter hours",
+   "perturbation": "plural",
+   "expected_uri": "http://qudt.org/vocab/unit/KiloGM-PER-M-HR",
+   "expected_kind": "unit",
+   "expected_label": "Kilogram per Meter Hour",
+   "source_surface": "kilogram per meter hour"
+  },
+  {
+   "id": "predicate-017",
+   "text": "a has number of electrical phases",
+   "perturbation": "filler",
+   "expected_uri": "http://data.ashrae.org/standard223#hasNumberOfElectricalPhases",
+   "expected_kind": "predicate",
+   "expected_label": "has number of electrical phases",
+   "source_surface": "has number of electrical phases"
+  },
+  {
+   "id": "process-010",
+   "text": "process rapid sand filtrations",
+   "perturbation": "plural",
+   "expected_uri": "urn:nawi-water-ontology#Process-RapidSandFiltration",
+   "expected_kind": "process",
+   "expected_label": "Rapid Sand Filtration",
+   "source_surface": "process rapid sand filtration"
+  },
+  {
+   "id": "process-016",
+   "text": "extraction of process solvent",
+   "perturbation": "reorder_of",
+   "expected_uri": "urn:nawi-water-ontology#Process-SolventExtraction",
+   "expected_kind": "process",
+   "expected_label": "Solvent-Based Extraction",
+   "source_surface": "process solvent extraction"
+  },
+  {
+   "id": "class-029",
+   "text": "the ac-3300vll-3ph-60hz",
+   "perturbation": "filler",
+   "expected_uri": "http://data.ashrae.org/standard223#AC-3300VLL-3Ph-60Hz",
+   "expected_kind": "class",
+   "expected_label": "AC-3300VLL-3Ph-60Hz",
+   "source_surface": "ac-3300vll-3ph-60hz"
+  },
+  {
+   "id": "unit-029",
+   "text": "gram per cubic metre",
+   "perturbation": "spelling",
+   "expected_uri": "http://qudt.org/vocab/unit/GM-PER-M3",
+   "expected_kind": "unit",
+   "expected_label": "Gram per Cubic Meter",
+   "source_surface": "gram per cubic meter"
+  },
+  {
+   "id": "unit-036",
+   "text": "parts per thusand",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://qudt.org/vocab/unit/PPTH",
+   "expected_kind": "unit",
+   "expected_label": "Parts per Thousand",
+   "source_surface": "parts per thousand"
+  },
+  {
+   "id": "process-014",
+   "text": "process coagulaiton",
+   "perturbation": "typo_swap",
+   "expected_uri": "urn:nawi-water-ontology#Process-Coagulation",
+   "expected_kind": "process",
+   "expected_label": "Coagulation",
+   "source_surface": "process coagulation"
+  },
+  {
+   "id": "substance-003",
+   "text": "ac-480vLL-277VlN-3PH-60HZ",
+   "perturbation": "case_noise",
+   "expected_uri": "http://data.ashrae.org/standard223#AC-480VLL-277VLN-3Ph-60Hz",
+   "expected_kind": "substance",
+   "expected_label": "AC-480VLL-277VLN-3Ph-60Hz",
+   "source_surface": "ac-480vll-277vln-3ph-60hz"
+  },
+  {
+   "id": "class-047",
+   "text": "constituent noxes",
+   "perturbation": "plural",
+   "expected_uri": "http://data.ashrae.org/standard223#Constituent-NOX",
+   "expected_kind": "class",
+   "expected_label": "NOX",
+   "source_surface": "constituent nox"
+  },
+  {
+   "id": "unit-047",
+   "text": "decibel/meter",
+   "perturbation": "per_slash",
+   "expected_uri": "http://qudt.org/vocab/unit/DeciB-PER-M",
+   "expected_kind": "unit",
+   "expected_label": "Decibel per Meter",
+   "source_surface": "decibel per meter"
+  },
+  {
+   "id": "unit-033",
+   "text": "reciprocal secod steradian square meter",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://qudt.org/vocab/unit/PER-SEC-SR-M2",
+   "expected_kind": "unit",
+   "expected_label": "Reciprocal Second Steradian Square Meter",
+   "source_surface": "reciprocal second steradian square meter"
+  },
+  {
+   "id": "class-058",
+   "text": "enumeration kind",
+   "perturbation": "exact_lower",
+   "expected_uri": "http://data.ashrae.org/standard223#EnumerationKind",
+   "expected_kind": "class",
+   "expected_label": "Enumeration kind",
+   "source_surface": "enumeration kind"
+  },
+  {
+   "id": "substance-021",
+   "text": "p-h-adjuster-sulfuric-acid",
+   "perturbation": "hyphen_space",
+   "expected_uri": "urn:nawi-water-ontology#pHAdjuster-SulfuricAcid",
+   "expected_kind": "substance",
+   "expected_label": "Sulfuric Acid",
+   "source_surface": "p h adjuster sulfuric acid"
+  },
+  {
+   "id": "predicate-007",
+   "text": "the subject",
+   "perturbation": "filler",
+   "expected_uri": "http://www.w3.org/ns/shacl#subject",
+   "expected_kind": "predicate",
+   "expected_label": "subject",
+   "source_surface": "subject"
+  },
+  {
+   "id": "quantity_kind-001",
+   "text": "atomic-attenuation-coefficient",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/AtomicAttenuationCoefficient",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Atomic Attenuation Coefficient",
+   "source_surface": "atomic attenuation coefficient"
+  },
+  {
+   "id": "class-016",
+   "text": "our voltage 347v",
+   "perturbation": "filler",
+   "expected_uri": "http://data.ashrae.org/standard223#Voltage-347V",
+   "expected_kind": "class",
+   "expected_label": "347 V",
+   "source_surface": "voltage 347v"
+  },
+  {
+   "id": "quantity_kind-019",
+   "text": "dnyamic viscosity",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/DynamicViscosity",
+   "expected_kind": "quantity_kind",
+   "expected_label": "dynamic viscosity",
+   "source_surface": "dynamic viscosity"
+  },
+  {
+   "id": "class-051",
+   "text": "a ac-6000vll-1ph-60hz",
+   "perturbation": "filler",
+   "expected_uri": "http://data.ashrae.org/standard223#AC-6000VLL-1Ph-60Hz",
+   "expected_kind": "class",
+   "expected_label": "AC-6000VLL-1Ph-60Hz",
+   "source_surface": "ac-6000vll-1ph-60hz"
+  },
+  {
+   "id": "class-038",
+   "text": "voltgae 415v",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://data.ashrae.org/standard223#Voltage-415V",
+   "expected_kind": "class",
+   "expected_label": "415 V",
+   "source_surface": "voltage 415v"
+  },
+  {
+   "id": "class-033",
+   "text": "flocculant of polymer",
+   "perturbation": "reorder_of",
+   "expected_uri": "urn:nawi-water-ontology#Flocculant-Polymer",
+   "expected_kind": "class",
+   "expected_label": "Polymer Flocculant",
+   "source_surface": "polymer flocculant"
+  },
+  {
+   "id": "process-002",
+   "text": "process-aeration",
+   "perturbation": "hyphen_space",
+   "expected_uri": "urn:nawi-water-ontology#Process-Aeration",
+   "expected_kind": "process",
+   "expected_label": "Aeration",
+   "source_surface": "process aeration"
+  },
+  {
+   "id": "class-053",
+   "text": "model for aspect",
+   "perturbation": "reorder_of",
+   "expected_uri": "http://data.ashrae.org/standard223#Aspect-Model",
+   "expected_kind": "class",
+   "expected_label": "Model",
+   "source_surface": "aspect model"
+  },
+  {
+   "id": "unit-043",
+   "text": "our pound mass per us gallon",
+   "perturbation": "filler",
+   "expected_uri": "http://qudt.org/vocab/unit/LB-PER-GAL_US",
+   "expected_kind": "unit",
+   "expected_label": "Pound Mass per Us Gallon",
+   "source_surface": "pound mass per us gallon"
+  },
+  {
+   "id": "class-037",
+   "text": "AC-240VLl-139VLn-1Ph-50hz",
+   "perturbation": "case_noise",
+   "expected_uri": "http://data.ashrae.org/standard223#AC-240VLL-139VLN-1Ph-50Hz",
+   "expected_kind": "class",
+   "expected_label": "AC-240VLL-139VLN-1Ph-50Hz",
+   "source_surface": "ac-240vll-139vln-1ph-50hz"
+  },
+  {
+   "id": "unit-039",
+   "text": "joule per kilogram kelvin cubic meters",
+   "perturbation": "plural",
+   "expected_uri": "http://qudt.org/vocab/unit/J-PER-KiloGM-K-M3",
+   "expected_kind": "unit",
+   "expected_label": "Joule per Kilogram Kelvin Cubic Meter",
+   "source_surface": "joule per kilogram kelvin cubic meter"
+  },
+  {
+   "id": "unit-030",
+   "text": "bar for bar per",
+   "perturbation": "reorder_of",
+   "expected_uri": "http://qudt.org/vocab/unit/BAR-PER-BAR",
+   "expected_kind": "unit",
+   "expected_label": "Bar per Bar",
+   "source_surface": "bar per bar"
+  },
+  {
+   "id": "class-042",
+   "text": "ice maekr",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://data.ashrae.org/standard223#IceMaker",
+   "expected_kind": "class",
+   "expected_label": "Ice maker",
+   "source_surface": "ice maker"
+  },
+  {
+   "id": "class-041",
+   "text": "fiber-optic-cable-om3",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#FiberOpticCable-OM3",
+   "expected_kind": "class",
+   "expected_label": "Fiber Optic Cable OM3",
+   "source_surface": "fiber optic cable om3"
+  },
+  {
+   "id": "substance-012",
+   "text": "Uhf LIceNSeD BANd",
+   "perturbation": "case_noise",
+   "expected_uri": "http://data.ashrae.org/standard223#UHF-LicensedBand",
+   "expected_kind": "substance",
+   "expected_label": "Licensed band",
+   "source_surface": "uhf licensed band"
+  },
+  {
+   "id": "predicate-011",
+   "text": "actutes",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#actuates",
+   "expected_kind": "predicate",
+   "expected_label": "actuates",
+   "source_surface": "actuates"
+  },
+  {
+   "id": "class-024",
+   "text": "mean squaerd error (mse)",
+   "perturbation": "typo_swap",
+   "expected_uri": "urn:nawi-water-ontology#Error-MeanSquaredError",
+   "expected_kind": "class",
+   "expected_label": "Mean Squared Error (MSE)",
+   "source_surface": "mean squared error (mse)"
+  },
+  {
+   "id": "unit-006",
+   "text": "baryeds",
+   "perturbation": "plural",
+   "expected_uri": "http://qudt.org/vocab/unit/BARYE",
+   "expected_kind": "unit",
+   "expected_label": "Barye",
+   "source_surface": "baryed"
+  },
+  {
+   "id": "class-043",
+   "text": "water chilled waters",
+   "perturbation": "plural",
+   "expected_uri": "http://data.ashrae.org/standard223#Water-ChilledWater",
+   "expected_kind": "class",
+   "expected_label": "Chilled water",
+   "source_surface": "water chilled water"
+  },
+  {
+   "id": "predicate-015",
+   "text": "target-subjects-of",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://www.w3.org/ns/shacl#targetSubjectsOf",
+   "expected_kind": "predicate",
+   "expected_label": "target subjects of",
+   "source_surface": "target subjects of"
+  },
+  {
+   "id": "unit-026",
+   "text": "reciprocal square placnk mass",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://qudt.org/vocab/unit/PER-PlanckMass2",
+   "expected_kind": "unit",
+   "expected_label": "Reciprocal Square Planck Mass",
+   "source_surface": "reciprocal square planck mass"
+  },
+  {
+   "id": "substance-013",
+   "text": "fiber ethernet gbics",
+   "perturbation": "plural",
+   "expected_uri": "http://data.ashrae.org/standard223#FiberEthernet-GBIC",
+   "expected_kind": "substance",
+   "expected_label": "Fiber Ethernet GBIC",
+   "source_surface": "fiber ethernet gbic"
+  },
+  {
+   "id": "predicate-006",
+   "text": "curve of has calibration",
+   "perturbation": "reorder_of",
+   "expected_uri": "urn:nawi-water-ontology#hasCalibrationCurve",
+   "expected_kind": "predicate",
+   "expected_label": "has calibration curve",
+   "source_surface": "has calibration curve"
+  },
+  {
+   "id": "process-009",
+   "text": "process bisoolids disposal",
+   "perturbation": "typo_swap",
+   "expected_uri": "urn:nawi-water-ontology#Process-BiosolidsDisposal",
+   "expected_kind": "process",
+   "expected_label": "BiosolidsDisposal",
+   "source_surface": "process biosolids disposal"
+  },
+  {
+   "id": "class-031",
+   "text": "water brackish",
+   "perturbation": "hyphen_space",
+   "expected_uri": "urn:nawi-water-ontology#Water-Brackish",
+   "expected_kind": "class",
+   "expected_label": "Water-Brackish",
+   "source_surface": "water-brackish"
+  },
+  {
+   "id": "unit-004",
+   "text": "cubic agstrom",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://qudt.org/vocab/unit/ANGSTROM3",
+   "expected_kind": "unit",
+   "expected_label": "Cubic Angstrom",
+   "source_surface": "cubic angstrom"
+  },
+  {
+   "id": "class-040",
+   "text": "oxgen meter",
+   "perturbation": "typo_drop",
+   "expected_uri": "urn:nawi-water-ontology#OxygenMeter",
+   "expected_kind": "class",
+   "expected_label": "Oxygen Meter",
+   "source_surface": "oxygen meter"
+  },
+  {
+   "id": "process-007",
+   "text": "the process electro dialytic crystallization",
+   "perturbation": "filler",
+   "expected_uri": "urn:nawi-water-ontology#Process-ElectroDialyticCrystallization",
+   "expected_kind": "process",
+   "expected_label": "Electro-Dialytic Crystallization (EDC)",
+   "source_surface": "process electro dialytic crystallization"
+  },
+  {
+   "id": "predicate-005",
+   "text": "has aspcet",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://data.ashrae.org/standard223#hasAspect",
+   "expected_kind": "predicate",
+   "expected_label": "has aspect",
+   "source_surface": "has aspect"
+  },
+  {
+   "id": "predicate-001",
+   "text": "the type",
+   "perturbation": "filler",
+   "expected_uri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+   "expected_kind": "predicate",
+   "expected_label": "type",
+   "source_surface": "type"
+  },
+  {
+   "id": "substance-029",
+   "text": "refirgerant r-407f",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://data.ashrae.org/standard223#Refrigerant-R-407F",
+   "expected_kind": "substance",
+   "expected_label": "Refrigerant R-407F",
+   "source_surface": "refrigerant r-407f"
+  },
+  {
+   "id": "class-013",
+   "text": "constituent-n2",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#Constituent-N2",
+   "expected_kind": "class",
+   "expected_label": "N2",
+   "source_surface": "constituent n2"
+  },
+  {
+   "id": "unit-050",
+   "text": "SoNE",
+   "perturbation": "case_noise",
+   "expected_uri": "http://qudt.org/vocab/unit/SON",
+   "expected_kind": "unit",
+   "expected_label": "Sone",
+   "source_surface": "sone"
+  },
+  {
+   "id": "substance-010",
+   "text": "substance mediums",
+   "perturbation": "plural",
+   "expected_uri": "http://data.ashrae.org/standard223#Substance-Medium",
+   "expected_kind": "substance",
+   "expected_label": "Medium",
+   "source_surface": "substance medium"
+  },
+  {
+   "id": "quantity_kind-012",
+   "text": "wavenumber of debye angular",
+   "perturbation": "reorder_of",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/DebyeAngularWavenumber",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Debye Angular Wavenumber",
+   "source_surface": "debye angular wavenumber"
+  },
+  {
+   "id": "unit-032",
+   "text": "decakelvins",
+   "perturbation": "plural",
+   "expected_uri": "http://qudt.org/vocab/unit/DecaK",
+   "expected_kind": "unit",
+   "expected_label": "Decakelvin",
+   "source_surface": "decakelvin"
+  },
+  {
+   "id": "class-030",
+   "text": "fiber cable om1",
+   "perturbation": "drop_word",
+   "expected_uri": "http://data.ashrae.org/standard223#FiberOpticCable-OM1",
+   "expected_kind": "class",
+   "expected_label": "Fiber Optic Cable OM1",
+   "source_surface": "fiber optic cable om1"
+  },
+  {
+   "id": "substance-008",
+   "text": "negative 190 vdc and postive 190 vdc electricity",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#380V-190V-Neg-190V-Pos",
+   "expected_kind": "substance",
+   "expected_label": "Negative 190 VDC and positive 190 VDC electricity",
+   "source_surface": "negative 190 vdc and positive 190 vdc electricity"
+  },
+  {
+   "id": "substance-014",
+   "text": "our negative 2.5 vdc and positive 2.5 vdc electricity",
+   "perturbation": "filler",
+   "expected_uri": "http://data.ashrae.org/standard223#5V-2.5V-Neg-2.5V-Pos",
+   "expected_kind": "substance",
+   "expected_label": "Negative 2.5 VDC and positive 2.5 VDC electricity",
+   "source_surface": "negative 2.5 vdc and positive 2.5 vdc electricity"
+  },
+  {
+   "id": "class-019",
+   "text": "neative 6 vdc electricity",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#6V-6V-Neg",
+   "expected_kind": "class",
+   "expected_label": "Negative 6 VDC electricity",
+   "source_surface": "negative 6 vdc electricity"
+  },
+  {
+   "id": "substance-007",
+   "text": "particulte pm10.0",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#Particulate-PM10.0",
+   "expected_kind": "substance",
+   "expected_label": "PM 10.0",
+   "source_surface": "particulate pm10.0"
+  },
+  {
+   "id": "process-011",
+   "text": "PrOCESS sEparatiON",
+   "perturbation": "case_noise",
+   "expected_uri": "urn:nawi-water-ontology#Process-Separation",
+   "expected_kind": "process",
+   "expected_label": "Separation",
+   "source_surface": "process separation"
+  },
+  {
+   "id": "class-032",
+   "text": "efficiency sensors",
+   "perturbation": "plural",
+   "expected_uri": "urn:nawi-water-ontology#EfficiencySensor",
+   "expected_kind": "class",
+   "expected_label": "Efficiency Sensor",
+   "source_surface": "efficiency sensor"
+  },
+  {
+   "id": "predicate-014",
+   "text": "nAMe",
+   "perturbation": "case_noise",
+   "expected_uri": "http://www.w3.org/ns/shacl#name",
+   "expected_kind": "predicate",
+   "expected_label": "name",
+   "source_surface": "name"
+  },
+  {
+   "id": "process-006",
+   "text": "process granular activated carbons",
+   "perturbation": "plural",
+   "expected_uri": "urn:nawi-water-ontology#Process-GranularActivatedCarbon",
+   "expected_kind": "process",
+   "expected_label": "Granular Activated Carbon (GAC)",
+   "source_surface": "process granular activated carbon"
+  },
+  {
+   "id": "class-046",
+   "text": "thermodynamic vapor",
+   "perturbation": "drop_word",
+   "expected_uri": "http://data.ashrae.org/standard223#ThermodynamicPhase-Vapor",
+   "expected_kind": "class",
+   "expected_label": "Vapor phase",
+   "source_surface": "thermodynamic phase vapor"
+  },
+  {
+   "id": "substance-019",
+   "text": "the ac-600vll-347vln-3ph-60hz",
+   "perturbation": "filler",
+   "expected_uri": "http://data.ashrae.org/standard223#AC-600VLL-347VLN-3Ph-60Hz",
+   "expected_kind": "substance",
+   "expected_label": "AC-600VLL-347VLN-3Ph-60Hz",
+   "source_surface": "ac-600vll-347vln-3ph-60hz"
+  },
+  {
+   "id": "class-010",
+   "text": "ism-band-bluetooth-le",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#ISMBand-BluetoothLE",
+   "expected_kind": "class",
+   "expected_label": "BluetoothLE",
+   "source_surface": "ism band bluetooth le"
+  },
+  {
+   "id": "unit-045",
+   "text": "volt per pascals",
+   "perturbation": "plural",
+   "expected_uri": "http://qudt.org/vocab/unit/V-PER-PA",
+   "expected_kind": "unit",
+   "expected_label": "Volt per Pascal",
+   "source_surface": "volt per pascal"
+  },
+  {
+   "id": "class-052",
+   "text": "ac 3000vll 1ph 60hz",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#AC-3000VLL-1Ph-60Hz",
+   "expected_kind": "class",
+   "expected_label": "AC-3000VLL-1Ph-60Hz",
+   "source_surface": "ac-3000vll-1ph-60hz"
+  },
+  {
+   "id": "substance-017",
+   "text": "the modulated signal",
+   "perturbation": "filler",
+   "expected_uri": "http://data.ashrae.org/standard223#Signal-Modulated",
+   "expected_kind": "substance",
+   "expected_label": "Modulated signal",
+   "source_surface": "modulated signal"
+  },
+  {
+   "id": "unit-023",
+   "text": "mllisecond",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://qudt.org/vocab/unit/MilliSEC",
+   "expected_kind": "unit",
+   "expected_label": "Millisecond",
+   "source_surface": "millisecond"
+  },
+  {
+   "id": "quantity_kind-016",
+   "text": "voltage imbaalnce",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/VoltageImbalance",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Voltage Imbalance",
+   "source_surface": "voltage imbalance"
+  },
+  {
+   "id": "unit-008",
+   "text": "meter-per-square-second",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://qudt.org/vocab/unit/M-PER-SEC2",
+   "expected_kind": "unit",
+   "expected_label": "Meter per Square Second",
+   "source_surface": "meter per square second"
+  },
+  {
+   "id": "unit-013",
+   "text": "kevin per bar",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://qudt.org/vocab/unit/K-PER-BAR",
+   "expected_kind": "unit",
+   "expected_label": "Kelvin per Bar",
+   "source_surface": "kelvin per bar"
+  },
+  {
+   "id": "process-019",
+   "text": "transfer for process gas",
+   "perturbation": "reorder_of",
+   "expected_uri": "urn:nawi-water-ontology#Process-GasTransfer",
+   "expected_kind": "process",
+   "expected_label": "Gas Transfer",
+   "source_surface": "process gas transfer"
+  },
+  {
+   "id": "process-015",
+   "text": "process-chemical-precipitation",
+   "perturbation": "hyphen_space",
+   "expected_uri": "urn:nawi-water-ontology#Process-ChemicalPrecipitation",
+   "expected_kind": "process",
+   "expected_label": "Chemical Precipitation",
+   "source_surface": "process chemical precipitation"
+  },
+  {
+   "id": "process-008",
+   "text": "our process condensation",
+   "perturbation": "filler",
+   "expected_uri": "urn:nawi-water-ontology#Process-Condensation",
+   "expected_kind": "process",
+   "expected_label": "Condensation",
+   "source_surface": "process condensation"
+  },
+  {
+   "id": "substance-022",
+   "text": "the po e 802.3bt 3",
+   "perturbation": "filler",
+   "expected_uri": "http://data.ashrae.org/standard223#PoE-802.3bt-3",
+   "expected_kind": "substance",
+   "expected_label": "PoE 802.3bt-3",
+   "source_surface": "po e 802.3bt 3"
+  },
+  {
+   "id": "unit-028",
+   "text": "statvolt per centimeter unit",
+   "perturbation": "filler",
+   "expected_uri": "http://qudt.org/vocab/unit/V_Stat-PER-CentiM",
+   "expected_kind": "unit",
+   "expected_label": "Statvolt per Centimeter",
+   "source_surface": "statvolt per centimeter"
+  },
+  {
+   "id": "class-008",
+   "text": "filter for trickling",
+   "perturbation": "reorder_of",
+   "expected_uri": "urn:nawi-water-ontology#TricklingFilter",
+   "expected_kind": "class",
+   "expected_label": "Trickling Filter",
+   "source_surface": "trickling filter"
+  },
+  {
+   "id": "class-035",
+   "text": "15 percet glycol solution",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#GlycolSolution-15Percent",
+   "expected_kind": "class",
+   "expected_label": "15 percent glycol solution",
+   "source_surface": "15 percent glycol solution"
+  },
+  {
+   "id": "class-036",
+   "text": "electric-energy-dcdc-converter",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#ElectricEnergyDCDCConverter",
+   "expected_kind": "class",
+   "expected_label": "DC-DC converter",
+   "source_surface": "electric energy dcdc converter"
+  },
+  {
+   "id": "class-044",
+   "text": "standardized flow cells",
+   "perturbation": "plural",
+   "expected_uri": "urn:nawi-water-ontology#StandardizedFlowCell",
+   "expected_kind": "class",
+   "expected_label": "Standardized Flow Cell",
+   "source_surface": "standardized flow cell"
+  },
+  {
+   "id": "class-011",
+   "text": "electric energy trasformer",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#ElectricEnergyTransformer",
+   "expected_kind": "class",
+   "expected_label": "Electric energy transformer",
+   "source_surface": "electric energy transformer"
+  },
+  {
+   "id": "class-039",
+   "text": "terminal units",
+   "perturbation": "plural",
+   "expected_uri": "http://data.ashrae.org/standard223#TerminalUnit",
+   "expected_kind": "class",
+   "expected_label": "Terminal unit",
+   "source_surface": "terminal unit"
+  },
+  {
+   "id": "unit-007",
+   "text": "kilometer for decibel per",
+   "perturbation": "reorder_of",
+   "expected_uri": "http://qudt.org/vocab/unit/DeciB-PER-KiloM",
+   "expected_kind": "unit",
+   "expected_label": "Decibel per Kilometer",
+   "source_surface": "decibel per kilometer"
+  },
+  {
+   "id": "unit-031",
+   "text": "milLIAMPere PEr BaR",
+   "perturbation": "case_noise",
+   "expected_uri": "http://qudt.org/vocab/unit/MilliA-PER-BAR",
+   "expected_kind": "unit",
+   "expected_label": "Milliampere per Bar",
+   "source_surface": "milliampere per bar"
+  },
+  {
+   "id": "process-004",
+   "text": "process cleanig",
+   "perturbation": "typo_drop",
+   "expected_uri": "urn:nawi-water-ontology#Process-Cleaning",
+   "expected_kind": "process",
+   "expected_label": "Cleaning",
+   "source_surface": "process cleaning"
+  },
+  {
+   "id": "unit-048",
+   "text": "kilonewton per square",
+   "perturbation": "drop_word",
+   "expected_uri": "http://qudt.org/vocab/unit/KiloN-PER-MilliM2",
+   "expected_kind": "unit",
+   "expected_label": "Kilonewton per Square Millimeter",
+   "source_surface": "kilonewton per square millimeter"
+  },
+  {
+   "id": "substance-020",
+   "text": "refrigernt r-744",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#Refrigerant-R-744",
+   "expected_kind": "substance",
+   "expected_label": "Refrigerant R-744",
+   "source_surface": "refrigerant r-744"
+  },
+  {
+   "id": "substance-018",
+   "text": "power ethernet (poe)",
+   "perturbation": "drop_word",
+   "expected_uri": "http://data.ashrae.org/standard223#PowerAndSignal-PoE",
+   "expected_kind": "substance",
+   "expected_label": "Power over Ethernet (PoE)",
+   "source_surface": "power over ethernet (poe)"
+  },
+  {
+   "id": "class-023",
+   "text": "variance of aggregate",
+   "perturbation": "reorder_of",
+   "expected_uri": "urn:nawi-water-ontology#Aggregate-Variance",
+   "expected_kind": "class",
+   "expected_label": "Variance",
+   "source_surface": "aggregate variance"
+  },
+  {
+   "id": "class-012",
+   "text": "aspect setpoints",
+   "perturbation": "plural",
+   "expected_uri": "http://data.ashrae.org/standard223#Aspect-Setpoint",
+   "expected_kind": "class",
+   "expected_label": "Setpoint",
+   "source_surface": "aspect setpoint"
+  },
+  {
+   "id": "class-025",
+   "text": "VOlTagE 6v",
+   "perturbation": "case_noise",
+   "expected_uri": "http://data.ashrae.org/standard223#Voltage-6V",
+   "expected_kind": "class",
+   "expected_label": "6 V",
+   "source_surface": "voltage 6v"
+  },
+  {
+   "id": "unit-024",
+   "text": "milligram/cubic meter kelvin",
+   "perturbation": "per_slash",
+   "expected_uri": "http://qudt.org/vocab/unit/MilliGM-PER-M3-K",
+   "expected_kind": "unit",
+   "expected_label": "Milligram per Cubic Meter Kelvin",
+   "source_surface": "milligram per cubic meter kelvin"
+  },
+  {
+   "id": "class-028",
+   "text": "signal-usb",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#Signal-USB",
+   "expected_kind": "class",
+   "expected_label": "USB",
+   "source_surface": "signal usb"
+  },
+  {
+   "id": "quantity_kind-004",
+   "text": "a electric displacement",
+   "perturbation": "filler",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/ElectricDisplacement",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Electric Displacement",
+   "source_surface": "electric displacement"
+  },
+  {
+   "id": "substance-001",
+   "text": "ISm BaNd ieeE802.11",
+   "perturbation": "case_noise",
+   "expected_uri": "http://data.ashrae.org/standard223#ISMBand-IEEE802.11",
+   "expected_kind": "substance",
+   "expected_label": "IEEE 802.11",
+   "source_surface": "ism band ieee802.11"
+  },
+  {
+   "id": "substance-006",
+   "text": "a modulated 4-20 ma",
+   "perturbation": "filler",
+   "expected_uri": "http://data.ashrae.org/standard223#Modulated-4-20mA",
+   "expected_kind": "substance",
+   "expected_label": "Modulated 4-20 mA",
+   "source_surface": "modulated 4-20 ma"
+  },
+  {
+   "id": "unit-037",
+   "text": "uS GaLlON Per SECoNd",
+   "perturbation": "case_noise",
+   "expected_uri": "http://qudt.org/vocab/unit/GAL_US-PER-SEC",
+   "expected_kind": "unit",
+   "expected_label": "Us Gallon per Second",
+   "source_surface": "us gallon per second"
+  },
+  {
+   "id": "class-017",
+   "text": "montior",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://data.ashrae.org/standard223#Monitor",
+   "expected_kind": "class",
+   "expected_label": "Monitor",
+   "source_surface": "monitor"
+  },
+  {
+   "id": "class-003",
+   "text": "COndENser rOLE",
+   "perturbation": "case_noise",
+   "expected_uri": "http://data.ashrae.org/standard223#Role-Condenser",
+   "expected_kind": "class",
+   "expected_label": "Condenser role",
+   "source_surface": "condenser role"
+  },
+  {
+   "id": "class-045",
+   "text": "themostat",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#Thermostat",
+   "expected_kind": "class",
+   "expected_label": "Thermostat",
+   "source_surface": "thermostat"
+  },
+  {
+   "id": "class-027",
+   "text": "outlet of water",
+   "perturbation": "reorder_of",
+   "expected_uri": "http://data.ashrae.org/standard223#WaterOutlet",
+   "expected_kind": "class",
+   "expected_label": "Water outlet",
+   "source_surface": "water outlet"
+  },
+  {
+   "id": "substance-028",
+   "text": "fiber ehternet xfp",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://data.ashrae.org/standard223#FiberEthernet-XFP",
+   "expected_kind": "substance",
+   "expected_label": "Fiber Ethernet XFP",
+   "source_surface": "fiber ethernet xfp"
+  },
+  {
+   "id": "process-017",
+   "text": "process memrbane process",
+   "perturbation": "typo_swap",
+   "expected_uri": "urn:nawi-water-ontology#Process-MembraneProcess",
+   "expected_kind": "process",
+   "expected_label": "Membrane Process",
+   "source_surface": "process membrane process"
+  },
+  {
+   "id": "class-014",
+   "text": "rerigerant r-1234yf",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#Refrigerant-R-1234yf",
+   "expected_kind": "class",
+   "expected_label": "Refrigerant R-1234yf",
+   "source_surface": "refrigerant r-1234yf"
+  },
+  {
+   "id": "predicate-012",
+   "text": "bias of has",
+   "perturbation": "reorder_of",
+   "expected_uri": "urn:nawi-water-ontology#hasBias",
+   "expected_kind": "predicate",
+   "expected_label": "has bias",
+   "source_surface": "has bias"
+  },
+  {
+   "id": "class-050",
+   "text": "intepolation forward fill",
+   "perturbation": "typo_drop",
+   "expected_uri": "urn:nawi-water-ontology#Interpolation-ForwardFill",
+   "expected_kind": "class",
+   "expected_label": "Forward Fill",
+   "source_surface": "interpolation forward fill"
+  },
+  {
+   "id": "substance-023",
+   "text": "AC-139VLN-1PH-50hZ",
+   "perturbation": "case_noise",
+   "expected_uri": "http://data.ashrae.org/standard223#AC-139VLN-1Ph-50Hz",
+   "expected_kind": "substance",
+   "expected_label": "AC-139VLN-1Ph-50Hz",
+   "source_surface": "ac-139vln-1ph-50hz"
+  },
+  {
+   "id": "quantity_kind-015",
+   "text": "pressure-coefficient",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/PressureCoefficient",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Pressure Coefficient",
+   "source_surface": "pressure coefficient"
+  },
+  {
+   "id": "unit-012",
+   "text": "giagwatt hour",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://qudt.org/vocab/unit/GigaW-HR",
+   "expected_kind": "unit",
+   "expected_label": "Gigawatt Hour",
+   "source_surface": "gigawatt hour"
+  },
+  {
+   "id": "process-001",
+   "text": "porcess chemical process",
+   "perturbation": "typo_swap",
+   "expected_uri": "urn:nawi-water-ontology#Process-ChemicalProcess",
+   "expected_kind": "process",
+   "expected_label": "Chemical Process",
+   "source_surface": "process chemical process"
+  },
+  {
+   "id": "class-057",
+   "text": "ac 208vll 3ph 60hz",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://data.ashrae.org/standard223#AC-208VLL-3Ph-60Hz",
+   "expected_kind": "class",
+   "expected_label": "AC-208VLL-3Ph-60Hz",
+   "source_surface": "ac-208vll-3ph-60hz"
+  },
+  {
+   "id": "class-034",
+   "text": "role peremate",
+   "perturbation": "typo_swap",
+   "expected_uri": "urn:nawi-water-ontology#Role-Permeate",
+   "expected_kind": "class",
+   "expected_label": "Permeate",
+   "source_surface": "role permeate"
+  },
+  {
+   "id": "process-020",
+   "text": "proecss centrifugation",
+   "perturbation": "typo_swap",
+   "expected_uri": "urn:nawi-water-ontology#Process-Centrifugation",
+   "expected_kind": "process",
+   "expected_label": "Centrifugation",
+   "source_surface": "process centrifugation"
+  },
+  {
+   "id": "unit-020",
+   "text": "the lambert",
+   "perturbation": "filler",
+   "expected_uri": "http://qudt.org/vocab/unit/LA",
+   "expected_kind": "unit",
+   "expected_label": "Lambert",
+   "source_surface": "lambert"
+  },
+  {
+   "id": "process-013",
+   "text": "a process chemical addition",
+   "perturbation": "filler",
+   "expected_uri": "urn:nawi-water-ontology#Process-ChemicalAddition",
+   "expected_kind": "process",
+   "expected_label": "Chemical Addition",
+   "source_surface": "process chemical addition"
+  },
+  {
+   "id": "unit-049",
+   "text": "reciprocal-square-meter",
+   "perturbation": "hyphen_space",
+   "expected_uri": "http://qudt.org/vocab/unit/PER-M2",
+   "expected_kind": "unit",
+   "expected_label": "Reciprocal Square Meter",
+   "source_surface": "reciprocal square meter"
+  },
+  {
+   "id": "unit-014",
+   "text": "gram per cubic metre poise",
+   "perturbation": "spelling",
+   "expected_uri": "http://qudt.org/vocab/unit/GM-PER-M3-POISE",
+   "expected_kind": "unit",
+   "expected_label": "Gram per Cubic Meter Poise",
+   "source_surface": "gram per cubic meter poise"
+  },
+  {
+   "id": "class-004",
+   "text": "sYncHRonIzatIoN DOwnsAmPlinG",
+   "perturbation": "case_noise",
+   "expected_uri": "urn:nawi-water-ontology#Synchronization-Downsampling",
+   "expected_kind": "class",
+   "expected_label": "Downsampling",
+   "source_surface": "synchronization downsampling"
+  },
+  {
+   "id": "predicate-002",
+   "text": "of constitunt",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#ofConstituent",
+   "expected_kind": "predicate",
+   "expected_label": "of constituent",
+   "source_surface": "of constituent"
+  },
+  {
+   "id": "class-059",
+   "text": "freqency 60hz",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#Frequency-60Hz",
+   "expected_kind": "class",
+   "expected_label": "60 Hertz",
+   "source_surface": "frequency 60hz"
+  },
+  {
+   "id": "quantity_kind-010",
+   "text": "enERgy aND WOrk pEr mASs AmoUNT Of substANCe",
+   "perturbation": "case_noise",
+   "expected_uri": "http://qudt.org/vocab/quantitykind/EnergyPerMassAmountOfSubstance",
+   "expected_kind": "quantity_kind",
+   "expected_label": "Energy and work per mass amount of substance",
+   "source_surface": "energy and work per mass amount of substance"
+  },
+  {
+   "id": "substance-027",
+   "text": "CONsTiTuent ELeCTriCity",
+   "perturbation": "case_noise",
+   "expected_uri": "http://data.ashrae.org/standard223#Constituent-Electricity",
+   "expected_kind": "substance",
+   "expected_label": "Electricity",
+   "source_surface": "constituent electricity"
+  },
+  {
+   "id": "substance-009",
+   "text": "sigal eia485",
+   "perturbation": "typo_drop",
+   "expected_uri": "http://data.ashrae.org/standard223#Signal-EIA485",
+   "expected_kind": "substance",
+   "expected_label": "EIA485",
+   "source_surface": "signal eia485"
+  },
+  {
+   "id": "class-049",
+   "text": "ducts",
+   "perturbation": "plural",
+   "expected_uri": "http://data.ashrae.org/standard223#Duct",
+   "expected_kind": "class",
+   "expected_label": "Duct",
+   "source_surface": "duct"
+  },
+  {
+   "id": "class-021",
+   "text": "pyhsical security domain",
+   "perturbation": "typo_swap",
+   "expected_uri": "http://data.ashrae.org/standard223#Domain-PhysicalSecurity",
+   "expected_kind": "class",
+   "expected_label": "Physical security domain",
+   "source_surface": "physical security domain"
+  },
+  {
+   "id": "unit-003",
+   "text": "millimole per mole unit",
+   "perturbation": "filler",
+   "expected_uri": "http://qudt.org/vocab/unit/MilliMOL-PER-MOL",
+   "expected_kind": "unit",
+   "expected_label": "Millimole per Mole",
+   "source_surface": "millimole per mole"
+  },
+  {
+   "id": "substance-011",
+   "text": "the ac-240vll-120vln-1ph-60hz",
+   "perturbation": "filler",
+   "expected_uri": "http://data.ashrae.org/standard223#AC-240VLL-120VLN-1Ph-60Hz",
+   "expected_kind": "substance",
+   "expected_label": "AC-240VLL-120VLN-1Ph-60Hz",
+   "source_surface": "ac-240vll-120vln-1ph-60hz"
+  }
+ ]
+}
