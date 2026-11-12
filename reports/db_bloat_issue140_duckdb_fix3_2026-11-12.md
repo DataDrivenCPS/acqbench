@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-12
 **Issue:** https://github.com/DataDrivenCPS/acquirium/issues/140
-**Branch:** `ums-duckdb-fix-3` @ `8cef704` (sections 2–6) @ `64e7dc0` after the PR revisions (section 7), and @ `d0cc2c4` read-path fix, queries only (section 8) (two commits on top of v0.4.0a9: `01ec7aa` drop the `UNIQUE (ref_id, ts)` constraint, `8cef704` stage each write in a temp table and insert it sorted by `(ref_id, ts)`; plus a migration that rebuilds existing tables once to drop the constraint)
+**Branch:** `ums-duckdb-fix-3` @ `8cef704` (sections 2–6) @ `64e7dc0` after the PR revisions (section 7), @ `d0cc2c4` read-path fix, queries only (section 8), @ `2215185` materialized-CTE read with a 300-query set (section 9), and @ `0a8eb80` CTE only for windowed non-LIMIT reads (section 10) (two commits on top of v0.4.0a9: `01ec7aa` drop the `UNIQUE (ref_id, ts)` constraint, `8cef704` stage each write in a temp table and insert it sorted by `(ref_id, ts)`; plus a migration that rebuilds existing tables once to drop the constraint)
 **Companion reports:** `db_bloat_issue140_duckdb_2026-11-08.md` (baseline, full set), `db_bloat_issue140_duckdb_variants_2026-11-11.md` (v1/v2/v3 on the same 1,000 files)
 
 **Result in one line:** on 1,000 files fix-3 ingests in **24 min 46 s** (baseline 42 min) into a **3.82 GB** file (baseline 36.1 GB) and reads at **0.86× of baseline p50**, fastest of the four variants on 28 of 50 queries; continuing the same store with the remaining 4,193 files took **1 h 42 min** at a flat 40 files/min with no slowdown from the index-free delete, ending at **3,554,166,660 rows in 20.4 GB (0.86× the 23.6 GB of CSV; the baseline was 188.9 GB)**, i.e. **2 h 07 min total versus 4 h 33 min**. The one problem is on the read side and is not the branch's fault: on the 31,903-row-group table, every windowed read costs ~0.8 s regardless of window size because DuckDB 2.0's `partitioned_execution` optimizer rewrites `ORDER BY ts` into a union of 20 range-partitioned scans, each re-checking zonemaps over all row groups. Disabling that optimizer on read connections brings a 1-hour read from 860 ms to 45 ms and the whole workload from 81 s to 43 s.
@@ -270,3 +270,137 @@ One commit on top of 64e7dc0, read path only: the `ref_ids` and `streams` lookup
 | Errors / row-count differences | 0 / — | 0 / none | — |
 
 The change gives back what section 7 lost and more: small reads are 28 % faster than at 64e7dc0 and LIMIT reads are now the fastest measured on this store (`latest 1` 146 ms, `limit 1000` 70 ms). The windowed reads still carry the `partitioned_execution` cost (0.7 s for a 7-row window on 31,904 row groups; 41–45 ms with the optimizer disabled), so that recommendation is unchanged. `timeseries_info` is unaffected by any of the read-path commits, as expected: it is an aggregate over the stream, not the streamed read.
+
+---
+
+## 9. 300-query comparison: `d0cc2c4` vs `2215185` (filter in a `MATERIALIZED` CTE before sorting)
+
+The read path at 2215185 wraps the filtered scan in `WITH filtered AS MATERIALIZED (…) SELECT … FROM filtered ORDER BY ts [LIMIT n]`, to sidestep the `partitioned_execution` rewrite from section 4. To test it on more than the original 50 shapes, 250 queries were generated once with a fixed seed over the 112 live streams (each window placed inside the stream's own time range; `~/bench/queries300.py`, set `~/var_runs/queries_300.json`): 100 windows (1 min … 90 d), 50 LIMIT reads (1 … 10,000, asc/desc, a third inside a 30-day window), 40 value-mode variants, 10 full-stream reads, 20 one-year windows, 30 `timeseries_info` batches (1 … 112 streams). Both passes ran read-only on the same full store (3.554 B rows, 31,904 row groups), 10 reps + 2 warmup, server restarted between them; no errors, identical row counts on all 300.
+
+| Group | n | median p50 at d0cc2c4 | median p50 at 2215185 | geomean 2215185 / d0cc2c4 |
+|---|---|---|---|---|
+| original 50 | 50 | 635 ms | 118 ms | 0.41 |
+| W windows (1 min – 90 d) | 100 | 589 ms | **51 ms** | **0.11** |
+| M value modes (1 h – 7 d windows) | 40 | 615 ms | **58 ms** | **0.11** |
+| L LIMIT reads | 50 | 103 ms | **2,625 ms** | **7.56** |
+| F full-stream reads (10–16 M rows) | 10 | 3,650 ms | 7,057 ms | 1.89 |
+| Y one-year windows (3 M rows) | 20 | 1,243 ms | 1,265 ms | 0.91 |
+| I `timeseries_info` batches | 30 | 317 ms | 323 ms | 1.01 |
+| all 300 | 300 | sum 221.5 s | sum 295.5 s | 0.44 |
+
+By read shape rather than group: windowed reads returning ≤ 10 k rows without a LIMIT (86 queries) go from a median of 584 ms to **49 ms** (geomean 0.083); LIMIT reads (57) go from 103 ms to **2,603 ms** (geomean 7.3); scans of ≥ 1 M rows (43) are 1.33× slower.
+
+**Why.** The CTE fixes exactly what it was meant to fix, but materialising the filter result has two costs: (1) a LIMIT can no longer stop early — `… WHERE ref_id = ? ORDER BY ts DESC LIMIT 1` now materialises the stream's 15 M rows before taking one, so `latest 1 desc` goes 167 → 2,603 ms and `limit 1000 asc` 77 → 2,679 ms; (2) a full-stream read is copied once more, 3.5 → 7.5 s for 15.6 M rows. Only LIMIT reads that also carry a window (the 17 of the 50 L queries with a 30-day range, and the original `30 days limit 10000`) improve, because the window bounds the materialisation.
+
+Direct measurement of the three plan shapes in DuckDB on the same file (`~/bench/diag_cte.py`, best of 3):
+
+| Read | plain (d0cc2c4) | `MATERIALIZED` CTE (2215185) | plain + `SET disabled_optimizers='partitioned_execution'` |
+|---|---|---|---|
+| 1-hour window, 361 rows | 616 ms | 28.5 ms | **27.2 ms** |
+| `ORDER BY ts DESC LIMIT 1` | 153 ms | 2,461 ms | **165 ms** |
+| `ORDER BY ts LIMIT 1000` | 65 ms | 2,525 ms | **73 ms** |
+| 30-day window `LIMIT 10000` | 93 ms | **50 ms** | 92 ms |
+| full stream, 13.5 M rows | 6,233 ms | 9,435 ms | **5,638 ms** |
+
+**Recommendation.** Keep the plain query and disable the optimizer on the read connection (`SET disabled_optimizers = 'partitioned_execution'` in `_connect()`, or per statement): it gets the CTE's windowed-read gain (27 ms) while keeping LIMIT reads streaming (65–165 ms) and full scans at their best (5.6 s). If a SQL-only fix is preferred, apply the CTE only when the read has a time window and no LIMIT; a LIMIT read must stay a plain Top-N over the scan. Files: `~/var_runs/fix3/phaseE_*` (d0cc2c4), `phaseF_*` (2215185).
+
+---
+
+## 10. 300 queries at `0a8eb80` (CTE only for windowed reads without LIMIT)
+
+Same store, same 300 queries, same runner (`phaseG_*`, 16:15–16:47 UTC); no errors, row counts identical to both previous passes.
+
+| Group | n | median p50 d0cc2c4 | median p50 2215185 | **median p50 0a8eb80** | 0a8eb80 / d0cc2c4 | 0a8eb80 / 2215185 |
+|---|---|---|---|---|---|---|
+| original 50 | 50 | 635 ms | 118 ms | **115 ms** | 0.30 | 0.73 |
+| W windows (1 min – 90 d) | 100 | 589 ms | 51 ms | **41 ms** | 0.09 | 0.83 |
+| M value modes | 40 | 615 ms | 58 ms | **42 ms** | 0.09 | 0.79 |
+| L LIMIT reads | 50 | 103 ms | 2,625 ms | **111 ms** | 1.06 | 0.14 |
+| F full-stream reads | 10 | 3,650 ms | 7,057 ms | **3,861 ms** | 1.06 | 0.56 |
+| Y one-year windows (3 M rows) | 20 | 1,243 ms | 1,265 ms | 1,382 ms | 1.04 | 1.15 |
+| I `timeseries_info` batches | 30 | 317 ms | 323 ms | 316 ms | 0.98 | 0.96 |
+| all 300, sum of p50 | 300 | 221.5 s | 295.5 s | **142.6 s** | 0.27 | 0.61 |
+
+By read shape: windowed reads ≤ 10 k rows without LIMIT (86) median 584 → **40 ms** (geomean 0.068 vs d0cc2c4); LIMIT reads without a window (37) 101 → 111 ms and with a window (20) 105 → 109 ms, i.e. back to the plain top-N; scans ≥ 1 M rows (43) 1.10× d0cc2c4.
+
+This head keeps the CTE's gain on the reads it was meant for and removes the LIMIT and full-scan regressions of 2215185: `P1 1 hour` 650 → 39 ms, `latest 1 desc` 167 → 160 ms, `limit 1000` 77 → 82 ms, `P1 full range` 3.5 → 3.95 s. The one residual is large windowed reads that take the CTE path: the 20 one-year windows (3 M rows each) are 1.15× slower than at d0cc2c4 (worst 1.7 → 2.9 s), which is the extra copy of a multi-million-row materialisation. The `SET disabled_optimizers='partitioned_execution'` route from section 9 does not pay that (same 27 ms on the small window, 5.6 s vs 6.2 s on a full stream), so if those large-window reads matter it remains the better option; otherwise 0a8eb80 is the best measured read path on this branch.
+
+Summary of the read path across the heads, full store (3.554 B rows), medians over the 300-query set unless noted:
+
+| | windowed ≤ 10 k rows | LIMIT reads | full-stream 15.6 M rows | one-year 3 M rows |
+|---|---|---|---|---|
+| 8cef704 (50-query set) | ~850 ms | 100–200 ms | 5.7 s | 1.6 s |
+| 64e7dc0 (50-query set) | ~1,000 ms | 110–230 ms | 3.9 s | 1.5 s |
+| d0cc2c4 | 584 ms | 103 ms | 3.5 s | 1.24 s |
+| 2215185 | 49 ms | 2,625 ms | 7.5 s | 1.27 s |
+| **0a8eb80** | **40 ms** | **111 ms** | **3.95 s** | 1.38 s |
+| d0cc2c4 + `partitioned_execution` off (DuckDB-level, section 9) | 27 ms | 73–165 ms | 5.6 s* | — |
+
+\* measured in DuckDB directly without the Arrow/HTTP path, so not comparable to the other rows' full-stream column; the relative gain (6.2 → 5.6 s) is what matters.
+
+---
+
+## 11. 100 new query shapes: `d0cc2c4` vs `0a8eb80`
+
+A second, disjoint query set (`backend_bench/issue140/queries100b.py`, seed 1400, ids 301–400, host file `~/var_runs/queries_100b.json`) with shapes none of the 300 earlier queries used. Same store (3.554 B rows, 31,903 row groups), same runner (1 cold + 2 warm-up + 10 timed, p50), run back to back on the same worktree: `phaseH_*` at d0cc2c4 (17:33–17:59 UTC, 1,557 s) and `phaseI_*` at 0a8eb80 (18:00–18:30 UTC, 1,829 s). No errors; row counts identical on both heads for all 100; the 10 deliberate-empty queries returned 0 rows on both.
+
+| Group | n | Shape | median rows | median p50 d0cc2c4 | **median p50 0a8eb80** | geomean I/H | min – max |
+|---|---|---|---|---|---|---|---|
+| S | 15 | `start` only, open end: last 1 h … 365 d | 60 k | 806 ms | **61 ms** | 0.14 | 0.05 – 1.10 |
+| E | 15 | `end` only, open start: first 1 h … 365 d | 2.7 k | 759 ms | **42 ms** | 0.08 | 0.05 – 0.57 |
+| X | 10 | explicit `start`=earliest, `end`=latest (whole stream, windowed path) | 15.6 M | **3,627 ms** | 7,590 ms | 2.10 | 1.88 – 2.29 |
+| B | 10 | 2- and 3-year windows, descending | 8.2 M | **2,317 ms** | 3,905 ms | 1.65 | 1.44 – 1.89 |
+| P | 10 | windows straddling a stream's first / last timestamp | 4.9 k | 753 ms | **46 ms** | 0.06 | 0.04 – 0.07 |
+| Z | 10 | deliberate empties (after latest, before earliest, unregistered uri, LIMIT 1 past the end) | 0 | 33 ms | **23 ms** | 0.43 | 0.05 – 1.15 |
+| Q | 10 | 5 sparsest streams, full and 30-day | 4.3 M | 1,658 ms | **1,227 ms** | 0.41 | 0.15 – 0.99 |
+| K | 10 | reads by storage key (`urn:acquirium#…`), 7-day and latest-10 | 30 k | 488 ms | **108 ms** | 0.25 | 0.07 – 0.91 |
+| N | 10 | odd `timeseries_info` batches (unregistered, mixed, repeated, storage keys) | 2 | 87 ms | 91 ms | 1.02 | 0.86 – 1.10 |
+| all | 100 | | | 786 ms | **82 ms** | 0.32 | 0.04 – 2.29 |
+| sum of p50 | 100 | | | **118.0 s** | 137.6 s | | |
+| sum of p50, X and B only | 20 | | | **58.6 s** | 113.9 s | | |
+| sum of p50, the other 80 | 80 | | | 59.3 s | **23.7 s** | | |
+
+The split is entirely by result size. Taking the 70 windowed reads without LIMIT (every group except Z, N and the LIMIT halves of K and Q) and bucketing by rows returned:
+
+| rows returned | n | median p50 d0cc2c4 | median p50 0a8eb80 | geomean 0a8eb80 / d0cc2c4 | min – max |
+|---|---|---|---|---|---|
+| ≤ 10 k | 26 | 749 ms | **42 ms** | 0.06 | 0.04 – 0.07 |
+| 10 k – 100 k | 11 | 806 ms | **64 ms** | 0.08 | 0.07 – 0.10 |
+| 100 k – 1 M | 10 | 897 ms | **167 ms** | 0.23 | 0.15 – 0.57 |
+| 1 – 3 M | 3 | 1,501 ms | 1,593 ms | 1.06 | 1.02 – 1.10 |
+| 3 – 8 M | 5 | **1,807 ms** | 2,733 ms | 1.47 | 1.44 – 1.53 |
+| > 8 M | 15 | **3,572 ms** | 7,332 ms | 2.01 | 1.81 – 2.29 |
+
+What the new shapes add to sections 9–10:
+
+- **Open-ended windows behave like closed ones.** `start`-only and `end`-only reads pay the full ~750 ms `partitioned_execution` floor at d0cc2c4 regardless of size (E8 returns 12 rows in 732 ms) and drop to 35–75 ms at 0a8eb80. Windows that straddle a stream's first or last timestamp, including the four that return 0 rows (P1/P3/P7/P9), are the same: 676–900 ms → 37–57 ms.
+- **The CTE path loses above ~2 M rows and the loss grows with size.** The whole-range X reads (10–15.6 M rows) go from 3.6 s to 7.3–8.3 s, 3-year B windows (10.8 M) from 2.9 s to 5.2–5.4 s, 2-year (5.5 M) from 1.8 s to 2.5–2.8 s; the 365-day S windows (2.9 M) are the break-even at 1.02–1.10. Throughput on the > 8 M reads halves, 4.2 → 2.0 M rows/s, while server CPU per request drops from 35 to 14 CPU-s: the materialised CTE sort runs with less parallelism than the partitioned sort it replaces, so it costs less CPU and twice the wall time.
+- **Explicit whole-range windows are the worst case for 0a8eb80 and a plausible client pattern** (a client that always passes `start`/`end` from `timeseries_info`). The same stream read with no window (Q1 full, 8.4 M rows) takes the plain path at both heads and is unchanged (2.38 → 2.28 s).
+- **Everything else is neutral**, as designed: LIMIT reads by storage key 170–191 → 152–164 ms, `LIMIT 1` past the end 59–70 → 55–64 ms, full-stream reads 0.95–0.99, `timeseries_info` batches 0.86–1.10. Two empties are interesting on their own: a window entirely after a stream's latest timestamp returns in 6 ms at both heads (short-circuited before SQL), but a window entirely before its earliest goes through the sort and costs 690–770 ms at d0cc2c4 vs 39–45 ms at 0a8eb80.
+- **Storage-key reads** (`urn:acquirium#uuid` instead of the point uri) resolve through the same path and show the same 10× gain on 7-day windows (786–919 → 60–65 ms); they are not a separate code path.
+
+Net: over these 100 queries 0a8eb80 is 10–20× faster on the 70 reads that return under 1 M rows and 1.5–2.3× slower on the 20 that return 5–15 M rows, which is enough to make its total 17% higher (137.6 vs 118.0 s) despite winning 80 of 100. Whether that trade is right depends on how often clients read multi-million-row windows; the `SET disabled_optimizers='partitioned_execution'` route (section 9) avoids the choice because it removes the fixed cost without materialising anything.
+
+Direct measurement of the three plan shapes on the large windows (`backend_bench/issue140/diag_big.py`, DuckDB 2.0 on the same file with the server stopped, stream 167 = 15.68 M rows, best of 2; absolute times include `fetchall()` into Python tuples and are therefore higher than the server's Arrow path, the ratios are what matters):
+
+| Read on stream 167 | plain (d0cc2c4) | `MATERIALIZED` CTE (0a8eb80) | plain + `SET disabled_optimizers='partitioned_execution'` |
+|---|---|---|---|
+| explicit whole range, 15.68 M rows | 7,712 ms | 10,376 ms (1.35×) | **6,802 ms (0.88×)** |
+| 3-year window `DESC`, 10.97 M rows | 4,730 ms | 7,169 ms (1.52×) | **4,547 ms (0.96×)** |
+| 1-year window, 2.88 M rows | 1,926 ms | 2,076 ms (1.08×) | **1,380 ms (0.72×)** |
+| 30-day window, 247 k rows | 796 ms | 196 ms (0.25×) | **139 ms (0.17×)** |
+
+Disabling the optimizer on the read connection is the best of the three at every size: it removes the fixed ~0.7 s cost on small and medium windows like the CTE does, and on multi-million-row windows it is faster than the plain query rather than slower. The CTE's loss grows with result size exactly as the server measurements above show (1.08× at 2.9 M, 1.35–1.52× at 11–16 M in DuckDB; 1.06× / 1.8–2.3× through the server, where the extra copy also delays the Arrow conversion).
+
+Updated cross-head summary (medians; the new 100-query columns from this section):
+
+| | windowed ≤ 10 k rows | LIMIT reads | full-stream, no window, 15.6 M | one-year window 3 M | whole-range window 15.6 M | 3-year window 10.9 M |
+|---|---|---|---|---|---|---|
+| d0cc2c4 | 584 ms | 103 ms | 3.5 s | 1.24 s | **3.6 s** | **2.9 s** |
+| 2215185 | 49 ms | 2,625 ms | 7.5 s | 1.27 s | — | — |
+| 0a8eb80 | **40 ms** | **111 ms** | 3.95 s | 1.38 s | 7.6 s | 5.3 s |
+| plain + `partitioned_execution` off (DuckDB-level) | 27 ms | 73–165 ms | 5.6 s* | 1.38 s* | 6.8 s* | 4.5 s* |
+
+\* DuckDB-direct with `fetchall()`, compare only within the row (0.72–0.96× of the plain query at d0cc2c4 in the same harness).
+
+Files: `~/var_runs/fix3/phaseH_*` (d0cc2c4), `phaseI_*` (0a8eb80), `diag_big.out`; local copies under the scratchpad `var_results/fix3b/`.
